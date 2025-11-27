@@ -12,7 +12,7 @@ func TestDecodeString(t *testing.T) {
 		0x11, 0xAA, 0x46, 0x34, 0x14, 0xE4, 0x9D, 0x53,
 	}
 
-	result := String(data)
+	result := StringBytes(data)
 	expected := string("Hello\nBen")
 
 	if result != expected {

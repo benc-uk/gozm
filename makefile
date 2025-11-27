@@ -15,7 +15,7 @@ test: # 🧪 Run tests
 	go test -v ./...
 
 run: # 🚀 Run the application
-	go run main.go
+	go run cmd/cli/main.go ./test/hello.z3
 
 watch: # 👀 Watch for file changes and rebuild
 	go tool -modfile=.dev/tools.mod air -c $(DEV_DIR)/air.toml
@@ -30,3 +30,7 @@ tidy: # 🧹 Tidy Go modules
 install: # 📦 Install dependencies
 	go mod download
 	go mod download -modfile=$(DEV_DIR)/tools.mod
+
+hello:
+	./tools/inform6.exe -v3 ./test/hello.inf ./test/hello.z3
+	./tools/unz ./test/hello.z3 > ./test/hello.dump 

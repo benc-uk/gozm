@@ -29,30 +29,50 @@ var alphabets = [][]rune{
 	},
 }
 
-// GetInt16 reads a 2-byte big-endian integer from the given byte slice at the specified offset.
-func GetInt16(b []byte, offset int16) int16 {
-	return int16(b[offset])<<8 | int16(b[offset+1])
+// GetWord reads a 2-byte big-endian integer from the given byte slice at the specified offset.
+func GetWord(b []byte, offset uint16) uint16 {
+	return uint16(b[offset])<<8 | uint16(b[offset+1])
 }
 
-// String decodes a Z-machine encoded string from the given byte slice.
-// These are encoded as a series of 2-byte words,
-// each containing three 5-bit Z-characters. It's weird AF
-// https://zspec.jaredreisinger.com/03-text
-func String(data []byte) string {
-	result := ""
-	zchars := make([]byte, len(data)*3/2)
+// SetWord writes a 2-byte big-endian integer to the given byte slice at the specified offset.
+func SetWord(b []byte, offset uint16, value uint16) {
+	b[offset] = byte((value >> 8) & 0xFF)
+	b[offset+1] = byte(value & 0xFF)
+}
 
-	// Convert each 2-byte word into 3 Z-chars
-	for i := 0; i < len(data); i += 2 {
-		word := uint16(data[i])<<8 | uint16(data[i+1])
-		zchars[i/2*3] = byte((word >> 10) & 0x1F)
-		zchars[i/2*3+1] = byte((word >> 5) & 0x1F)
-		zchars[i/2*3+2] = byte(word & 0x1F)
+func PackedAddress(addr uint16) uint16 {
+	return uint16(addr) * 2
+}
+
+// Helper to decode a Z-machine encoded string from a byte slice
+func StringBytes(data []byte) string {
+	words := []uint16{}
+	for i := uint16(0); int(i) < len(data); i += 2 {
+		word := GetWord(data, i)
+		words = append(words, word)
 
 		// If the high bit is set, this is the end of the string
 		if word&0x8000 != 0 {
 			break
 		}
+	}
+
+	return String(words)
+}
+
+// String decodes a Z-machine encoded string from the given slice of 16-bit words
+// each containing three 5-bit Z-characters. It's weird AF
+// https://zspec.jaredreisinger.com/03-text
+func String(words []uint16) string {
+	result := ""
+	zchars := make([]byte, len(words)*3)
+
+	// Convert each 2-byte word into 3 Z-chars
+	for i := 0; i < len(words); i++ {
+		word := words[i]
+		zchars[i*3] = byte((word >> 10) & 0x1F)
+		zchars[i*3+1] = byte((word >> 5) & 0x1F)
+		zchars[i*3+2] = byte(word & 0x1F)
 	}
 
 	// Decode Z-chars into a string

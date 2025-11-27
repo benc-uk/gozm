@@ -4,7 +4,7 @@
 Filename:                                  ./test/hello.z3
 Compiled With:                             Inform 6.44
 Z-machine version:                         3
-Calculated checksum:                       0x468C, checksum ok
+Calculated checksum:                       0x4AD9, checksum ok
 Object count:                              4
 Unique verbs count:                        0
 Grammar table version:                     No syntax/grammar identified
@@ -14,9 +14,9 @@ Scanning for routines from:                0x00496
 Found first routine at address:            0x00496
 Lowest routine address (immediate call) :  0x0049E
 Highest routine address (immediate call):  0x0049E
-Strings start at address:                  0x004B0
+Strings start at address:                  0x004BE
 Highest used global in z-code:             240
-Number of used globals in z-code:          1
+Number of used globals in z-code:          2
 Number of unique properties:               0
 
 ***** MEMORY MAP *****
@@ -37,9 +37,9 @@ Number of unique properties:               0
    0048E-00494 Vocabulary/Dictionary, 7 bytes.
    00495-00495 Padding, 1 byte.
 
-00496-004F3 HIGH MEMORY
-   00496-004AF Z-code, 26 bytes.
-   004B0-004F3 Static strings, 68 bytes.
+00496-00501 HIGH MEMORY
+   00496-004BD Z-code, 40 bytes.
+   004BE-00501 Static strings, 68 bytes.
 
 
 ***** HEADER (00000-0003F, 64 bytes) *****
@@ -54,10 +54,10 @@ Number of unique properties:               0
 0000C 02 AC                   GLOBALS Global variables table:    0x02AC
 0000E 04 8C                   PURBOT  Base of static memory:     0x048C
 00010 00 00                   FLAGS   Flags 2:                   0x0000
-00012 32 35 31 31 32 34       SERIAL  Serial number:             251124
+00012 32 35 31 31 32 37       SERIAL  Serial number:             251127
 00018 00 42                   FWORDS  Abbreviations table:       0x0042
-0001A 02 7A                   PLENTH  Length of file:            0x04F4
-0001C 46 8C                   PCHKSM  Checksum of file:          0x468C
+0001A 02 81                   PLENTH  Length of file:            0x0502
+0001C 4A D9                   PCHKSM  Checksum of file:          0x4AD9
 0001E 00                      INTWRD  Interpreter number:        0
 0001F 00                              Interpreter version:       0
 00020 00                      SCRWRD  Screen height (lines):     0
@@ -376,7 +376,7 @@ Object: 4
 ***** UNIDENTIFIED DATA (001A8-002AB, 260 bytes) *****
 
 001A0                         00 00 00 00 00 00 22 00          ......".
-001B0 04 00 00 01 00 02 00 03 00 04 00 00 00 48 02 61  .............H.a
+001B0 04 00 00 01 00 02 00 03 00 04 00 00 00 48 02 68  .............H.h
 001C0 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
 001D0 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
 001E0 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
@@ -384,8 +384,8 @@ Object: 4
 00200 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
 00210 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
 00220 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
-00230 00 00 00 00 00 00 00 00 00 00 00 00 02 63 02 65  .............c.e
-00240 02 68 02 6B 02 6E 02 70 02 72 02 74 00 00 00 00  .h.k.n.p.r.t....
+00230 00 00 00 00 00 00 00 00 00 00 00 00 02 6A 02 6C  .............j.l
+00240 02 6F 02 72 02 75 02 77 02 79 02 7B 00 00 00 00  .o.r.u.w.y.{....
 00250 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
 00260 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
 00270 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
@@ -396,7 +396,7 @@ Object: 4
 
 ***** GLOBAL VARIABLES TABLE (002AC-0048B, 480 bytes) *****
 
-002AC 00 00                    G00, Global #1 =   0x0000 (This global is not refered to from z-code.)
+002AC 00 24                    G00, Global #1 =   0x0024
 002AE 00 00                    G01, Global #2 =   0x0000 (This global is not refered to from z-code.)
 002B0 00 00                    G02, Global #3 =   0x0000 (This global is not refered to from z-code.)
 002B2 00 00                    G03, Global #4 =   0x0000 (This global is not refered to from z-code.)
@@ -657,7 +657,7 @@ Object: 4
 00490                00                                                    .
 
 
-***** Z-CODE (00496-004AF, 26 bytes) *****
+***** Z-CODE (00496-004BD, 40 bytes) *****
 
 Main routine: 0x00496
 00496 00                       No locals
@@ -671,30 +671,32 @@ Padding:
 Routine: 0x0049E               Called from routine(s) at 0x00496
 0049E 00                       No locals
 
-0049F B2 11 AA 46 34 14 E4 9D 
-      53                       PRINT "Hello^Ben"
-004A8 B0                       RTRUE
+0049F B2 11 AA 46 34 14 E4 1D 
+      53 00 B6 1E 26 34 B6 03 
+      CA 99 A5                 PRINT "Hello^Ben _blah_ yeah"
+004B2 54 10 07 10              ADD G00 0x07 -> G0
+004B6 B0                       RTRUE
 
 Padding:
-004A9 00 
+004B7 00 
 
-Routine: 0x004AA
-004AA 02                       2 locals
-004AB 00 00 00 00              L00=0x0000 L01=0x0000 
+Routine: 0x004B8
+004B8 02                       2 locals
+004B9 00 00 00 00              L00=0x0000 L01=0x0000 
 
-004AF B1                       RFALSE
+004BD B1                       RFALSE
 
 
-***** STATIC STRINGS (004B0-004F3, 68 bytes) *****
+***** STATIC STRINGS (004BE-00501, 68 bytes) *****
 
-004B0 S0001 "<unknown attribute>"
-004C2 S0002 "name"
-004C6 S0003 "create"
-004CA S0004 "recreate"
-004D0 S0005 "destroy"
-004D6 S0006 "remaining"
-004DC S0007 "copy"
-004E0 S0008 "call"
-004E4 S0009 "print"
-004E8 S0010 "print_to_array"
+004BE S0001 "<unknown attribute>"
+004D0 S0002 "name"
+004D4 S0003 "create"
+004D8 S0004 "recreate"
+004DE S0005 "destroy"
+004E4 S0006 "remaining"
+004EA S0007 "copy"
+004EE S0008 "call"
+004F2 S0009 "print"
+004F6 S0010 "print_to_array"
 
