@@ -7,9 +7,8 @@ import (
 )
 
 type Machine struct {
-	mem   []byte
-	pc    uint16
-	stack []callFrame
+	mem []byte
+	pc  uint16
 
 	header header
 }
@@ -27,25 +26,6 @@ type header struct {
 	checksum    uint16
 }
 
-type callFrame struct {
-	returnAddr uint16
-	locals     []uint16
-}
-
-func (sf *callFrame) Push(val uint16) {
-	sf.locals = append(sf.locals, val)
-}
-
-func (sf *callFrame) Pop() uint16 {
-	if len(sf.locals) == 0 {
-		return 0
-	}
-
-	val := sf.locals[len(sf.locals)-1]
-	sf.locals = sf.locals[:len(sf.locals)-1]
-	return val
-}
-
 func NewMachine(data []byte) *Machine {
 	// Copy data into machine memory, very likely this is unnecessary
 	memCopy := make([]byte, len(data))
@@ -53,31 +33,23 @@ func NewMachine(data []byte) *Machine {
 
 	h := header{
 		version:     memCopy[0x00],
-		highAddr:    decode.GetWord(memCopy, 0x04),
 		initialPC:   decode.GetWord(memCopy, 0x06),
-		dictAddr:    decode.GetWord(memCopy, 0x08),
-		objectsAddr: decode.GetWord(memCopy, 0x0A),
 		globalsAddr: decode.GetWord(memCopy, 0x0C),
-		staticAddr:  decode.GetWord(memCopy, 0x0E),
-		abbrvAddr:   decode.GetWord(memCopy, 0x18),
-		fileLen:     decode.GetWord(memCopy, 0x1A),
-		checksum:    decode.GetWord(memCopy, 0x1C),
 	}
-
 	fmt.Println("Z-machine initialized & loaded...")
-	fmt.Printf("Version: %d, PC: %04x, HiMem: %04x, StaticMem: %04x\n", h.version, h.initialPC, h.highAddr, h.staticAddr)
+	fmt.Printf("Version: %d, pc: %04x, globalsAddr:\n", h.version, h.globalsAddr)
 
 	return &Machine{
 		mem:    memCopy,
 		pc:     h.initialPC,
 		header: h,
-		stack:  make([]callFrame, 0),
 	}
 }
 
+// Step executes a single instruction at the current program counter
 func (m *Machine) Step() {
 	inst := m.decodeInst()
-	fmt.Printf("PC: %04x, Code: %02x, Len: %d\n", m.pc, inst.code, inst.byteLen)
+	fmt.Printf("%04x - %s\n", m.pc, inst.String())
 
 	// Decode and execute instruction here
 	// This is a ultra minimum implementation with only a few opcodes
@@ -85,81 +57,72 @@ func (m *Machine) Step() {
 	case 0x00:
 		fmt.Println(" ++ NOP")
 		m.pc += 1
-	case 0xE0:
-		fmt.Print(" ++ CALL: \x1b[32m")
-
-		inst := m.decodeInst()
-		funcAddr := decode.PackedAddress(inst.operands[0])
-		fmt.Printf("%04x\x1b[0m\n", funcAddr)
-
-		// Push new stack frame
-		frame := callFrame{
-			returnAddr: m.pc + uint16(inst.byteLen),
-			// TODO: initialize locals from operands
-			locals: make([]uint16, 0),
-		}
-		m.stack = append(m.stack, frame)
-
-		// TODO: moving past routine header
-		m.pc = funcAddr
-
-	case 0xB0:
-
-		// Pop stack frame
-		if len(m.stack) == 0 {
-			fmt.Println(" !! Stack underflow on RET")
-			os.Exit(1)
-		}
-
-		frame := m.stack[len(m.stack)-1]
-		m.stack = m.stack[:len(m.stack)-1]
-
-		m.pc = frame.returnAddr
-		storeLoc := m.mem[m.pc]
-		fmt.Printf(" ++ RET_TRUE into: %0x\n", storeLoc)
-		m.Store(uint16(storeLoc), 1) // true
-		m.pc += 1
 	case 0xBA:
 		fmt.Println(" ++ QUIT")
 		os.Exit(0)
-	case 0xB2:
-		fmt.Print(" ++ PRINT: \x1b[35m")
-		words := []uint16{}
-		for i := uint16(0); int(i) < len(m.mem); i += 2 {
-			word := decode.GetWord(m.mem, m.pc+1+i)
-			words = append(words, word)
+	case 0x54: // ADD V,S -> result
+		v := m.GetVar(byte(inst.operands[0]))
+		s := inst.operands[1]
+		dest := m.mem[m.pc+inst.len] // destination in next byte
+		fmt.Printf("++ ADD %d, %d -> %d\n", v, s, dest)
 
-			// If the high bit is set, this is the end of the string
-			if word&0x8000 != 0 {
-				break
-			}
-		}
-		str := decode.String(words)
-		fmt.Printf("%s\n\x1b[0m", str)
+		m.StoreVar(dest, v+s)
+		m.pc += inst.len + 1 // +1 for dest byte
+	case 0x0d: // STORE V,S
+		v := inst.operands[0]
+		s := inst.operands[1]
+		fmt.Printf("++ STORE %d, %d\n", v, s)
 
-		// Advance PC past the string
-		m.pc += uint16(len(words)*2) + 1
+		m.StoreVar(byte(v), s)
+		m.pc += inst.len
 	default:
-		fmt.Printf(" !! UNKNOWN: %02x\n", inst.code)
+		fmt.Printf(" !! UNKNOWN OPCODE: %02x\n", inst.code)
+
+		// Dump the first four globals
+		m.DumpMem(m.header.globalsAddr, 2*4)
 		panic("BYE")
-		//m.pc += 1
 	}
 }
 
-func (m *Machine) Store(loc uint16, val uint16) {
+// StoreVar stores a value into a variable location
+func (m *Machine) StoreVar(loc byte, val uint16) {
 	if loc == 0 {
 		// TODO: store on stack
 	} else if loc > 0 && loc < 0x10 {
 		// TODO: store in local variable
 	} else {
 		// Global variable
-		addr := uint16(m.header.globalsAddr + ((loc - 16) * 2))
+		addr := uint16(m.header.globalsAddr + ((uint16(loc) - 0x10) * 2))
 		decode.SetWord(m.mem, addr, val)
 	}
 }
 
+// GetVar retrieves a value from a variable location
+func (m *Machine) GetVar(loc byte) uint16 {
+	if loc == 0 {
+		// TODO: store on stack
+	} else if loc > 0 && loc < 0x10 {
+		// TODO: store in local variable
+	} else {
+		// Global variable
+		addr := uint16(m.header.globalsAddr + ((uint16(loc) - 0x10) * 2))
+		return decode.GetWord(m.mem, addr)
+	}
+	return 0
+}
+
+// Run starts the main execution loop of the Z-machine
 func (m *Machine) Run() {
+	// HACK: Point to known location otherwise we need to implement more opcodes
+	m.pc = 0x0049F
 	for {
 		m.Step()
+	}
+}
+
+func (m *Machine) DumpMem(addr uint16, length uint16) {
+	for i := uint16(0); i < length; i += 2 {
+		word := decode.GetWord(m.mem, addr+i)
+		fmt.Printf("%04x: %04x (%04d)\n", addr+i, word, word)
 	}
 }

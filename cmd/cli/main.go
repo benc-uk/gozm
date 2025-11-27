@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"gozm/internal/io"
 	"gozm/internal/zmachine"
 	"os"
 )
@@ -15,7 +14,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	data, err := io.LoadZFileFromFS(os.Args[1])
+	filePath := os.Args[1]
+	data, err := os.ReadFile(filePath)
 	if err != nil {
 		fmt.Printf("Error loading Z-machine file: %v\n", err)
 		os.Exit(1)

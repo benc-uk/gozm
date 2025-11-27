@@ -1,5 +1,6 @@
 ROOT_DIR := $(shell git rev-parse --show-toplevel)
 DEV_DIR := $(ROOT_DIR)/.dev
+STORY ?= bare-bones
 
 .DEFAULT_GOAL := help
 
@@ -15,7 +16,7 @@ test: # 🧪 Run tests
 	go test -v ./...
 
 run: # 🚀 Run the application
-	go run cmd/cli/main.go ./test/hello.z3
+	go run cmd/cli/main.go ./stories/$(STORY).z3
 
 watch: # 👀 Watch for file changes and rebuild
 	go tool -modfile=.dev/tools.mod air -c $(DEV_DIR)/air.toml
@@ -31,6 +32,6 @@ install: # 📦 Install dependencies
 	go mod download
 	go mod download -modfile=$(DEV_DIR)/tools.mod
 
-hello:
-	./tools/inform6.exe -v3 ./test/hello.inf ./test/hello.z3
-	./tools/unz ./test/hello.z3 > ./test/hello.dump 
+story:
+	inform6 -v3 ./stories/$(STORY).inf ./stories/$(STORY).z3
+	./tools/unz ./stories/$(STORY).z3 > ./stories/$(STORY).dump 

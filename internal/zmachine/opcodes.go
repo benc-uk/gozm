@@ -1,12 +1,19 @@
 package zmachine
 
-import "gozm/internal/decode"
+import "fmt"
 
-// implementation of pcode 2B - Print literal string
+// Enum for forms of instructions
+const (
+	FORM_LONG  = 0
+	FORM_SHORT = 1
+	FORM_VAR   = 2
+)
+
 type instruction struct {
 	code     byte     // opcode byte
 	operands []uint16 // operands for the instruction
-	byteLen  uint16   // total length of instruction + operands in bytes
+	len      uint16   // total length of instruction + operands in bytes
+	form     byte     // form of the instruction
 }
 
 // Decodes the instruction at the current program counter
@@ -15,45 +22,32 @@ func (m *Machine) decodeInst() instruction {
 	inst := instruction{}
 
 	inst.code = m.mem[m.pc]
-	inst.byteLen = 1
+	inst.len = 1
 
-	// 0OP is just the opcode, no operands, B0-BF
-	if inst.code&0xF0 == 0xB0 {
-		return inst
+	// VAR FORM has $11 in the top bits
+	if inst.code&0xC0 == 0xC0 {
+		// TODO: Implement VAR FORM decoding
 	}
 
-	// TODO: handle other instruction formats
-	// 1OP
-	// 2OP
-
-	// VAR
-	operandTypes := m.mem[m.pc+1]
-
-	// Decode the operands based on operand types
-	inst.byteLen++
-	for i := uint16(0); i < 2; i++ {
-		shift := 6 - (i * 2)
-		otype := (operandTypes >> shift) & 0x03
-
-		switch otype {
-		case 0x00: // large constant
-			val := decode.GetWord(m.mem, m.pc+2+i*2) // TODO: Possible bug if mixed operand types
-			inst.operands = append(inst.operands, val)
-			inst.byteLen += 2
-		case 0x01: // small constant
-			val := uint16(m.mem[m.pc+2+i])
-			inst.operands = append(inst.operands, val)
-			inst.byteLen += 1
-		case 0x02: // variable
-			// For now, just read the variable number, not the value
-			// TODO: implement variable reading
-			varNum := m.mem[m.pc+2+i]
-			inst.operands = append(inst.operands, uint16(varNum))
-			inst.byteLen += 1
-		case 0x03: // omitted
-			// No operand
-		}
+	// SHORT FORM has $10 in the top bits
+	if inst.code&0xC0 == 0x80 {
+		// TODO: Implement SHORT FORM decoding
 	}
+
+	// LONG FORM otherwise, see docs on why
+	// https://zspec.jaredreisinger.com/04-instructions#4_3
+	inst.form = FORM_LONG
+	op1 := uint16(m.mem[m.pc+1])
+	op2 := uint16(m.mem[m.pc+2])
+	inst.operands = []uint16{op1, op2}
+	inst.len += 2
 
 	return inst
+}
+
+// string representation of the instruction
+func (inst *instruction) String() string {
+	return "CODE: " + fmt.Sprintf("%02x", inst.code) +
+		", LEN: " + fmt.Sprintf("%d", inst.len) +
+		", OPERANDS: " + fmt.Sprintf("%v", inst.operands)
 }
