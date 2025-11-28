@@ -1,12 +1,12 @@
 # Step by Step Guide - Core
 
-Step 1 is to get a minimal Z Machine story file running that does some basic arithmetic operations. Which is in absolute minimum, but it's a start!
+First stage is to get a minimal Z Machine story file running and just something happening, we'll create a very simple story file that does some arithmetic operations and stores the results in global variables.
 
-To see the code that starts things off, check the branch in this repository called `core`.
+To see the code for this tutorial in context, check out the `core` branch of the repository.
 
 ## Getting Started
 
-Loading a complete game like Zork is WAY too complicated for a first step, there's test files out there but it's nice to be able to control the source code too and keep things ultra simple.
+Loading a complete game like Zork or anything else is WAY too complicated for a first step, there are test files out there but it's nice to be able to control & constrain what the story file does to keep things ultra simple.
 
 We can use Inform 6, which is a programming language and compiler specifically designed for creating interactive fiction games for the Z Machine. Use of this is WAY outside the scope of this guide, but you can find more information on the [Inform 6 website](https://inform-fiction.org/).
 
@@ -26,14 +26,16 @@ Global total = 0;
 
 Don't worry if you don't have the inform6 compiler installed the compiled story file `core.z3` is already included in the `stories` directory.
 
-NOTE: The `core.dump.txt` file is a full dump & disassembly of the compiled story file, which is SUPER useful for understanding what's going on under the hood, and will go some way to explaining wht we jump to address 0x0049F if you scroll nearly to the end of the file you will see `0049F 54 11 0E 12              ADD G01 0x0E -> G2`
+NOTE: The `core.dump.txt` file has a full dump & disassembly of the compiled story file, which is SUPER useful for understanding what's going on under the hood, and will go some way to explaining wht we jump to address 0x0049F if you scroll nearly to the end of the file you will see `0049F 54 11 0E 12              ADD G01 0x0E -> G2`
 This is dumped [using the unz tool mentioned in the readme](https://github.com/heasm66/UnZ)
 
-So where on earth do you start! To begin all you need is an array of bytes for the machine memory and an program counter to point to the current instruction. The Z Machine story file is loaded directly & completely into the machine memory. Yes the compiled story file on disk is essentially a snapshot of memory, so we can just load the story file into a byte array that represents the Z Machine memory.
+So where on earth do you start! To begin you'll need is an array for the machine memory and an program counter to point to the current instruction. The Z Machine story file is loaded directly & completely into the machine memory. It might be surprising, the compiled story file on disk is essentially a snapshot of memory, so we can just load the story file into a byte array that represents the Z Machine memory.
 
-I'm not going to explain every step in this tutorial, but cover the important parts & main gotchas, you can always refer to the code on the `core` branch for full details and working code.
+The first 64 bytes of the story file & memory is a special header, which contains important info such as the starting PC, and a range of offset memory addresses. The [spec doc has full details on the header](https://zspec.jaredreisinger.com/b-conventional-header) in suprisingly well written form.
 
-Go code to represent core of the Z Machine looks something like this:
+I'm not going to walk through every step in this tutorial, but cover the important parts & main gotchas, you can always refer to the code on the `core` branch for full details and working code.
+
+Code to represent core of the Z Machine looks something like this:
 
 ```go
 type Machine struct {
@@ -141,7 +143,7 @@ Memory dump at 02ac:
 panic: BYE!
 ```
 
-Global variable 0 (points) is 3 as expected.
+Global variable 0 (points) is 3 as expected it was never changed.
 Global variable 1 (score) is 93 as expected after being updated by STORE.
 Global variable 2 (total) is 21 as expected after being calculated by ADD (7 + 14 = 21).
 
