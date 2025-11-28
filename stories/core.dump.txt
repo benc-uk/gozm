@@ -1,10 +1,10 @@
 
 ***** ANALYZING *****
 
-Filename:                                  ./stories/bare-bones.z3
+Filename:                                  ./stories/core.z3
 Compiled With:                             Inform 6.41
 Z-machine version:                         3
-Calculated checksum:                       0x43BE, checksum ok
+Calculated checksum:                       0x4472, checksum ok
 Object count:                              4
 Unique verbs count:                        0
 Grammar table version:                     No syntax/grammar identified
@@ -54,10 +54,10 @@ Number of unique properties:               0
 0000C 02 AC                   GLOBALS Global variables table:    0x02AC
 0000E 04 8C                   PURBOT  Base of static memory:     0x048C
 00010 00 00                   FLAGS   Flags 2:                   0x0000
-00012 32 35 31 31 32 37       SERIAL  Serial number:             251127
+00012 32 35 31 31 32 38       SERIAL  Serial number:             251128
 00018 00 42                   FWORDS  Abbreviations table:       0x0042
 0001A 02 79                   PLENTH  Length of file:            0x04F2
-0001C 43 BE                   PCHKSM  Checksum of file:          0x43BE
+0001C 44 72                   PCHKSM  Checksum of file:          0x4472
 0001E 00                      INTWRD  Interpreter number:        0
 0001F 00                              Interpreter version:       0
 00020 00                      SCRWRD  Screen height (lines):     0
@@ -398,7 +398,7 @@ Object: 4
 
 002AC 00 03                    G00, Global #1 =   0x0003 (This global is not refered to from z-code.)
 002AE 00 07                    G01, Global #2 =   0x0007
-002B0 00 00                    G02, Global #3 =   0x0000
+002B0 00 B4                    G02, Global #3 =   0x00B4
 002B2 00 00                    G03, Global #4 =   0x0000 (This global is not refered to from z-code.)
 002B4 00 00                    G04, Global #5 =   0x0000 (This global is not refered to from z-code.)
 002B6 00 00                    G05, Global #6 =   0x0000 (This global is not refered to from z-code.)

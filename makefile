@@ -1,6 +1,6 @@
 ROOT_DIR := $(shell git rev-parse --show-toplevel)
 DEV_DIR := $(ROOT_DIR)/.dev
-STORY ?= bare-bones
+STORY ?= core
 
 .DEFAULT_GOAL := help
 
@@ -32,6 +32,6 @@ install: # 📦 Install dependencies
 	go mod download
 	go mod download -modfile=$(DEV_DIR)/tools.mod
 
-story:
+story: # 📚 Compile and dump the story file
 	inform6 -v3 ./stories/$(STORY).inf ./stories/$(STORY).z3
-	./tools/unz ./stories/$(STORY).z3 > ./stories/$(STORY).dump 
+	./tools/unz ./stories/$(STORY).z3 > ./stories/$(STORY).dump.txt

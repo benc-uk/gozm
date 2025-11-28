@@ -1,6 +1,6 @@
 Global points = 3;
 Global score = 7;
-Global total = 0;
+Global total = 180;
 
 ! Dumb test file to get us started and no printing or strings yet
 [main;

@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	fmt.Println("👺 GOZM: Go Z-Machine Interpreter and VM")
+	fmt.Println("GOZM: Go Z-Machine Interpreter and VM")
 
 	if len(os.Args) < 2 {
 		fmt.Println("Usage: gozm <z-machine-file>")
