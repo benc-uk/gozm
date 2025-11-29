@@ -1,0 +1,9 @@
+Global points = 3;
+Global score = 7;
+Global total = 180;
+
+! Dumb test file to get us started and no printing or strings yet
+[main;
+  total = score + 14;
+  score = 93;
+];

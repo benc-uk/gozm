@@ -1,0 +1,21 @@
+Global points = 1;
+Global score = 99;
+Global total = 3;
+
+! Now with printing, stack and a routine call
+
+[main;
+  total = score + total;
+  points = total;
+  score = someRoutine (5, 18);
+  print "^Score is finally: ", score;
+];
+
+[someRoutine foo bar;
+  print "bar is ", bar;
+  bar = 113;
+  print "^bar is now ", bar, "^";
+  print "foo plus 7: ", foo + 7;
+  foo = foo + 10;
+  return foo + 100;
+];

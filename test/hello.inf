@@ -1,6 +1,0 @@
-Global score = 36;
-
-[ Main;
-    print "Hello^Ben _blah_ yeah";
-    score = score + 7;
-];
