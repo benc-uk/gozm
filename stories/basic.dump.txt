@@ -4,7 +4,7 @@
 Filename:                                  ./stories/basic.z3
 Compiled With:                             Inform 6.41
 Z-machine version:                         3
-Calculated checksum:                       0x6659, checksum ok
+Calculated checksum:                       0x6CBB, checksum ok
 Object count:                              4
 Unique verbs count:                        0
 Grammar table version:                     No syntax/grammar identified
@@ -14,7 +14,7 @@ Scanning for routines from:                0x00496
 Found first routine at address:            0x00496
 Lowest routine address (immediate call) :  0x0049E
 Highest routine address (immediate call):  0x004C2
-Strings start at address:                  0x00506
+Strings start at address:                  0x00514
 Highest used global in z-code:             240
 Number of used globals in z-code:          4
 Number of unique properties:               0
@@ -37,9 +37,9 @@ Number of unique properties:               0
    0048E-00494 Vocabulary/Dictionary, 7 bytes.
    00495-00495 Padding, 1 byte.
 
-00496-00549 HIGH MEMORY
-   00496-00505 Z-code, 112 bytes.
-   00506-00549 Static strings, 68 bytes.
+00496-00557 HIGH MEMORY
+   00496-00513 Z-code, 126 bytes.
+   00514-00557 Static strings, 68 bytes.
 
 
 ***** HEADER (00000-0003F, 64 bytes) *****
@@ -56,8 +56,8 @@ Number of unique properties:               0
 00010 00 00                   FLAGS   Flags 2:                   0x0000
 00012 32 35 31 31 32 39       SERIAL  Serial number:             251129
 00018 00 42                   FWORDS  Abbreviations table:       0x0042
-0001A 02 A5                   PLENTH  Length of file:            0x054A
-0001C 66 59                   PCHKSM  Checksum of file:          0x6659
+0001A 02 AC                   PLENTH  Length of file:            0x0558
+0001C 6C BB                   PCHKSM  Checksum of file:          0x6CBB
 0001E 00                      INTWRD  Interpreter number:        0
 0001F 00                              Interpreter version:       0
 00020 00                      SCRWRD  Screen height (lines):     0
@@ -376,7 +376,7 @@ Object: 4
 ***** UNIDENTIFIED DATA (001A8-002AB, 260 bytes) *****
 
 001A0                         00 00 00 00 00 00 22 00          ......".
-001B0 04 00 00 01 00 02 00 03 00 04 00 00 00 48 02 8C  .............H..
+001B0 04 00 00 01 00 02 00 03 00 04 00 00 00 48 02 93  .............H..
 001C0 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
 001D0 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
 001E0 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
@@ -384,8 +384,8 @@ Object: 4
 00200 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
 00210 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
 00220 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
-00230 00 00 00 00 00 00 00 00 00 00 00 00 02 8E 02 90  ................
-00240 02 93 02 96 02 99 02 9B 02 9D 02 9F 00 00 00 00  ................
+00230 00 00 00 00 00 00 00 00 00 00 00 00 02 95 02 97  ................
+00240 02 9A 02 9D 02 A0 02 A2 02 A4 02 A6 00 00 00 00  ................
 00250 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
 00260 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
 00270 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
@@ -657,7 +657,7 @@ Object: 4
 00490                00                                                    .
 
 
-***** Z-CODE (00496-00505, 112 bytes) *****
+***** Z-CODE (00496-00513, 126 bytes) *****
 
 Main routine: 0x00496
 00496 00                       No locals
@@ -684,38 +684,40 @@ Routine: 0x004C2               Called from routine(s) at 0x0049E
 004C2 02                       2 locals
 004C3 00 00 00 00              L00=0x0000 L01=0x0000 
 
-004C7 B2 1C D7 01 D8 80 A5     PRINT "bar is "
-004CE E6 BF 02                 PRINT_NUM L01
-004D1 0D 02 71                 STORE L01 0x71
-004D4 B2 14 E7 1A E0 3B 00 4E 
-      9C 80 A5                 PRINT "^bar is now "
-004DF E6 BF 02                 PRINT_NUM L01
-004E2 B2 94 E5                 PRINT "^"
-004E5 B2 2E 94 02 B1 6B 00 15 
-      E5 F4 05                 PRINT "foo plus 7: "
-004F0 54 01 07 00              ADD L00 0x07 -> -(SP)
-004F4 E6 BF 00                 PRINT_NUM (SP)+
-004F7 54 01 0A 01              ADD L00 0x0A -> L0
-004FB 54 01 64 00              ADD L00 0x64 -> -(SP)
-004FF B8                       RET_POPPED
+004C7 B2 1C D7 01 D8 00 BC 14 
+      C1 F8 05                 PRINT "bar is -> "
+004D2 E6 BF 02                 PRINT_NUM L01
+004D5 0D 02 71                 STORE L01 0x71
+004D8 B2 14 E7 1A E0 70 D8 03 
+      55 24 D9 29 20 14 C3 EC 
+      A5                       PRINT "^bar was updated {"
+004E9 E6 BF 02                 PRINT_NUM L01
+004EC B2 14 C3 F4 A7           PRINT "}^"
+004F1 B2 2E 94 00 A6 05 60 15 
+      E0 14 C1 F4 05           PRINT "foo + 7 = "
+004FE 54 01 07 00              ADD L00 0x07 -> -(SP)
+00502 E6 BF 00                 PRINT_NUM (SP)+
+00505 54 01 0A 01              ADD L00 0x0A -> L0
+00509 54 01 64 00              ADD L00 0x64 -> -(SP)
+0050D B8                       RET_POPPED
 
-Routine: 0x00500
-00500 02                       2 locals
-00501 00 00 00 00              L00=0x0000 L01=0x0000 
+Routine: 0x0050E
+0050E 02                       2 locals
+0050F 00 00 00 00              L00=0x0000 L01=0x0000 
 
-00505 B1                       RFALSE
+00513 B1                       RFALSE
 
 
-***** STATIC STRINGS (00506-00549, 68 bytes) *****
+***** STATIC STRINGS (00514-00557, 68 bytes) *****
 
-00506 S0001 "<unknown attribute>"
-00518 S0002 "name"
-0051C S0003 "create"
-00520 S0004 "recreate"
-00526 S0005 "destroy"
-0052C S0006 "remaining"
-00532 S0007 "copy"
-00536 S0008 "call"
-0053A S0009 "print"
-0053E S0010 "print_to_array"
+00514 S0001 "<unknown attribute>"
+00526 S0002 "name"
+0052A S0003 "create"
+0052E S0004 "recreate"
+00534 S0005 "destroy"
+0053A S0006 "remaining"
+00540 S0007 "copy"
+00544 S0008 "call"
+00548 S0009 "print"
+0054C S0010 "print_to_array"
 

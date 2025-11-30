@@ -31,10 +31,10 @@ func (m *Machine) getCallFrame() *callFrame {
 }
 
 // Helper to add a new empty call frame to machine call stack
-func (m *Machine) addCallFrame() *callFrame {
+func (m *Machine) addCallFrame(localCount int) *callFrame {
 	frame := callFrame{
 		returnAddr: 0,
-		locals:     make([]uint16, 15),
+		locals:     make([]uint16, localCount),
 		stack:      make([]uint16, 0),
 	}
 

@@ -2,20 +2,38 @@ Global points = 1;
 Global score = 99;
 Global total = 3;
 
-! Now with printing, stack and a routine call
+! =============================================================================
+! The purpose of this story is to simply test some basic functionality
+! like: printing, addition, calling, returning & passing arguments
+! The code is essentially gibberish for demonstration purposes only
+! =================================================================================
 
 [main;
   total = score + total;
   points = total;
+
+  ! Call someRoutine with arguments foo=5 and bar=18
   score = someRoutine (5, 18);
+
   print "^Score is finally: ", score;
 ];
 
+! A routine that takes two arguments, foo and bar
 [someRoutine foo bar;
+  ! Check arguments passed in
   print "bar is ", bar;
+  
+  !local var assigment
   bar = 113;
-  print "^bar is now ", bar, "^";
-  print "foo plus 7: ", foo + 7;
+
+  print "^bar was updated ", bar, "^";
+
+  ! Increment foo and return a value but on the stack only
+  print "increment foo on stack", foo + 7;
+
+  ! Modify foo into local variable and continue
   foo = foo + 10;
+
+  ! Modify foo again (on stack) and return
   return foo + 100;
 ];

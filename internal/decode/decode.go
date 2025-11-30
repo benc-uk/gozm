@@ -22,7 +22,7 @@ var alphabets = [][]rune{
 	},
 	{
 		// Note value 0 would normally never be output, it means escape
-		'%', '\n', '0', '1', '2', '3', '4', '5',
+		' ', '\n', '0', '1', '2', '3', '4', '5',
 		'6', '7', '8', '9', '.', ',', '!', '?',
 		'_', '#', '\'', '"', '/', '\\', '-', ':',
 		'(', ')',
@@ -77,10 +77,13 @@ func String(words []uint16) string {
 
 	// Decode Z-chars into a string
 	alphabet := 0
-	for _, zchar := range zchars {
+	for i := 0; i < len(zchars); i++ {
+		zchar := zchars[i]
+
 		switch zchar {
 		case 0:
 			result += " " // Z-char 0 is space
+			continue
 		case 1:
 			// Abbreviation handling would go here
 		case 2:
@@ -89,13 +92,36 @@ func String(words []uint16) string {
 			// Abbreviation handling would go here
 		case 4:
 			alphabet = 1 // Switch to upper case
+			continue
 		case 5:
 			alphabet = 2 // Switch to punctuation
+			continue
+		case 6:
+			// See https://zspec.jaredreisinger.com/03-text#3_4
+			if alphabet == 2 {
+				zc10 := (zchars[i+1] << 5) | zchars[i+2]
+				result += getZSCIIChar(zc10)
+				i += 2 // Skip next two zchars
+				alphabet = 0
+				continue
+			}
+
+			fallthrough
 		default:
 			result += string(alphabets[alphabet][zchar-6])
-			alphabet = 0 // Reset to default alphabet after use, this is v3 behaviour
 		}
+
+		alphabet = 0 // Reset to default alphabet after use, this is v3 behaviour
 	}
 
 	return string(result)
+}
+
+func getZSCIIChar(zchar byte) string {
+	if zchar >= 32 && zchar <= 126 {
+		return string(rune(zchar))
+	}
+
+	// Handle special ZSCII characters here if needed, but for now return 0
+	return string(rune(0))
 }

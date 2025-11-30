@@ -22,6 +22,7 @@ const OPTYPE_OMITTED = 0x03
 // instruction represents a decoded Z-machine instruction
 type instruction struct {
 	code     byte     // opcode byte
+	number   byte     // instruction number, not used yet
 	operands []uint16 // operand values for the instruction
 	len      uint16   // total length of instruction + operands in bytes
 	form     byte     // form of the instruction, not used yet
@@ -29,10 +30,11 @@ type instruction struct {
 
 // Decodes the instruction at the current program counter
 func (m *Machine) decodeInst() instruction {
-	inst := instruction{}
+	inst := instruction{
+		code: m.mem[m.pc],
+		len:  1, // start with 1 for the opcode byte
+	}
 
-	inst.code = m.mem[m.pc]
-	inst.len = 1
 	if inst.code == 0 {
 		return inst
 	}

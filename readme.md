@@ -12,7 +12,7 @@ I found getting started with even a minimal Z Machine implementation quite chall
 
 I found so little information on how to get started I thought it would be helpful to document the start of my development journey step-by-step for others who might want to embark on a similar path.
 
-I've split this into a separate [tutorial.md](tutorial.md) file to keep the readme cleaner.
+I've split this into a separate parts [tutorial](tutorial.md) and [tutorial-2](tutorial-2.md), which walk through the process of building a basic Z Machine interpreter in Go, explaining the key concepts and challenges along the way.
 
 ## Tools
 

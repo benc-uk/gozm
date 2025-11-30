@@ -60,7 +60,7 @@ func NewMachine(data []byte) *Machine {
 	fmt.Printf(" - Globals Address: %04x\n", m.globalsAddr)
 
 	// Initialize the stack with the main__ call frame
-	m.addCallFrame()
+	m.addCallFrame(0)
 
 	return m
 }
@@ -127,7 +127,7 @@ func (m *Machine) Step() {
 		m.debug("++ CALL to %04x with %d locals\n", routineAddr, numLocals)
 
 		// Push new stack frame
-		frame := m.addCallFrame()
+		frame := m.addCallFrame(int(numLocals))
 		frame.returnAddr = m.pc + inst.len
 
 		// Populate locals (word sized) from the routine header
@@ -141,10 +141,8 @@ func (m *Machine) Step() {
 		if len(inst.operands) > 1 {
 			// Push arguments into local variables
 			for i, argVal := range inst.operands[1:] {
-				if i < int(numLocals) {
-					frame.locals[i] = argVal
-					m.trace("  Arg %d = %d\n", i, argVal)
-				}
+				frame.locals[i] = argVal
+				m.trace("  Arg %d = %d\n", i, argVal)
 			}
 		}
 
