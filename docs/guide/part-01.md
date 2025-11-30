@@ -2,7 +2,7 @@
 
 First stage is to get a minimal Z Machine story file running and just something happening, we'll create a very simple story file that does some arithmetic operations and stores the results in global variables.
 
-To see the code for this tutorial in context, check out the `core` branch of the repository.
+To see the code for this tutorial in context, [check out the `core` branch of the repository.](https://github.com/benc-uk/gozm/tree/core)
 
 ## Getting Started
 

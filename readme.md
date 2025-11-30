@@ -10,9 +10,12 @@ The target is to support Z Machine version 3 only at this time.
 
 I found getting started with even a minimal Z Machine implementation quite challenging due to the complexity and a badly written specification that assumes a LOT of prior knowledge. Getting a simple "Hello World" working is like facing a mountain of unknowns.
 
-I found so little information on how to get started I thought it would be helpful to document the start of my development journey step-by-step for others who might want to embark on a similar path.
+I found so little information on how to get started I thought it would be helpful to document the start of my development journey step-by-step for others who might want to embark on a similar path. I've split this into a separate parts
 
-I've split this into a separate parts [tutorial](tutorial.md) and [tutorial-2](tutorial-2.md), which walk through the process of building a basic Z Machine interpreter in Go, explaining the key concepts and challenges along the way.
+- [Part 1 - The core](docs/guide/part-01.md)
+- [Part 2 - Basic program execution](docs/guide/part-02.md)
+
+These walk through the process of building a basic Z Machine interpreter in Go, explaining all the gotcha and head-scratchers I encountered.
 
 ## Tools
 

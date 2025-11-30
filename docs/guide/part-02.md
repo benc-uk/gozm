@@ -2,7 +2,7 @@
 
 Next we'll tackle decoding instructions properly, handling CALLs and RETurns, and decoding & printing strings. This will be a lot more work, but the result will be a lot more functional and serve as a solid foundation for further development.
 
-Working code for this tutorial can be found in the `tutorial-2` branch of the [gozm repository]
+Working code for this tutorial can be found in [the `tutorial-2` branch of this repository.](https://github.com/benc-uk/gozm/tree/core)
 
 ## Decoding Instructions
 
