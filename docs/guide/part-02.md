@@ -2,7 +2,7 @@
 
 Next we'll tackle decoding instructions properly, handling CALLs and RETurns, and decoding & printing strings. This will be a lot more work, but the result will be a lot more functional and serve as a solid foundation for further development.
 
-Working code for this tutorial can be found in [the `guide-part-02` branch of this repository](https://github.com/benc-uk/gozm/tree/guide-part-02)
+Working code for this tutorial can be found in [the `guide-part-02` branch of this repository](https://github.com/benc-uk/gozm/tree/guide-part-02), any references to code files are assumed to be in this branch, and not `main`.
 
 ## Decoding Instructions
 
@@ -85,7 +85,9 @@ func (m *Machine) decodeInst() instruction {
 
 You'll notice in the long form decoding we add 1 to the extracted bits to map them to the operand type encoding. This is because long form instructions only use a single bit to indicate either small constant (0) or variable (1), so we adjust the value to fit the same operand type scheme used elsewhere.
 
-You'll also need a helper function to fetch operands based on their type, which reads from memory and returns the appropriate value. See the `fetchOperand` function in `instructions.go` for an example implementation.
+You'll also need a helper function to fetch operands based on their type, which reads from memory and returns the appropriate value.
+
+See the fully completed `decodeInst()` function in `internal/decode/instructions.go` for a full working implementationm along with helper functions to read operands.
 
 ## String Decoding
 
@@ -158,6 +160,8 @@ for i := uint16(0); int(i) < len(mem); i += 2 {
 	}
 }
 ```
+
+Working version of the string decoding can be found in `internal/decode/decode.go`.
 
 ## Implementing CALL and RET
 
@@ -246,6 +250,8 @@ if len(inst.operands) > 1 {
 m.pc = routineAddr + 1 + uint16(numLocals*2)
 ```
 
+See the full implementation at line 121 of the `Step()` function in `internal/zmachine/zmachine.go`.
+
 ### Handling RET Instructions
 
 When we encounter a RET instruction, we'll need to:
@@ -291,6 +297,6 @@ func (m *Machine) StoreVar(loc uint16, val uint16) {
 
 We've covered a LOT of ground here, implementing instruction decoding, string decoding, and handling CALL and RET instructions with a call stack. This sets a solid foundation for further development of our Z-machine interpreter.
 
-Implementing more instructions, is a matter of following the same patterns we've established here. Each instruction will have its own logic, but the overall structure remains consistent. Check out the `Step()` function in `zmachine.go` for how to handle different instructions.
+Implementing more instructions, is a matter of following the same patterns we've established here. Each instruction will have its own logic, but the overall structure remains consistent. Check out the `Step()` function in `internal/zmachine/zmachine.go` for how to handle different instructions.
 
-Take a look at [stories/basic.inf](./stories/basic.inf) for an example story that uses these features. Try running the compiled stories/basic.z3 file with your interpreter to see the results.
+Take a look at [stories/basic.inf](https://github.com/benc-uk/gozm/blob/guide-part-02/docs/guide/stories/basic.inf) for an example story that uses these features. Try running the compiled stories/basic.z3 file with your interpreter to see the results.
