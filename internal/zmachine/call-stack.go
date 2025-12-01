@@ -1,15 +1,25 @@
+// =======================================================================
+// Package: zmachine - Core Z-machine interpreter
+// call-stack.go - Call stack management, for routine calls and returns
+//
+// Copyright (c) 2025 Ben Coleman. Licensed under the MIT License
+// =======================================================================
+
 package zmachine
 
+// callFrame represents a single routine call in the Z-machine call stack
 type callFrame struct {
 	returnAddr uint16
 	locals     []uint16
 	stack      []uint16
 }
 
+// Push a value onto the call frame stack
 func (sf *callFrame) Push(val uint16) {
 	sf.stack = append(sf.stack, val)
 }
 
+// Pop a value from the call frame stack
 func (sf *callFrame) Pop() uint16 {
 	if len(sf.locals) == 0 {
 		// TODO: Maybe panic here?
@@ -52,6 +62,6 @@ func (m *Machine) returnFromCall(val uint16) {
 	resultStoreLoc := m.mem[m.pc]
 	m.trace("Result %04x into %d\n", val, resultStoreLoc)
 
-	m.StoreVar(uint16(resultStoreLoc), val)
+	m.storeVar(uint16(resultStoreLoc), val)
 	m.pc += 1
 }

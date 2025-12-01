@@ -1,3 +1,10 @@
+// =======================================================================
+// Package: zmachine - Core Z-machine interpreter
+// instructions.go - Instruction decoding and representation
+//
+// Copyright (c) 2025 Ben Coleman. Licensed under the MIT License
+// =======================================================================
+
 package zmachine
 
 import (
@@ -115,7 +122,7 @@ func fetchOperand(m *Machine, operandType byte, loc uint16) (uint16, uint16) {
 		val := uint16(m.mem[loc])
 		return val, 1
 	case OPTYPE_VARIABLE: // variable
-		val := m.GetVar(uint16(m.mem[loc]))
+		val := m.getVar(uint16(m.mem[loc]))
 		return val, 1
 	case OPTYPE_OMITTED: // omitted, should not happen here
 		return 0, 0

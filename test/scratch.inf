@@ -1,12 +1,15 @@
-Object tree "oak tree"
+Object tree "A gnarled old oak tree"
   with height 222;
 
 Object -> magpie "black-striped bird"
   with wingspan 5, worms_eaten;
 
-Object -> acorn "ACORN DESCRIPTION HERE"
-  with goat 7, hat 8, cake 9,
-  smell "It";
+Object -> acorn "small brown nut"
+  with goat 7, hat 8, cake 9;
+
+Object -> -> worm "squirmy worm"
+  with length 3;
+
 
 
 ! =============================================================================
@@ -14,12 +17,18 @@ Object -> acorn "ACORN DESCRIPTION HERE"
 ! =============================================================================
 
 Global g1 = 10;
+Global g2;
 
 [main;
   @get_sibling magpie -> g1 ?someLabel;
 
-  print magpie;
+  print "The thing has no sibling.^";
+
+  jump endLab;
 
   .someLabel;
-  print "The magpie has eaten ";
+  print "The thing is next to the ", g1.description, "^";
+
+  .endLab;
+  print "The end.^";
 ];

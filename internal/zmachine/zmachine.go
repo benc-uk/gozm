@@ -1,3 +1,11 @@
+// =======================================================================
+// Package: zmachine - Core Z-machine interpreter
+// zmachine.go - Main code, structs and core execution loop
+// Note: This file probably needs to be split up more later!
+//
+// Copyright (c) 2025 Ben Coleman. Licensed under the MIT License
+// =======================================================================
+
 package zmachine
 
 import (
@@ -16,12 +24,12 @@ const (
 // Machine represents the state of a Z-machine interpreter
 type Machine struct {
 	mem          []byte
-	pc           uint16
+	pc           uint16 // Actually think this probably needs to be a uint32
 	callStack    []callFrame
 	debugLevel   int
 	ext          External
 	propDefaults []uint16
-	objects      map[byte]*zObject
+	objects      []*zObject
 
 	version     byte
 	highAddr    uint16
@@ -44,7 +52,7 @@ func NewMachine(data []byte, debugLevel int, ext External) *Machine {
 		debugLevel:   debugLevel,
 		ext:          ext,
 		propDefaults: make([]uint16, 31),
-		objects:      make(map[byte]*zObject),
+		objects:      make([]*zObject, 0),
 
 		version:     data[0x00],
 		highAddr:    decode.GetWord(data, 0x04),
@@ -78,12 +86,12 @@ func (m *Machine) Run() {
 
 	// We just loop forever for now, this is our life
 	for {
-		m.Step()
+		m.step()
 	}
 }
 
-// Step executes a single instruction at the current program counter
-func (m *Machine) Step() {
+// step executes a single instruction at the current program counter
+func (m *Machine) step() {
 	inst := m.decodeInst()
 	m.debug("\n%04X: %s\n", m.pc, inst.String())
 
@@ -146,8 +154,8 @@ func (m *Machine) Step() {
 
 	// SHOW_STATUS
 	case 0xBC:
-		score := m.GetVar(17) // global variable 17 is score
-		turns := m.GetVar(16) // global variable 16 is turns
+		score := m.getVar(17) // global variable 17 is score
+		turns := m.getVar(16) // global variable 16 is turns
 		// TODO: Placeholder for scoreboard/status line handling, use ansi code to invert colors
 		m.ext.TextOut(fmt.Sprintf("\n\033[32m\033[7m Unknown location                  score:%d turns:%d \033[27m\033[0m\n", score, turns))
 		m.pc += inst.len
@@ -170,17 +178,12 @@ func (m *Machine) Step() {
 		m.pc = uint16(int16(m.pc) + int16(inst.len) + offset - 2)
 
 	// GET_SIBLING
-	// case 0xE1:
-	// 	objNum := inst.operands[0]
-	// 	sibling := m.getSibling(objNum)
-	// 	m.debug(" - get_sibling of obj %d = %d\n", objNum, sibling)
-
-	// 	// Store result in variable specified in next byte
-	// 	dest := m.mem[m.pc+inst.len]
-	// 	m.debug(" - store in var:%d\n", dest)
-	// 	m.StoreVar(uint16(dest), sibling)
-
-	// 	m.pc += inst.len + 1 // +1 for dest byte
+	case 0x81, 0x91, 0xA1:
+		objNum := byte(inst.operands[0])
+		sibling := m.getObject(objNum).sibling
+		dest := m.mem[m.pc+inst.len] // destination in next byte
+		m.storeVar(uint16(dest), uint16(sibling))
+		m.branchHandler(inst.len+1, sibling != NULL_OBJECT)
 
 	// PRINT_NUM
 	case 0xE6:
@@ -195,7 +198,7 @@ func (m *Machine) Step() {
 		dest := m.mem[m.pc+inst.len] // destination in next byte
 		m.debug(" - add dest var:%d\n", dest)
 
-		m.StoreVar(uint16(dest), v+s)
+		m.storeVar(uint16(dest), v+s)
 		m.pc += inst.len + 1 // +1 for dest byte
 
 	// STORE
@@ -203,7 +206,7 @@ func (m *Machine) Step() {
 		v := inst.operands[0]
 		s := inst.operands[1]
 
-		m.StoreVar(v, s)
+		m.storeVar(v, s)
 		m.pc += inst.len
 
 	// CALL
@@ -253,8 +256,8 @@ func (m *Machine) Step() {
 	}
 }
 
-// StoreVar stores a value into a variable location
-func (m *Machine) StoreVar(loc uint16, val uint16) {
+// storeVar stores a value into a variable location
+func (m *Machine) storeVar(loc uint16, val uint16) {
 	// We made loc uint16 for ease of use, now restrict to valid range
 	if loc > 0xFF {
 		panic(fmt.Sprintf("Variable location out of range: %02x", loc))
@@ -273,8 +276,8 @@ func (m *Machine) StoreVar(loc uint16, val uint16) {
 	}
 }
 
-// GetVar retrieves a value from a variable location
-func (m *Machine) GetVar(loc uint16) uint16 {
+// getVar retrieves a value from a variable location
+func (m *Machine) getVar(loc uint16) uint16 {
 	// We made loc uint16 for ease of use, now restrict to valid range
 	if loc > 0xFF {
 		panic(fmt.Sprintf("Variable location out of range: %02x", loc))

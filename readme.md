@@ -9,7 +9,8 @@ The target is to support Z Machine version 3 only at this time.
 ## Todo List
 
 - [ ] Branch instructions (JUMP, JZ, etc)!
-- [ ] Object tree handling!
+- [x] Object tree handling!
+- [ ] Abbreviations
 - [ ] Reading input from user
 - [ ] Streams
 - [ ] WASM support, part 1, load & run story in browser

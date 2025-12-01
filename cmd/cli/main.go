@@ -35,6 +35,5 @@ func main() {
 	}
 
 	machine := zmachine.NewMachine(data, debugLevel, terminal.NewTerminal())
-
 	machine.Run()
 }

@@ -1,3 +1,10 @@
+// =======================================================================
+// Package: zmachine - Core Z-machine interpreter
+// debug.go - Debugging utilities for the Z-machine
+//
+// Copyright (c) 2025 Ben Coleman. Licensed under the MIT License
+// =======================================================================
+
 package zmachine
 
 import (
@@ -24,4 +31,13 @@ func (m *Machine) trace(format string, a ...interface{}) {
 	if m.debugLevel == DEBUG_TRACE {
 		fmt.Printf("\033[36m"+format+"\033[0m", a...)
 	}
+}
+
+// Internal helper to dump object properties for debugging
+func (o *zObject) propDebugDump() string {
+	result := ""
+	for propNum, propData := range o.properties {
+		result += fmt.Sprintf("    Prop %d: %X\n", propNum, propData)
+	}
+	return result
 }

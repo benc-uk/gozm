@@ -1,26 +1,37 @@
+// =======================================================================
+// Package: zmachine - Core Z-machine interpreter
+// objects.go - Object table parsing and object management
+//
+// Copyright (c) 2025 Ben Coleman. Licensed under the MIT License
+// =======================================================================
+
 package zmachine
 
-import "gozm/internal/decode"
+import (
+	"gozm/internal/decode"
+)
 
 const (
-	OBJECT_ENTRY_SIZE    = 9
-	OBJECT_PARENT_INDEX  = 4
-	OBJECT_SIBLING_INDEX = 5
-	OBJECT_CHILD_INDEX   = 6
-	NULL_OBJECT_INDEX    = 0
+	NULL_OBJECT = 0
 )
 
 type zObject struct {
-	num     byte
-	attr    [32]bool
-	parent  byte
-	sibling byte
-	child   byte
-	//properties map[byte][]byte
+	num        byte
+	name       string
+	attr       [32]bool
+	parent     byte
+	sibling    byte
+	child      byte
+	properties map[byte][]byte
 }
 
 // Parses the object table and initializes the objects in the machine
+// This is called once during machine initialization
 func (m *Machine) initObjects() {
+	if len(m.objects) > 0 || m.objectsAddr == 0 {
+		return // Already initialized or we have no object table
+	}
+
 	// Parse property defaults table, don't think it's used much
 	for i := 0; i < 31; i++ {
 		propAddr := m.objectsAddr + uint16(i*2)
@@ -32,7 +43,7 @@ func (m *Machine) initObjects() {
 	objCount := 0
 	propTableAddr := uint16(0xffff) // will be set when first object is read
 	for {
-		objEntryAddr := objTableAddr + uint16(objCount*OBJECT_ENTRY_SIZE)
+		objEntryAddr := objTableAddr + uint16(objCount*9)
 
 		// Stop if we've reached the property table
 		if objEntryAddr >= propTableAddr {
@@ -42,15 +53,17 @@ func (m *Machine) initObjects() {
 		// Parse object entry
 		objCount++
 		obj := &zObject{
-			num: byte(objCount),
+			num:        byte(objCount),
+			properties: make(map[byte][]byte),
 		}
 
 		// Read attributes bit at a time (4 bytes, 32 bits total)
-		for i := 0; i < 32; i++ {
-			byteIndex := i / 8
-			bitIndex := 7 - (i % 8)
-			attrByte := m.mem[objEntryAddr+uint16(byteIndex)]
-			obj.attr[i] = (attrByte&(1<<bitIndex) != 0)
+		for i := 0; i < 4; i++ {
+			attrByte := m.mem[objEntryAddr+uint16(i)]
+			for bit := 0; bit < 8; bit++ {
+				attrIndex := i*8 + bit
+				obj.attr[attrIndex] = (attrByte & (1 << (7 - bit))) != 0
+			}
 		}
 
 		// Read parent, sibling, child (1 byte each)
@@ -64,14 +77,74 @@ func (m *Machine) initObjects() {
 			propTableAddr = propAddr
 		}
 
-		m.trace("Parsed object %d: parent=%d, sibling=%d, child=%d, props=%04x, attr=%v\n",
-			obj.num, obj.parent, obj.sibling, obj.child, propAddr, obj.attr)
+		// Parse properties table for this object
 
-		m.objects[obj.num] = obj
+		// Property table header starts with a description: [ size byte | string literal (size * 2 bytes) ]
+		currPropAddr := propAddr
+		descSize := m.mem[currPropAddr]
+		descWords := make([]uint16, descSize)
+		for i := uint16(0); i < uint16(descSize); i++ {
+			word := decode.GetWord(m.mem, currPropAddr+1+i*2)
+			descWords[i] = word
+		}
+		obj.name = decode.String(descWords) // decode string literal
+		currPropAddr += 1 + uint16(descSize)*2
+
+		// Now read properties until we hit a 0 size byte in the header
+		for {
+			propHeader := m.mem[currPropAddr]
+			if propHeader == 0 {
+				// End of properties for this object
+				currPropAddr++
+				break
+			}
+
+			// Property number is in the lower 5 bits, size in upper 3 bits
+			propNum := propHeader & 0x1F
+			propSize := (propHeader>>5)&0x07 + 1 // size is stored as size-1
+			propData := make([]byte, propSize)
+			for i := byte(0); i < propSize; i++ {
+				propData[i] = m.mem[currPropAddr+1+uint16(i)]
+			}
+			obj.properties[propNum] = propData
+
+			currPropAddr += 1 + uint16(propSize)
+		}
+
+		// Debug output
+		m.trace("Parsed object '%s' (%d): parent=%d, sibling=%d, child=%d, props=%04x, attr=%v\n",
+			obj.name, obj.num, obj.parent, obj.sibling, obj.child, propAddr, obj.attr)
+		m.trace("%s\n\n", obj.propDebugDump())
+
+		// We assume objects are in order by number
+		m.objects = append(m.objects, obj)
 
 		// Sanity check to prevent infinite loop
 		if objCount > 255 {
 			break
 		}
 	}
+}
+
+// Helper to get an object by its number
+func (m *Machine) getObject(objNum byte) *zObject {
+	if objNum == NULL_OBJECT || int(objNum) > len(m.objects) {
+		return nil
+	}
+
+	return m.objects[objNum-1]
+}
+
+func (o *zObject) hasAttribute(attrNum byte) bool {
+	if attrNum > 31 {
+		return false
+	}
+	return o.attr[attrNum]
+}
+
+func (o *zObject) setAttribute(attrNum byte, value bool) {
+	if attrNum > 31 {
+		return
+	}
+	o.attr[attrNum] = value
 }

@@ -27,21 +27,21 @@ func TestStoreGlobal(t *testing.T) {
 	m := NewMachine(s, 0, terminal.NewTerminal())
 
 	// Set local variable should NOT affect globals
-	m.StoreVar(0x0f, 77)
+	m.storeVar(0x0f, 77)
 	val0 := decode.GetWord(m.mem, m.globalsAddr)
 	if val0 != 0 {
 		t.Errorf("Expected global variable %d to be 0, got %d", 0, val0)
 	}
 
 	gVar := uint16(0)
-	m.StoreVar(globalVarStart+gVar, 55)
+	m.storeVar(globalVarStart+gVar, 55)
 	val := decode.GetWord(m.mem, m.globalsAddr+gVar)
 	if val != 55 {
 		t.Errorf("Expected global variable %d to be 55, got %d", gVar, val)
 	}
 
 	gVar = 5
-	m.StoreVar(globalVarStart+gVar, 65535)
+	m.storeVar(globalVarStart+gVar, 65535)
 	val = decode.GetWord(m.mem, m.globalsAddr+gVar*2)
 	if val != 65535 {
 		t.Errorf("Expected global variable %d to be 55, got %d", gVar, val)
@@ -62,7 +62,7 @@ func TestStoreNegatives(t *testing.T) {
 			t.Errorf("Expected panic when accessing invalid global variable")
 		}
 	}()
-	m.StoreVar(globalVarStart+gVar, 123)
+	m.storeVar(globalVarStart+gVar, 123)
 	val := decode.GetWord(m.mem, m.globalsAddr+gVar*2)
 	if val != 123 {
 		t.Errorf("Expected global variable %d to be 55, got %d", gVar, val)
