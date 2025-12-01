@@ -1,0 +1,25 @@
+Object tree "oak tree"
+  with height 222;
+
+Object -> magpie "black-striped bird"
+  with wingspan 5, worms_eaten;
+
+Object -> acorn "ACORN DESCRIPTION HERE"
+  with goat 7, hat 8, cake 9,
+  smell "It";
+
+
+! =============================================================================
+! The purpose of this story is to simply test some basic functionality
+! =============================================================================
+
+Global g1 = 10;
+
+[main;
+  @get_sibling magpie -> g1 ?someLabel;
+
+  print magpie;
+
+  .someLabel;
+  print "The magpie has eaten ";
+];

@@ -6,6 +6,16 @@ This is EXTREMELY early work-in-progress. The goal is to create a fully function
 
 The target is to support Z Machine version 3 only at this time.
 
+## Todo List
+
+- [ ] Branch instructions (JUMP, JZ, etc)!
+- [ ] Object tree handling!
+- [ ] Reading input from user
+- [ ] Streams
+- [ ] WASM support, part 1, load & run story in browser
+- [ ] WASM support, part 2, implement input/output handling in browser
+- [ ] Handle SAVE, RESTORE, RESTART opcodes
+
 ## Tutorial
 
 I found getting started with even a minimal Z Machine implementation quite challenging due to the complexity and a badly written specification that assumes a LOT of prior knowledge. Getting a simple "Hello World" working is like facing a mountain of unknowns.

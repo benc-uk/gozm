@@ -1,6 +1,7 @@
 ROOT_DIR := $(shell git rev-parse --show-toplevel)
 DEV_DIR := $(ROOT_DIR)/.dev
-STORY ?= core
+STORY ?= scratch
+DEBUG ?= 0
 
 .DEFAULT_GOAL := help
 
@@ -17,7 +18,11 @@ test: # 🧪 Run tests
 
 run: # 🚀 Run the application
 	clear
-	go run cmd/cli/main.go ./stories/$(STORY).z3
+	go run cmd/cli/main.go -file=test/$(STORY).z3 -debug=$(DEBUG)
+
+watch: # 👀 Watch for changes and run the application
+	clear
+	go tool -modfile=.dev/tools.mod air -c $(DEV_DIR)/air.toml
 
 lint: # ✨ Run golangci-lint
 	go tool -modfile=.dev/tools.mod golangci-lint run --config $(DEV_DIR)/golangci.yaml
@@ -31,5 +36,5 @@ install: # 📦 Install dependencies
 	go mod download -modfile=$(DEV_DIR)/tools.mod
 
 story: # 📚 Compile and dump the story file
-	inform6 -v3 ./stories/$(STORY).inf ./stories/$(STORY).z3
-	./tools/unz ./stories/$(STORY).z3 > ./stories/$(STORY).dump.txt
+	inform6 -v3 ./test/$(STORY).inf ./test/$(STORY).z3
+	./tools/unz ./test/$(STORY).z3 > ./test/$(STORY).dump.txt

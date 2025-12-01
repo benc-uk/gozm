@@ -41,3 +41,17 @@ func (m *Machine) addCallFrame(localCount int) *callFrame {
 	m.callStack = append(m.callStack, frame)
 	return &m.callStack[len(m.callStack)-1]
 }
+
+// Helper to return from a call with a value
+func (m *Machine) returnFromCall(val uint16) {
+	frame := m.getCallFrame()
+	m.pc = frame.returnAddr
+	m.callStack = m.callStack[:len(m.callStack)-1]
+
+	// The next byte after a CALL is the variable to store the result in
+	resultStoreLoc := m.mem[m.pc]
+	m.trace("Result %04x into %d\n", val, resultStoreLoc)
+
+	m.StoreVar(uint16(resultStoreLoc), val)
+	m.pc += 1
+}

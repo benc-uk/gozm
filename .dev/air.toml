@@ -2,7 +2,7 @@ root = "."
 tmp_dir = "tmp"
 
 [build]
-  args_bin = ["test/hello.z3"]
+  args_bin = ["stories/wip.z3"]
   bin = "./tmp/gozm"
   cmd = "go build -o ./tmp/gozm cmd/cli/main.go"
   delay = 1000

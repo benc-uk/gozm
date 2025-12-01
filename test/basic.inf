@@ -15,7 +15,7 @@ Global total = 3;
   ! Call someRoutine with arguments foo=5 and bar=18
   score = someRoutine (5, 18);
 
-  print "^Score is finally: ", score;
+  print "^Score is finally: ", score, "^";
 ];
 
 ! A routine that takes two arguments, foo and bar
@@ -29,7 +29,7 @@ Global total = 3;
   print "^bar was updated ", bar, "^";
 
   ! Increment foo and return a value but on the stack only
-  print "increment foo on stack", foo + 7;
+  print "increment foo on stack ", foo + 7;
 
   ! Modify foo into local variable and continue
   foo = foo + 10;

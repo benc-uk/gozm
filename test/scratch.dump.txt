@@ -1,0 +1,741 @@
+
+***** ANALYZING *****
+
+Filename:                                  ./test/scratch.z3
+Compiled With:                             Inform 6.41
+Z-machine version:                         3
+Calculated checksum:                       0x9D55, checksum ok
+Object count:                              7
+Unique verbs count:                        0
+Grammar table version:                     No syntax/grammar identified
+Verb action count:                         0
+Dictionary word count:                     0
+Scanning for routines from:                0x00526
+Found first routine at address:            0x00526
+Lowest routine address (immediate call) :  0x0052E
+Highest routine address (immediate call):  0x0052E
+Strings start at address:                  0x0054E
+Highest used global in z-code:             240
+Number of used globals in z-code:          2
+Number of unique properties:               1
+
+***** MEMORY MAP *****
+
+00000-0051C DYNAMIC MEMORY
+   00000-0003F Header table, 64 bytes.
+   00040-00041 Abbreviation strings, 2 bytes.
+   00042-00101 Abbreviation table, 192 bytes.
+   00102-00109 Header extension table, 8 bytes.
+   0010A-00147 Object defaults table, 62 bytes.
+   00148-00186 Object tree table, 63 bytes.
+   00187-0020B Object properties tables, 133 bytes.
+   0020C-0033C Unidentified data (Class, indiv. prop & symbol table), 305 bytes.
+   0033D-0051C Global variables, 480 bytes.
+
+0051D-00525 STATIC MEMORY
+   0051D-0051E Unidentified data, 2 bytes.
+   0051F-00525 Vocabulary/Dictionary, 7 bytes.
+
+00526-005B3 HIGH MEMORY
+   00526-0054D Z-code, 40 bytes.
+   0054E-005B3 Static strings, 102 bytes.
+
+
+***** HEADER (00000-0003F, 64 bytes) *****
+
+00000 03                      VERSION Z-machine version:         3
+00001 00                      MODE    Flags 1:                   0x00
+00002 00 01                   ZORKID  Release number:            1
+00004 05 26                   ENDLOD  Base of high memory:       0x0526
+00006 05 27                   START   Initial value of pc:       0x0527
+00008 05 1F                   VOCAB   Dictionary:                0x051F
+0000A 01 0A                   OBJECT  Object table:              0x010A
+0000C 03 3D                   GLOBALS Global variables table:    0x033D
+0000E 05 1D                   PURBOT  Base of static memory:     0x051D
+00010 00 00                   FLAGS   Flags 2:                   0x0000
+00012 32 35 31 32 30 31       SERIAL  Serial number:             251201
+00018 00 42                   FWORDS  Abbreviations table:       0x0042
+0001A 02 DA                   PLENTH  Length of file:            0x05B4
+0001C 9D 55                   PCHKSM  Checksum of file:          0x9D55
+0001E 00                      INTWRD  Interpreter number:        0
+0001F 00                              Interpreter version:       0
+00020 00                      SCRWRD  Screen height (lines):     0
+00021 00                              Screen width (chars):      0
+00022 00 00                   HWRD    Screen width in units:     0x0000
+00024 00 00                   VWRD    Screen width in units:     0x0000
+00026 00                      FWRD    Font width/height:         0
+00027 00                              Font width/height:         0
+00028 00 00                   FOFF    Routines offset:           0x0000
+0002A 00 00                   SOFF    Static strings offset:     0x0000
+0002C 00                      CLRWRD  Default backgr. color:     0
+0002D 00                              Default foregr. color:     0
+0002E 00 00                   TCHARS  Terminating chars table:   0x0000
+00030 00 00                   TWID    Output loc for DIROUT:     0x0000
+00032 00 00                           Standard revision number:  0x0000
+00034 00 00                   CHRSET  Alphabet table address:    0x0000
+00036 01 02                   EXTAB   Header extension address:  0x0102
+00038 00 00 00 00 36 2E 34 31 USRNM   Username:                  ....6.41
+
+
+***** ABBREVIATION STRINGS (00040-00041, 2 bytes) *****
+
+00040 80 00                    A00: "   "
+00040 80 00                    A01: "   "
+00040 80 00                    A02: "   "
+00040 80 00                    A03: "   "
+00040 80 00                    A04: "   "
+00040 80 00                    A05: "   "
+00040 80 00                    A06: "   "
+00040 80 00                    A07: "   "
+00040 80 00                    A08: "   "
+00040 80 00                    A09: "   "
+00040 80 00                    A10: "   "
+00040 80 00                    A11: "   "
+00040 80 00                    A12: "   "
+00040 80 00                    A13: "   "
+00040 80 00                    A14: "   "
+00040 80 00                    A15: "   "
+00040 80 00                    A16: "   "
+00040 80 00                    A17: "   "
+00040 80 00                    A18: "   "
+00040 80 00                    A19: "   "
+00040 80 00                    A20: "   "
+00040 80 00                    A21: "   "
+00040 80 00                    A22: "   "
+00040 80 00                    A23: "   "
+00040 80 00                    A24: "   "
+00040 80 00                    A25: "   "
+00040 80 00                    A26: "   "
+00040 80 00                    A27: "   "
+00040 80 00                    A28: "   "
+00040 80 00                    A29: "   "
+00040 80 00                    A30: "   "
+00040 80 00                    A31: "   "
+00040 80 00                    A32: "   "
+00040 80 00                    A33: "   "
+00040 80 00                    A34: "   "
+00040 80 00                    A35: "   "
+00040 80 00                    A36: "   "
+00040 80 00                    A37: "   "
+00040 80 00                    A38: "   "
+00040 80 00                    A39: "   "
+00040 80 00                    A40: "   "
+00040 80 00                    A41: "   "
+00040 80 00                    A42: "   "
+00040 80 00                    A43: "   "
+00040 80 00                    A44: "   "
+00040 80 00                    A45: "   "
+00040 80 00                    A46: "   "
+00040 80 00                    A47: "   "
+00040 80 00                    A48: "   "
+00040 80 00                    A49: "   "
+00040 80 00                    A50: "   "
+00040 80 00                    A51: "   "
+00040 80 00                    A52: "   "
+00040 80 00                    A53: "   "
+00040 80 00                    A54: "   "
+00040 80 00                    A55: "   "
+00040 80 00                    A56: "   "
+00040 80 00                    A57: "   "
+00040 80 00                    A58: "   "
+00040 80 00                    A59: "   "
+00040 80 00                    A60: "   "
+00040 80 00                    A61: "   "
+00040 80 00                    A62: "   "
+00040 80 00                    A63: "   "
+00040 80 00                    A64: "   "
+00040 80 00                    A65: "   "
+00040 80 00                    A66: "   "
+00040 80 00                    A67: "   "
+00040 80 00                    A68: "   "
+00040 80 00                    A69: "   "
+00040 80 00                    A70: "   "
+00040 80 00                    A71: "   "
+00040 80 00                    A72: "   "
+00040 80 00                    A73: "   "
+00040 80 00                    A74: "   "
+00040 80 00                    A75: "   "
+00040 80 00                    A76: "   "
+00040 80 00                    A77: "   "
+00040 80 00                    A78: "   "
+00040 80 00                    A79: "   "
+00040 80 00                    A80: "   "
+00040 80 00                    A81: "   "
+00040 80 00                    A82: "   "
+00040 80 00                    A83: "   "
+00040 80 00                    A84: "   "
+00040 80 00                    A85: "   "
+00040 80 00                    A86: "   "
+00040 80 00                    A87: "   "
+00040 80 00                    A88: "   "
+00040 80 00                    A89: "   "
+00040 80 00                    A90: "   "
+00040 80 00                    A91: "   "
+00040 80 00                    A92: "   "
+00040 80 00                    A93: "   "
+00040 80 00                    A94: "   "
+00040 80 00                    A95: "   "
+
+
+***** ABBREVIATION TABLE (00042-000BF, 192 bytes) *****
+
+00042 00 20                    Address of abbreviation  0: 0x0040
+00044 00 20                    Address of abbreviation  1: 0x0040
+00046 00 20                    Address of abbreviation  2: 0x0040
+00048 00 20                    Address of abbreviation  3: 0x0040
+0004A 00 20                    Address of abbreviation  4: 0x0040
+0004C 00 20                    Address of abbreviation  5: 0x0040
+0004E 00 20                    Address of abbreviation  6: 0x0040
+00050 00 20                    Address of abbreviation  7: 0x0040
+00052 00 20                    Address of abbreviation  8: 0x0040
+00054 00 20                    Address of abbreviation  9: 0x0040
+00056 00 20                    Address of abbreviation 10: 0x0040
+00058 00 20                    Address of abbreviation 11: 0x0040
+0005A 00 20                    Address of abbreviation 12: 0x0040
+0005C 00 20                    Address of abbreviation 13: 0x0040
+0005E 00 20                    Address of abbreviation 14: 0x0040
+00060 00 20                    Address of abbreviation 15: 0x0040
+00062 00 20                    Address of abbreviation 16: 0x0040
+00064 00 20                    Address of abbreviation 17: 0x0040
+00066 00 20                    Address of abbreviation 18: 0x0040
+00068 00 20                    Address of abbreviation 19: 0x0040
+0006A 00 20                    Address of abbreviation 20: 0x0040
+0006C 00 20                    Address of abbreviation 21: 0x0040
+0006E 00 20                    Address of abbreviation 22: 0x0040
+00070 00 20                    Address of abbreviation 23: 0x0040
+00072 00 20                    Address of abbreviation 24: 0x0040
+00074 00 20                    Address of abbreviation 25: 0x0040
+00076 00 20                    Address of abbreviation 26: 0x0040
+00078 00 20                    Address of abbreviation 27: 0x0040
+0007A 00 20                    Address of abbreviation 28: 0x0040
+0007C 00 20                    Address of abbreviation 29: 0x0040
+0007E 00 20                    Address of abbreviation 30: 0x0040
+00080 00 20                    Address of abbreviation 31: 0x0040
+00082 00 20                    Address of abbreviation 32: 0x0040
+00084 00 20                    Address of abbreviation 33: 0x0040
+00086 00 20                    Address of abbreviation 34: 0x0040
+00088 00 20                    Address of abbreviation 35: 0x0040
+0008A 00 20                    Address of abbreviation 36: 0x0040
+0008C 00 20                    Address of abbreviation 37: 0x0040
+0008E 00 20                    Address of abbreviation 38: 0x0040
+00090 00 20                    Address of abbreviation 39: 0x0040
+00092 00 20                    Address of abbreviation 40: 0x0040
+00094 00 20                    Address of abbreviation 41: 0x0040
+00096 00 20                    Address of abbreviation 42: 0x0040
+00098 00 20                    Address of abbreviation 43: 0x0040
+0009A 00 20                    Address of abbreviation 44: 0x0040
+0009C 00 20                    Address of abbreviation 45: 0x0040
+0009E 00 20                    Address of abbreviation 46: 0x0040
+000A0 00 20                    Address of abbreviation 47: 0x0040
+000A2 00 20                    Address of abbreviation 48: 0x0040
+000A4 00 20                    Address of abbreviation 49: 0x0040
+000A6 00 20                    Address of abbreviation 50: 0x0040
+000A8 00 20                    Address of abbreviation 51: 0x0040
+000AA 00 20                    Address of abbreviation 52: 0x0040
+000AC 00 20                    Address of abbreviation 53: 0x0040
+000AE 00 20                    Address of abbreviation 54: 0x0040
+000B0 00 20                    Address of abbreviation 55: 0x0040
+000B2 00 20                    Address of abbreviation 56: 0x0040
+000B4 00 20                    Address of abbreviation 57: 0x0040
+000B6 00 20                    Address of abbreviation 58: 0x0040
+000B8 00 20                    Address of abbreviation 59: 0x0040
+000BA 00 20                    Address of abbreviation 60: 0x0040
+000BC 00 20                    Address of abbreviation 61: 0x0040
+000BE 00 20                    Address of abbreviation 62: 0x0040
+000C0 00 20                    Address of abbreviation 63: 0x0040
+000C2 00 20                    Address of abbreviation 64: 0x0040
+000C4 00 20                    Address of abbreviation 65: 0x0040
+000C6 00 20                    Address of abbreviation 66: 0x0040
+000C8 00 20                    Address of abbreviation 67: 0x0040
+000CA 00 20                    Address of abbreviation 68: 0x0040
+000CC 00 20                    Address of abbreviation 69: 0x0040
+000CE 00 20                    Address of abbreviation 70: 0x0040
+000D0 00 20                    Address of abbreviation 71: 0x0040
+000D2 00 20                    Address of abbreviation 72: 0x0040
+000D4 00 20                    Address of abbreviation 73: 0x0040
+000D6 00 20                    Address of abbreviation 74: 0x0040
+000D8 00 20                    Address of abbreviation 75: 0x0040
+000DA 00 20                    Address of abbreviation 76: 0x0040
+000DC 00 20                    Address of abbreviation 77: 0x0040
+000DE 00 20                    Address of abbreviation 78: 0x0040
+000E0 00 20                    Address of abbreviation 79: 0x0040
+000E2 00 20                    Address of abbreviation 80: 0x0040
+000E4 00 20                    Address of abbreviation 81: 0x0040
+000E6 00 20                    Address of abbreviation 82: 0x0040
+000E8 00 20                    Address of abbreviation 83: 0x0040
+000EA 00 20                    Address of abbreviation 84: 0x0040
+000EC 00 20                    Address of abbreviation 85: 0x0040
+000EE 00 20                    Address of abbreviation 86: 0x0040
+000F0 00 20                    Address of abbreviation 87: 0x0040
+000F2 00 20                    Address of abbreviation 88: 0x0040
+000F4 00 20                    Address of abbreviation 89: 0x0040
+000F6 00 20                    Address of abbreviation 90: 0x0040
+000F8 00 20                    Address of abbreviation 91: 0x0040
+000FA 00 20                    Address of abbreviation 92: 0x0040
+000FC 00 20                    Address of abbreviation 93: 0x0040
+000FE 00 20                    Address of abbreviation 94: 0x0040
+00100 00 20                    Address of abbreviation 95: 0x0040
+
+
+***** HEADER EXTENSION TABLE (00102-00109, 8 bytes) *****
+
+00102 00 03                   Number of further words:                  3
+00104 00 00                   MSLOCX  X-coord of mouse after a click:    0x0000
+00106 00 00                   MSLOCX  Y-coord of mouse after a click:    0x0000
+00108 00 00                           Unicode translation table address: 0x0000
+
+
+***** PROPERTY DEFAULTS TABLE (0010A-00147, 62 bytes) *****
+
+0010A 00 00                   Default value property 1 = 0000
+0010C 00 00                   Default value property 2 = 0000
+0010E 00 00                   Default value property 3 = 0000
+00110 00 00                   Default value property 4 = 0000
+00112 00 00                   Default value property 5 = 0000
+00114 00 00                   Default value property 6 = 0000
+00116 00 00                   Default value property 7 = 0000
+00118 00 00                   Default value property 8 = 0000
+0011A 00 00                   Default value property 9 = 0000
+0011C 00 00                   Default value property 10 = 0000
+0011E 00 00                   Default value property 11 = 0000
+00120 00 00                   Default value property 12 = 0000
+00122 00 00                   Default value property 13 = 0000
+00124 00 00                   Default value property 14 = 0000
+00126 00 00                   Default value property 15 = 0000
+00128 00 00                   Default value property 16 = 0000
+0012A 00 00                   Default value property 17 = 0000
+0012C 00 00                   Default value property 18 = 0000
+0012E 00 00                   Default value property 19 = 0000
+00130 00 00                   Default value property 20 = 0000
+00132 00 00                   Default value property 21 = 0000
+00134 00 00                   Default value property 22 = 0000
+00136 00 00                   Default value property 23 = 0000
+00138 00 00                   Default value property 24 = 0000
+0013A 00 00                   Default value property 25 = 0000
+0013C 00 00                   Default value property 26 = 0000
+0013E 00 00                   Default value property 27 = 0000
+00140 00 00                   Default value property 28 = 0000
+00142 00 00                   Default value property 29 = 0000
+00144 00 00                   Default value property 30 = 0000
+00146 00 00                   Default value property 31 = 0000
+
+
+***** OBJECT TREE TABLE (00148-00186, 63 bytes) *****
+
+[  1] Class
+[  2] Object
+[  3] Routine
+[  4] String
+[  5] oak tree
+   [  6] black-striped bird
+   [  7] ACORN DESCRIPTION HERE
+
+***** OBJECT PROPERTIES TABLES (00187-0020B, 133 bytes) *****
+
+Object count: 7
+
+Object: 1
+00148 00 00 00 00 00 00 00 01 87 
+  Attributes:
+  Parent = 0 
+  Next   = 0 
+  Child  = 0 
+  Properties address  = 0187 
+    00187 02 11 11 9B 18 
+    Description = "Class"
+
+Object: 2
+00151 00 00 00 00 00 00 00 01 97 
+  Attributes:
+  Parent = 0 
+  Next   = 0 
+  Child  = 0 
+  Properties address  = 0197 
+    00197 03 12 87 3D 48 E4 A5 
+    Description = "Object"
+
+Object: 3
+0015A 00 00 00 00 00 00 00 01 A9 
+  Attributes:
+  Parent = 0 
+  Next   = 0 
+  Child  = 0 
+  Properties address  = 01A9 
+    001A9 03 12 F4 6B 2E CD 45 
+    Description = "Routine"
+
+Object: 4
+00163 00 00 00 00 00 00 00 01 BB 
+  Attributes:
+  Parent = 0 
+  Next   = 0 
+  Child  = 0 
+  Properties address  = 01BB 
+    001BB 03 13 19 5D D3 B0 A5 
+    Description = "String"
+
+Object: 5
+0016C 00 00 00 00 00 00 06 01 CD 
+  Attributes:
+  Parent = 0 
+  Next   = 0 
+  Child  = 6 
+  Properties address  = 01CD 
+    001CD 03 50 D0 03 37 A9 45 
+    Description = "oak tree"
+    001D4 23    03 14                    3/2  prop#3 Data = 03 14 
+
+Object: 6
+00175 00 00 00 00 05 07 00 01 D8 
+  Attributes: 37, 39, 45, 46, 47
+  Parent = 5 
+  Next   = 7 
+  Child  = 0 
+  Properties address  = 01D8 
+    001D8 07 1E 26 22 05 73 19 5D D5 29 20 1D D7 A4 A5 
+    Description = "black-striped bird"
+    001E7 23    03 1B                    3/2  prop#3 Data = 03 1B 
+
+Object: 7
+0017E 00 00 00 00 05 00 00 01 EB 
+  Attributes: 37, 39
+  Parent = 5 
+  Next   = 0 
+  Child  = 0 
+  Properties address  = 01EB 
+    001EB 0E 10 C4 20 94 12 E4 4C 04 24 8A 13 04 20 97 11 C4 54 99 11 C4 50 93 00 8D 11 44 DC 8A 
+    Description = "ACORN DESCRIPTION HERE"
+    00208 23    03 27                    3/2  prop#3 Data = 03 27 
+
+
+***** UNIDENTIFIED DATA (0020C-0033C, 305 bytes) *****
+
+00200                                     00 01 00 02              ....
+00210 00 03 00 04 00 00 00 4F 02 B1 00 00 00 00 00 00  .......O........
+00220 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
+00230 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
+00240 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
+00250 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
+00260 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
+00270 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
+00280 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
+00290 00 00 00 00 00 00 02 B3 02 B5 02 B8 02 BB 02 BE  ................
+002A0 02 C0 02 C2 02 C4 02 CA 02 CC 02 CF 02 D3 02 D5  ................
+002B0 02 D6 02 D8 02 A8 02 A8 02 A8 02 A8 02 A8 02 A8  ................
+002C0 02 A8 02 A8 02 A8 02 A8 02 A8 02 A8 02 A8 02 A8  ................
+002D0 02 A8 02 A8 02 A8 02 A8 02 A8 02 A8 02 A8 02 A8  ................
+002E0 02 A8 02 A8 02 A8 02 A8 02 A8 02 A8 02 A8 02 A8  ................
+002F0 02 A8 02 A8 02 A8 02 A8 02 A8 02 A8 02 A8 02 A8  ................
+00300 02 A8 02 A8 02 A8 02 A8 02 A8 02 A8 02 A8 02 A8  ................
+00310 02 A8 02 A8 00 48 02 00 DE 00 00 00 49 02 00 05  .....H......I...
+00320 00 4A 02 00 00 00 00 00 4B 02 00 07 00 4C 02 00  .J......K....L..
+00330 08 00 4D 02 00 09 00 4E 02 02 A7 00 00           ..M....N.....
+
+
+***** GLOBAL VARIABLES TABLE (0033D-0051C, 480 bytes) *****
+
+0033D 00 0A                    G00, Global #1 =   0x000A
+0033F 00 00                    G01, Global #2 =   0x0000 (This global is not refered to from z-code.)
+00341 00 00                    G02, Global #3 =   0x0000 (This global is not refered to from z-code.)
+00343 00 00                    G03, Global #4 =   0x0000 (This global is not refered to from z-code.)
+00345 00 00                    G04, Global #5 =   0x0000 (This global is not refered to from z-code.)
+00347 00 00                    G05, Global #6 =   0x0000 (This global is not refered to from z-code.)
+00349 00 00                    G06, Global #7 =   0x0000 (This global is not refered to from z-code.)
+0034B 00 00                    G07, Global #8 =   0x0000 (This global is not refered to from z-code.)
+0034D 00 00                    G08, Global #9 =   0x0000 (This global is not refered to from z-code.)
+0034F 00 00                    G09, Global #10 =  0x0000 (This global is not refered to from z-code.)
+00351 00 00                    G0A, Global #11 =  0x0000 (This global is not refered to from z-code.)
+00353 00 00                    G0B, Global #12 =  0x0000 (This global is not refered to from z-code.)
+00355 00 00                    G0C, Global #13 =  0x0000 (This global is not refered to from z-code.)
+00357 00 00                    G0D, Global #14 =  0x0000 (This global is not refered to from z-code.)
+00359 00 00                    G0E, Global #15 =  0x0000 (This global is not refered to from z-code.)
+0035B 00 00                    G0F, Global #16 =  0x0000 (This global is not refered to from z-code.)
+0035D 00 00                    G10, Global #17 =  0x0000 (This global is not refered to from z-code.)
+0035F 00 00                    G11, Global #18 =  0x0000 (This global is not refered to from z-code.)
+00361 00 00                    G12, Global #19 =  0x0000 (This global is not refered to from z-code.)
+00363 00 00                    G13, Global #20 =  0x0000 (This global is not refered to from z-code.)
+00365 00 00                    G14, Global #21 =  0x0000 (This global is not refered to from z-code.)
+00367 00 00                    G15, Global #22 =  0x0000 (This global is not refered to from z-code.)
+00369 00 00                    G16, Global #23 =  0x0000 (This global is not refered to from z-code.)
+0036B 00 00                    G17, Global #24 =  0x0000 (This global is not refered to from z-code.)
+0036D 00 00                    G18, Global #25 =  0x0000 (This global is not refered to from z-code.)
+0036F 00 00                    G19, Global #26 =  0x0000 (This global is not refered to from z-code.)
+00371 00 00                    G1A, Global #27 =  0x0000 (This global is not refered to from z-code.)
+00373 00 00                    G1B, Global #28 =  0x0000 (This global is not refered to from z-code.)
+00375 00 00                    G1C, Global #29 =  0x0000 (This global is not refered to from z-code.)
+00377 00 00                    G1D, Global #30 =  0x0000 (This global is not refered to from z-code.)
+00379 00 00                    G1E, Global #31 =  0x0000 (This global is not refered to from z-code.)
+0037B 00 00                    G1F, Global #32 =  0x0000 (This global is not refered to from z-code.)
+0037D 00 00                    G20, Global #33 =  0x0000 (This global is not refered to from z-code.)
+0037F 00 00                    G21, Global #34 =  0x0000 (This global is not refered to from z-code.)
+00381 00 00                    G22, Global #35 =  0x0000 (This global is not refered to from z-code.)
+00383 00 00                    G23, Global #36 =  0x0000 (This global is not refered to from z-code.)
+00385 00 00                    G24, Global #37 =  0x0000 (This global is not refered to from z-code.)
+00387 00 00                    G25, Global #38 =  0x0000 (This global is not refered to from z-code.)
+00389 00 00                    G26, Global #39 =  0x0000 (This global is not refered to from z-code.)
+0038B 00 00                    G27, Global #40 =  0x0000 (This global is not refered to from z-code.)
+0038D 00 00                    G28, Global #41 =  0x0000 (This global is not refered to from z-code.)
+0038F 00 00                    G29, Global #42 =  0x0000 (This global is not refered to from z-code.)
+00391 00 00                    G2A, Global #43 =  0x0000 (This global is not refered to from z-code.)
+00393 00 00                    G2B, Global #44 =  0x0000 (This global is not refered to from z-code.)
+00395 00 00                    G2C, Global #45 =  0x0000 (This global is not refered to from z-code.)
+00397 00 00                    G2D, Global #46 =  0x0000 (This global is not refered to from z-code.)
+00399 00 00                    G2E, Global #47 =  0x0000 (This global is not refered to from z-code.)
+0039B 00 00                    G2F, Global #48 =  0x0000 (This global is not refered to from z-code.)
+0039D 00 00                    G30, Global #49 =  0x0000 (This global is not refered to from z-code.)
+0039F 00 00                    G31, Global #50 =  0x0000 (This global is not refered to from z-code.)
+003A1 00 00                    G32, Global #51 =  0x0000 (This global is not refered to from z-code.)
+003A3 00 00                    G33, Global #52 =  0x0000 (This global is not refered to from z-code.)
+003A5 00 00                    G34, Global #53 =  0x0000 (This global is not refered to from z-code.)
+003A7 00 00                    G35, Global #54 =  0x0000 (This global is not refered to from z-code.)
+003A9 00 00                    G36, Global #55 =  0x0000 (This global is not refered to from z-code.)
+003AB 00 00                    G37, Global #56 =  0x0000 (This global is not refered to from z-code.)
+003AD 00 00                    G38, Global #57 =  0x0000 (This global is not refered to from z-code.)
+003AF 00 00                    G39, Global #58 =  0x0000 (This global is not refered to from z-code.)
+003B1 00 00                    G3A, Global #59 =  0x0000 (This global is not refered to from z-code.)
+003B3 00 00                    G3B, Global #60 =  0x0000 (This global is not refered to from z-code.)
+003B5 00 00                    G3C, Global #61 =  0x0000 (This global is not refered to from z-code.)
+003B7 00 00                    G3D, Global #62 =  0x0000 (This global is not refered to from z-code.)
+003B9 00 00                    G3E, Global #63 =  0x0000 (This global is not refered to from z-code.)
+003BB 00 00                    G3F, Global #64 =  0x0000 (This global is not refered to from z-code.)
+003BD 00 00                    G40, Global #65 =  0x0000 (This global is not refered to from z-code.)
+003BF 00 00                    G41, Global #66 =  0x0000 (This global is not refered to from z-code.)
+003C1 00 00                    G42, Global #67 =  0x0000 (This global is not refered to from z-code.)
+003C3 00 00                    G43, Global #68 =  0x0000 (This global is not refered to from z-code.)
+003C5 00 00                    G44, Global #69 =  0x0000 (This global is not refered to from z-code.)
+003C7 00 00                    G45, Global #70 =  0x0000 (This global is not refered to from z-code.)
+003C9 00 00                    G46, Global #71 =  0x0000 (This global is not refered to from z-code.)
+003CB 00 00                    G47, Global #72 =  0x0000 (This global is not refered to from z-code.)
+003CD 00 00                    G48, Global #73 =  0x0000 (This global is not refered to from z-code.)
+003CF 00 00                    G49, Global #74 =  0x0000 (This global is not refered to from z-code.)
+003D1 00 00                    G4A, Global #75 =  0x0000 (This global is not refered to from z-code.)
+003D3 00 00                    G4B, Global #76 =  0x0000 (This global is not refered to from z-code.)
+003D5 00 00                    G4C, Global #77 =  0x0000 (This global is not refered to from z-code.)
+003D7 00 00                    G4D, Global #78 =  0x0000 (This global is not refered to from z-code.)
+003D9 00 00                    G4E, Global #79 =  0x0000 (This global is not refered to from z-code.)
+003DB 00 00                    G4F, Global #80 =  0x0000 (This global is not refered to from z-code.)
+003DD 00 00                    G50, Global #81 =  0x0000 (This global is not refered to from z-code.)
+003DF 00 00                    G51, Global #82 =  0x0000 (This global is not refered to from z-code.)
+003E1 00 00                    G52, Global #83 =  0x0000 (This global is not refered to from z-code.)
+003E3 00 00                    G53, Global #84 =  0x0000 (This global is not refered to from z-code.)
+003E5 00 00                    G54, Global #85 =  0x0000 (This global is not refered to from z-code.)
+003E7 00 00                    G55, Global #86 =  0x0000 (This global is not refered to from z-code.)
+003E9 00 00                    G56, Global #87 =  0x0000 (This global is not refered to from z-code.)
+003EB 00 00                    G57, Global #88 =  0x0000 (This global is not refered to from z-code.)
+003ED 00 00                    G58, Global #89 =  0x0000 (This global is not refered to from z-code.)
+003EF 00 00                    G59, Global #90 =  0x0000 (This global is not refered to from z-code.)
+003F1 00 00                    G5A, Global #91 =  0x0000 (This global is not refered to from z-code.)
+003F3 00 00                    G5B, Global #92 =  0x0000 (This global is not refered to from z-code.)
+003F5 00 00                    G5C, Global #93 =  0x0000 (This global is not refered to from z-code.)
+003F7 00 00                    G5D, Global #94 =  0x0000 (This global is not refered to from z-code.)
+003F9 00 00                    G5E, Global #95 =  0x0000 (This global is not refered to from z-code.)
+003FB 00 00                    G5F, Global #96 =  0x0000 (This global is not refered to from z-code.)
+003FD 00 00                    G60, Global #97 =  0x0000 (This global is not refered to from z-code.)
+003FF 00 00                    G61, Global #98 =  0x0000 (This global is not refered to from z-code.)
+00401 00 00                    G62, Global #99 =  0x0000 (This global is not refered to from z-code.)
+00403 00 00                    G63, Global #100 = 0x0000 (This global is not refered to from z-code.)
+00405 00 00                    G64, Global #101 = 0x0000 (This global is not refered to from z-code.)
+00407 00 00                    G65, Global #102 = 0x0000 (This global is not refered to from z-code.)
+00409 00 00                    G66, Global #103 = 0x0000 (This global is not refered to from z-code.)
+0040B 00 00                    G67, Global #104 = 0x0000 (This global is not refered to from z-code.)
+0040D 00 00                    G68, Global #105 = 0x0000 (This global is not refered to from z-code.)
+0040F 00 00                    G69, Global #106 = 0x0000 (This global is not refered to from z-code.)
+00411 00 00                    G6A, Global #107 = 0x0000 (This global is not refered to from z-code.)
+00413 00 00                    G6B, Global #108 = 0x0000 (This global is not refered to from z-code.)
+00415 00 00                    G6C, Global #109 = 0x0000 (This global is not refered to from z-code.)
+00417 00 00                    G6D, Global #110 = 0x0000 (This global is not refered to from z-code.)
+00419 00 00                    G6E, Global #111 = 0x0000 (This global is not refered to from z-code.)
+0041B 00 00                    G6F, Global #112 = 0x0000 (This global is not refered to from z-code.)
+0041D 00 00                    G70, Global #113 = 0x0000 (This global is not refered to from z-code.)
+0041F 00 00                    G71, Global #114 = 0x0000 (This global is not refered to from z-code.)
+00421 00 00                    G72, Global #115 = 0x0000 (This global is not refered to from z-code.)
+00423 00 00                    G73, Global #116 = 0x0000 (This global is not refered to from z-code.)
+00425 00 00                    G74, Global #117 = 0x0000 (This global is not refered to from z-code.)
+00427 00 00                    G75, Global #118 = 0x0000 (This global is not refered to from z-code.)
+00429 00 00                    G76, Global #119 = 0x0000 (This global is not refered to from z-code.)
+0042B 00 00                    G77, Global #120 = 0x0000 (This global is not refered to from z-code.)
+0042D 00 00                    G78, Global #121 = 0x0000 (This global is not refered to from z-code.)
+0042F 00 00                    G79, Global #122 = 0x0000 (This global is not refered to from z-code.)
+00431 00 00                    G7A, Global #123 = 0x0000 (This global is not refered to from z-code.)
+00433 00 00                    G7B, Global #124 = 0x0000 (This global is not refered to from z-code.)
+00435 00 00                    G7C, Global #125 = 0x0000 (This global is not refered to from z-code.)
+00437 00 00                    G7D, Global #126 = 0x0000 (This global is not refered to from z-code.)
+00439 00 00                    G7E, Global #127 = 0x0000 (This global is not refered to from z-code.)
+0043B 00 00                    G7F, Global #128 = 0x0000 (This global is not refered to from z-code.)
+0043D 00 00                    G80, Global #129 = 0x0000 (This global is not refered to from z-code.)
+0043F 00 00                    G81, Global #130 = 0x0000 (This global is not refered to from z-code.)
+00441 00 00                    G82, Global #131 = 0x0000 (This global is not refered to from z-code.)
+00443 00 00                    G83, Global #132 = 0x0000 (This global is not refered to from z-code.)
+00445 00 00                    G84, Global #133 = 0x0000 (This global is not refered to from z-code.)
+00447 00 00                    G85, Global #134 = 0x0000 (This global is not refered to from z-code.)
+00449 00 00                    G86, Global #135 = 0x0000 (This global is not refered to from z-code.)
+0044B 00 00                    G87, Global #136 = 0x0000 (This global is not refered to from z-code.)
+0044D 00 00                    G88, Global #137 = 0x0000 (This global is not refered to from z-code.)
+0044F 00 00                    G89, Global #138 = 0x0000 (This global is not refered to from z-code.)
+00451 00 00                    G8A, Global #139 = 0x0000 (This global is not refered to from z-code.)
+00453 00 00                    G8B, Global #140 = 0x0000 (This global is not refered to from z-code.)
+00455 00 00                    G8C, Global #141 = 0x0000 (This global is not refered to from z-code.)
+00457 00 00                    G8D, Global #142 = 0x0000 (This global is not refered to from z-code.)
+00459 00 00                    G8E, Global #143 = 0x0000 (This global is not refered to from z-code.)
+0045B 00 00                    G8F, Global #144 = 0x0000 (This global is not refered to from z-code.)
+0045D 00 00                    G90, Global #145 = 0x0000 (This global is not refered to from z-code.)
+0045F 00 00                    G91, Global #146 = 0x0000 (This global is not refered to from z-code.)
+00461 00 00                    G92, Global #147 = 0x0000 (This global is not refered to from z-code.)
+00463 00 00                    G93, Global #148 = 0x0000 (This global is not refered to from z-code.)
+00465 00 00                    G94, Global #149 = 0x0000 (This global is not refered to from z-code.)
+00467 00 00                    G95, Global #150 = 0x0000 (This global is not refered to from z-code.)
+00469 00 00                    G96, Global #151 = 0x0000 (This global is not refered to from z-code.)
+0046B 00 00                    G97, Global #152 = 0x0000 (This global is not refered to from z-code.)
+0046D 00 00                    G98, Global #153 = 0x0000 (This global is not refered to from z-code.)
+0046F 00 00                    G99, Global #154 = 0x0000 (This global is not refered to from z-code.)
+00471 00 00                    G9A, Global #155 = 0x0000 (This global is not refered to from z-code.)
+00473 00 00                    G9B, Global #156 = 0x0000 (This global is not refered to from z-code.)
+00475 00 00                    G9C, Global #157 = 0x0000 (This global is not refered to from z-code.)
+00477 00 00                    G9D, Global #158 = 0x0000 (This global is not refered to from z-code.)
+00479 00 00                    G9E, Global #159 = 0x0000 (This global is not refered to from z-code.)
+0047B 00 00                    G9F, Global #160 = 0x0000 (This global is not refered to from z-code.)
+0047D 00 00                    GA0, Global #161 = 0x0000 (This global is not refered to from z-code.)
+0047F 00 00                    GA1, Global #162 = 0x0000 (This global is not refered to from z-code.)
+00481 00 00                    GA2, Global #163 = 0x0000 (This global is not refered to from z-code.)
+00483 00 00                    GA3, Global #164 = 0x0000 (This global is not refered to from z-code.)
+00485 00 00                    GA4, Global #165 = 0x0000 (This global is not refered to from z-code.)
+00487 00 00                    GA5, Global #166 = 0x0000 (This global is not refered to from z-code.)
+00489 00 00                    GA6, Global #167 = 0x0000 (This global is not refered to from z-code.)
+0048B 00 00                    GA7, Global #168 = 0x0000 (This global is not refered to from z-code.)
+0048D 00 00                    GA8, Global #169 = 0x0000 (This global is not refered to from z-code.)
+0048F 00 00                    GA9, Global #170 = 0x0000 (This global is not refered to from z-code.)
+00491 00 00                    GAA, Global #171 = 0x0000 (This global is not refered to from z-code.)
+00493 00 00                    GAB, Global #172 = 0x0000 (This global is not refered to from z-code.)
+00495 00 00                    GAC, Global #173 = 0x0000 (This global is not refered to from z-code.)
+00497 00 00                    GAD, Global #174 = 0x0000 (This global is not refered to from z-code.)
+00499 00 00                    GAE, Global #175 = 0x0000 (This global is not refered to from z-code.)
+0049B 00 00                    GAF, Global #176 = 0x0000 (This global is not refered to from z-code.)
+0049D 00 00                    GB0, Global #177 = 0x0000 (This global is not refered to from z-code.)
+0049F 00 00                    GB1, Global #178 = 0x0000 (This global is not refered to from z-code.)
+004A1 00 00                    GB2, Global #179 = 0x0000 (This global is not refered to from z-code.)
+004A3 00 00                    GB3, Global #180 = 0x0000 (This global is not refered to from z-code.)
+004A5 00 00                    GB4, Global #181 = 0x0000 (This global is not refered to from z-code.)
+004A7 00 00                    GB5, Global #182 = 0x0000 (This global is not refered to from z-code.)
+004A9 00 00                    GB6, Global #183 = 0x0000 (This global is not refered to from z-code.)
+004AB 00 00                    GB7, Global #184 = 0x0000 (This global is not refered to from z-code.)
+004AD 00 00                    GB8, Global #185 = 0x0000 (This global is not refered to from z-code.)
+004AF 00 00                    GB9, Global #186 = 0x0000 (This global is not refered to from z-code.)
+004B1 00 00                    GBA, Global #187 = 0x0000 (This global is not refered to from z-code.)
+004B3 00 00                    GBB, Global #188 = 0x0000 (This global is not refered to from z-code.)
+004B5 00 00                    GBC, Global #189 = 0x0000 (This global is not refered to from z-code.)
+004B7 00 00                    GBD, Global #190 = 0x0000 (This global is not refered to from z-code.)
+004B9 00 00                    GBE, Global #191 = 0x0000 (This global is not refered to from z-code.)
+004BB 00 00                    GBF, Global #192 = 0x0000 (This global is not refered to from z-code.)
+004BD 00 00                    GC0, Global #193 = 0x0000 (This global is not refered to from z-code.)
+004BF 00 00                    GC1, Global #194 = 0x0000 (This global is not refered to from z-code.)
+004C1 00 00                    GC2, Global #195 = 0x0000 (This global is not refered to from z-code.)
+004C3 00 00                    GC3, Global #196 = 0x0000 (This global is not refered to from z-code.)
+004C5 00 00                    GC4, Global #197 = 0x0000 (This global is not refered to from z-code.)
+004C7 00 00                    GC5, Global #198 = 0x0000 (This global is not refered to from z-code.)
+004C9 00 00                    GC6, Global #199 = 0x0000 (This global is not refered to from z-code.)
+004CB 00 00                    GC7, Global #200 = 0x0000 (This global is not refered to from z-code.)
+004CD 00 00                    GC8, Global #201 = 0x0000 (This global is not refered to from z-code.)
+004CF 00 00                    GC9, Global #202 = 0x0000 (This global is not refered to from z-code.)
+004D1 00 00                    GCA, Global #203 = 0x0000 (This global is not refered to from z-code.)
+004D3 00 00                    GCB, Global #204 = 0x0000 (This global is not refered to from z-code.)
+004D5 00 00                    GCC, Global #205 = 0x0000 (This global is not refered to from z-code.)
+004D7 00 00                    GCD, Global #206 = 0x0000 (This global is not refered to from z-code.)
+004D9 00 00                    GCE, Global #207 = 0x0000 (This global is not refered to from z-code.)
+004DB 00 00                    GCF, Global #208 = 0x0000 (This global is not refered to from z-code.)
+004DD 00 00                    GD0, Global #209 = 0x0000 (This global is not refered to from z-code.)
+004DF 00 00                    GD1, Global #210 = 0x0000 (This global is not refered to from z-code.)
+004E1 00 00                    GD2, Global #211 = 0x0000 (This global is not refered to from z-code.)
+004E3 00 00                    GD3, Global #212 = 0x0000 (This global is not refered to from z-code.)
+004E5 00 00                    GD4, Global #213 = 0x0000 (This global is not refered to from z-code.)
+004E7 00 00                    GD5, Global #214 = 0x0000 (This global is not refered to from z-code.)
+004E9 00 00                    GD6, Global #215 = 0x0000 (This global is not refered to from z-code.)
+004EB 00 00                    GD7, Global #216 = 0x0000 (This global is not refered to from z-code.)
+004ED 00 00                    GD8, Global #217 = 0x0000 (This global is not refered to from z-code.)
+004EF 00 00                    GD9, Global #218 = 0x0000 (This global is not refered to from z-code.)
+004F1 00 00                    GDA, Global #219 = 0x0000 (This global is not refered to from z-code.)
+004F3 00 00                    GDB, Global #220 = 0x0000 (This global is not refered to from z-code.)
+004F5 00 00                    GDC, Global #221 = 0x0000 (This global is not refered to from z-code.)
+004F7 00 00                    GDD, Global #222 = 0x0000 (This global is not refered to from z-code.)
+004F9 00 00                    GDE, Global #223 = 0x0000 (This global is not refered to from z-code.)
+004FB 00 00                    GDF, Global #224 = 0x0000 (This global is not refered to from z-code.)
+004FD 00 00                    GE0, Global #225 = 0x0000 (This global is not refered to from z-code.)
+004FF 00 00                    GE1, Global #226 = 0x0000 (This global is not refered to from z-code.)
+00501 00 00                    GE2, Global #227 = 0x0000 (This global is not refered to from z-code.)
+00503 00 00                    GE3, Global #228 = 0x0000 (This global is not refered to from z-code.)
+00505 00 00                    GE4, Global #229 = 0x0000 (This global is not refered to from z-code.)
+00507 00 00                    GE5, Global #230 = 0x0000 (This global is not refered to from z-code.)
+00509 00 00                    GE6, Global #231 = 0x0000 (This global is not refered to from z-code.)
+0050B 00 00                    GE7, Global #232 = 0x0000 (This global is not refered to from z-code.)
+0050D 00 00                    GE8, Global #233 = 0x0000 (This global is not refered to from z-code.)
+0050F 00 00                    GE9, Global #234 = 0x0000 (This global is not refered to from z-code.)
+00511 00 00                    GEA, Global #235 = 0x0000 (This global is not refered to from z-code.)
+00513 00 00                    GEB, Global #236 = 0x0000 (This global is not refered to from z-code.)
+00515 00 00                    GEC, Global #237 = 0x0000 (This global is not refered to from z-code.)
+00517 00 00                    GED, Global #238 = 0x0000 (This global is not refered to from z-code.)
+00519 00 00                    GEE, Global #239 = 0x0000 (This global is not refered to from z-code.)
+0051B 00 00                    GEF, Global #240 = 0x0000
+
+
+***** UNIDENTIFIED DATA (0051D-0051E, 2 bytes) *****
+
+00510                                        00 00                                                         ..
+
+
+***** VOCABULARY/DICTIONARY (0051F-00525, 7 bytes) *****
+
+0051F 03                       # of separators: 3
+00520 2E 2C 22                 Word separators: .,"
+00523 07                       Entry length   : 7
+00524 00 00                    Word count     : 0
+
+
+
+***** Z-CODE (00526-0054D, 40 bytes) *****
+
+Main routine: 0x00526
+00526 00                       No locals
+
+00527 E0 3F 02 97 FF           CALL 0x052E -> G239
+0052C BA                       QUIT
+
+Padding:
+0052D 00 
+
+Routine: 0x0052E               Called from routine(s) at 0x00526
+0052E 00                       No locals
+
+0052F 91 06 10 C5              GET_SIBLING OBJECT6 -> G0 [TRUE] 0x0536
+00533 E6 7F 06                 PRINT_NUM 0x06
+00536 B2 13 2D 28 12 19 95 39 
+      40 34 D8 01 46 65 53 80 
+      A5                       PRINT "The magpie has eaten "
+00547 B0                       RTRUE
+
+Routine: 0x00548
+00548 02                       2 locals
+00549 00 00 00 00              L00=0x0000 L01=0x0000 
+
+0054D B1                       RFALSE
+
+
+***** STATIC STRINGS (0054E-005B3, 102 bytes) *****
+
+0054E S0001 "It"
+00550 S0002 "<unknown attribute>"
+00562 S0003 "name"
+00566 S0004 "create"
+0056A S0005 "recreate"
+00570 S0006 "destroy"
+00576 S0007 "remaining"
+0057C S0008 "copy"
+00580 S0009 "call"
+00584 S0010 "print"
+00588 S0011 "print_to_array"
+00594 S0012 "height"
+00598 S0013 "wingspan"
+0059E S0014 "worms_eaten"
+005A6 S0015 "goat"
+005AA S0016 "hat"
+005AC S0017 "cake"
+005B0 S0018 "smell"
+

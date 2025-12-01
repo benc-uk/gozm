@@ -1,6 +1,7 @@
 package zmachine
 
 import (
+	"gozm/externals/terminal"
 	"gozm/internal/decode"
 	"testing"
 )
@@ -23,7 +24,7 @@ func makeTestStory() []byte {
 
 func TestStoreGlobal(t *testing.T) {
 	s := makeTestStory()
-	m := NewMachine(s)
+	m := NewMachine(s, 0, terminal.NewTerminal())
 
 	// Set local variable should NOT affect globals
 	m.StoreVar(0x0f, 77)
@@ -51,7 +52,7 @@ func TestStoreGlobal(t *testing.T) {
 
 func TestStoreNegatives(t *testing.T) {
 	s := makeTestStory()
-	m := NewMachine(s)
+	m := NewMachine(s, 0, terminal.NewTerminal())
 
 	gVar := uint16(240)
 

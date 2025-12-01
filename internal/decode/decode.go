@@ -125,3 +125,11 @@ func getZSCIIChar(zchar byte) string {
 	// Handle special ZSCII characters here if needed, but for now return 0
 	return string(rune(0))
 }
+
+// Convert 14-bit value to signed 16-bit: if bit 13 is set, it's negative
+func Convert14BitToSigned(val uint16) int16 {
+	if val&0x2000 != 0 {
+		return int16(val | 0xC000)
+	}
+	return int16(val)
+}
