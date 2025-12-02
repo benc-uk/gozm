@@ -9,11 +9,12 @@ import (
 
 func TestDecodeString(t *testing.T) {
 	data := []byte{
-		0x11, 0xAA, 0x46, 0x34, 0x14, 0xE4, 0x9D, 0x53,
+		0xb1, 0x1c, 0xd7, 0x03, 0x8e, 0x1c, 0xf1, 0x28,
+		0x07, 0x9b, 0xe5,
 	}
 
 	result := StringBytes(data)
-	expected := string("Hello\nBen")
+	expected := string("bar wibble baz")
 
 	if result != expected {
 		t.Errorf("decode.String failed: got %v, want %v", []byte(result), []byte(expected))

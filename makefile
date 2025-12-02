@@ -1,26 +1,27 @@
 ROOT_DIR := $(shell git rev-parse --show-toplevel)
 DEV_DIR := $(ROOT_DIR)/.dev
+PACKAGE := github.com/benc-uk/gozm
 STORY ?= scratch
 DEBUG ?= 0
 
 .DEFAULT_GOAL := help
 
-.PHONY: help build test run watch lint tidy install
+.PHONY: help build test run watch lint tidy install story
 
 help: # 💬 Show this help message
 	@grep -E '^[a-zA-Z_-]+:.*?# .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?# "}; {printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2}'
 
 build: # 🔨 Build the Go binary
-	go build -o bin/gozm cmd/cli/main.go
+	go build -o bin/gozm $(PACKAGE)/impl/terminal
 
 test: # 🧪 Run tests
 	go test -v ./...
 
-run: # 🚀 Run the application
+run: # 🚀 Run the terminal app
 	clear
-	go run cmd/cli/main.go -file=test/$(STORY).z3 -debug=$(DEBUG)
+	go run $(PACKAGE)/impl/terminal -file=test/$(STORY).z3 -debug=$(DEBUG)
 
-watch: # 👀 Watch for changes and run the application
+watch: # 👀 Watch for changes and run the terminal app
 	clear
 	go tool -modfile=.dev/tools.mod air -c $(DEV_DIR)/air.toml
 

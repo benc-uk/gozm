@@ -3,9 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
-	"gozm/externals/terminal"
-	"gozm/internal/zmachine"
 	"os"
+
+	"github.com/benc-uk/gozm/internal/zmachine"
 )
 
 var version = "0.0.1alpha"
@@ -34,6 +34,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	machine := zmachine.NewMachine(data, debugLevel, terminal.NewTerminal())
+	machine := zmachine.NewMachine(data, debugLevel, NewTerminal())
 	machine.Run()
 }

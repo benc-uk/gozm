@@ -10,8 +10,9 @@ package zmachine
 
 import (
 	"fmt"
-	"gozm/internal/decode"
 	"os"
+
+	"github.com/benc-uk/gozm/internal/decode"
 )
 
 // enum for debug levels
@@ -112,13 +113,13 @@ func (m *Machine) step() {
 
 	// PRINT (literal string)
 	case 0xB2:
-		str, wordCount := m.readStringLiteral()
+		str, wordCount := m.readStringLiteral(m.pc + 1)
 		m.ext.TextOut(str)
 		m.pc += uint16(wordCount*2) + 1 // Advance PC past the string
 
 	// PRINT_RET (literal string)
 	case 0xB3:
-		str, _ := m.readStringLiteral()
+		str, _ := m.readStringLiteral(m.pc + 1)
 		m.ext.TextOut(str)
 		m.returnFromCall(1)
 
@@ -162,8 +163,12 @@ func (m *Machine) step() {
 
 	// VERIFY
 	case 0xBD:
-		// Not worth implementing, just skip
-		m.pc += inst.len
+		m.pc += inst.len // Not worth implementing, just skip
+
+	// RET_POPPED
+	case 0xB8:
+		val := m.getCallFrame().Pop()
+		m.returnFromCall(val)
 
 	// ===================== 1OP INSTRUCTIONS =====================
 
@@ -185,11 +190,67 @@ func (m *Machine) step() {
 		m.storeVar(uint16(dest), uint16(sibling))
 		m.branchHandler(inst.len+1, sibling != NULL_OBJECT)
 
-	// PRINT_NUM
-	case 0xE6:
-		v := inst.operands[0]
-		m.ext.TextOut(fmt.Sprintf("%d", v))
+	// GET_CHILD
+	case 0x82, 0x92, 0xA2:
+		objNum := byte(inst.operands[0])
+		sibling := m.getObject(objNum).sibling
+		dest := m.mem[m.pc+inst.len] // destination in next byte
+		m.storeVar(uint16(dest), uint16(sibling))
+		m.branchHandler(inst.len+1, sibling != NULL_OBJECT)
+
+	// GET_PARENT
+	case 0x83, 0x93, 0xA3:
+		objNum := byte(inst.operands[0])
+		sibling := m.getObject(objNum).sibling
+		dest := m.mem[m.pc+inst.len] // destination in next byte
+		m.storeVar(uint16(dest), uint16(sibling))
+		m.pc += inst.len + 1 // +1 for dest byte
+
+	// GET_PROP_LEN
+	case 0x84, 0x94, 0xA4:
+		propAddr := inst.operands[0]
+		var length byte
+		if propAddr == 0 {
+			length = 0
+		} else {
+			// Gotcha: The property address points to the property data, not the size byte
+			// The size byte is immediately before the property data
+			sizeByte := m.mem[propAddr-1]
+			_, length = decode.PropSizeNumber(sizeByte)
+		}
+		dest := m.mem[m.pc+inst.len] // destination in next byte
+		m.storeVar(uint16(dest), uint16(length))
+		m.pc += inst.len + 1 // +1 for dest byte
+
+	// INC
+	case 0x85, 0x95, 0xA5:
+		varLoc := inst.operands[0]
+		m.addToVar(varLoc, 1)
 		m.pc += inst.len
+
+	// DEC
+	case 0x86, 0x96, 0xA6:
+		varLoc := inst.operands[0]
+		m.addToVar(varLoc, -1)
+		m.pc += inst.len
+
+	// PRINT_ADDR
+	case 0x87, 0x97, 0xA7:
+		addr := inst.operands[0]
+		m.trace(" - print_addr from %04x\n", addr)
+		str, _ := m.readStringLiteral(addr)
+		m.ext.TextOut(str)
+		m.pc += inst.len
+
+	// REMOVE_OBJ
+	case 0x89, 0x99, 0xA9:
+		objNum := byte(inst.operands[0])
+		m.getObject(objNum).removeObjectFromParent(m)
+		m.pc += inst.len
+
+	// RET
+
+	// ===================== 2OP INSTRUCTIONS =====================
 
 	// ADD
 	case 0x14, 0x34, 0x54, 0x74, 0xD4:
@@ -240,15 +301,18 @@ func (m *Machine) step() {
 		// Set PC to start of routine after header and locals
 		m.pc = routineAddr + 1 + uint16(numLocals*2)
 
-	// RET_POPPED
-	case 0xB8:
-		val := m.getCallFrame().Pop()
-		m.returnFromCall(val)
-
 	// RET
 	case 0x8B, 0x9B, 0xAB:
 		val := inst.operands[0]
 		m.returnFromCall(val)
+
+	// ===================== VAR INSTRUCTIONS =====================
+
+	// PRINT_NUM
+	case 0xE6:
+		v := inst.operands[0]
+		m.ext.TextOut(fmt.Sprintf("%d", int16(v))) // Print as signed number
+		m.pc += inst.len
 
 	// Unimplemented instruction!
 	default:
@@ -269,7 +333,6 @@ func (m *Machine) storeVar(loc uint16, val uint16) {
 		// Local variable
 		m.getCallFrame().locals[loc-1] = val
 	} else {
-
 		// Global variable, which are all word sized
 		addr := uint16(m.globalsAddr + (loc-0x10)*2)
 		decode.SetWord(m.mem, addr, val)
@@ -296,12 +359,35 @@ func (m *Machine) getVar(loc uint16) uint16 {
 	}
 }
 
+func (m *Machine) addToVar(loc uint16, val int16) {
+	// We made loc uint16 for ease of use, now restrict to valid range
+	if loc > 0xFF {
+		panic(fmt.Sprintf("Variable location out of range: %02x", loc))
+	}
+
+	// Do the addition signed
+	if loc == 0 {
+		// Stack variable
+		curr := int16(m.getCallFrame().Pop())
+		m.getCallFrame().Push(uint16(curr + val))
+	} else if loc > 0 && loc < 0x10 {
+		// Local variable
+		curr := int16(m.getCallFrame().locals[loc-1])
+		m.getCallFrame().locals[loc-1] = uint16(curr + val)
+	} else {
+		// Global variable, which are all word sized
+		addr := uint16(m.globalsAddr + (loc-0x10)*2)
+		curr := decode.GetWordSigned(m.mem, addr)
+		decode.SetWord(m.mem, addr, uint16(curr+val))
+	}
+}
+
 // Read a Z-machine string literal: 2byte pairs from the current PC
 // Returns the decoded string and number of words read
-func (m *Machine) readStringLiteral() (string, int) {
+func (m *Machine) readStringLiteral(addr uint16) (string, int) {
 	words := []uint16{}
-	for i := uint16(1); int(i) < len(m.mem); i += 2 {
-		word := decode.GetWord(m.mem, m.pc+i)
+	for i := uint16(0); int(i) < len(m.mem); i += 2 {
+		word := decode.GetWord(m.mem, addr+i)
 		words = append(words, word)
 
 		// If the high bit is set, this is the end of the string

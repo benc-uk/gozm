@@ -6,6 +6,8 @@
 
 package decode
 
+import "fmt"
+
 // Lookups used for decoding z-chars, see: https://zspec.jaredreisinger.com/03-text#3_5_3
 var alphabets = [][]rune{
 	{
@@ -34,6 +36,10 @@ func GetWord(b []byte, offset uint16) uint16 {
 	return uint16(b[offset])<<8 | uint16(b[offset+1])
 }
 
+func GetWordSigned(b []byte, offset uint16) int16 {
+	return int16(b[offset])<<8 | int16(b[offset+1])
+}
+
 // SetWord writes a 2-byte big-endian integer to the given byte slice at the specified offset.
 func SetWord(b []byte, offset uint16, value uint16) {
 	b[offset] = byte((value >> 8) & 0xFF)
@@ -56,6 +62,7 @@ func StringBytes(data []byte) string {
 			break
 		}
 	}
+	fmt.Printf("Decoded words: %v\n", words)
 
 	return String(words)
 }
@@ -132,4 +139,14 @@ func Convert14BitToSigned(val uint16) int16 {
 		return int16(val | 0xC000)
 	}
 	return int16(val)
+}
+
+// Version 3 property size & num decoding
+func PropSizeNumber(sizeByte byte) (byte, byte) {
+	// In version 3, the size is encoded in the top 3 bits of the size byte
+	// Size = (top 3 bits >> 5) + 1
+	// The property number is in the lower 5 bits
+	propNum := sizeByte & 0x1F
+	propSize := (sizeByte>>5)&0x07 + 1 // size is stored as size-1
+	return propNum, propSize
 }

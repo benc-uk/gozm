@@ -9,7 +9,8 @@ package zmachine
 
 import (
 	"fmt"
-	"gozm/internal/decode"
+
+	"github.com/benc-uk/gozm/internal/decode"
 )
 
 // Enum for forms of instructions

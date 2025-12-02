@@ -9,7 +9,8 @@ package zmachine
 
 import (
 	"fmt"
-	"gozm/internal/decode"
+
+	"github.com/benc-uk/gozm/internal/decode"
 )
 
 // DumpMem dumps a section of memory for debugging

@@ -8,7 +8,7 @@
 package zmachine
 
 import (
-	"gozm/internal/decode"
+	"github.com/benc-uk/gozm/internal/decode"
 )
 
 const (
@@ -100,8 +100,7 @@ func (m *Machine) initObjects() {
 			}
 
 			// Property number is in the lower 5 bits, size in upper 3 bits
-			propNum := propHeader & 0x1F
-			propSize := (propHeader>>5)&0x07 + 1 // size is stored as size-1
+			propNum, propSize := decode.PropSizeNumber(propHeader) // Alternative way to get propNum and propSize
 			propData := make([]byte, propSize)
 			for i := byte(0); i < propSize; i++ {
 				propData[i] = m.mem[currPropAddr+1+uint16(i)]
@@ -147,4 +146,39 @@ func (o *zObject) setAttribute(attrNum byte, value bool) {
 		return
 	}
 	o.attr[attrNum] = value
+}
+
+func (o *zObject) removeObjectFromParent(m *Machine) {
+	if o.parent == NULL_OBJECT {
+		return // No parent to remove from
+	}
+
+	parentObj := m.getObject(o.parent)
+	if parentObj == nil {
+		return // Parent object not found
+	}
+
+	// If this object is the first child of the parent
+	if parentObj.child == o.num {
+		parentObj.child = o.sibling
+	} else {
+		// If this object is not the first child, find the previous sibling
+		siblingNum := parentObj.child
+		for siblingNum != NULL_OBJECT {
+			siblingObj := m.getObject(siblingNum)
+			if siblingObj == nil {
+				break // Should not happen
+			}
+			if siblingObj.sibling == o.num {
+				// Found the previous sibling, update its sibling pointer
+				siblingObj.sibling = o.sibling
+				break
+			}
+			siblingNum = siblingObj.sibling
+		}
+	}
+
+	// Clear this object's parent and sibling pointers
+	o.parent = NULL_OBJECT
+	o.sibling = NULL_OBJECT
 }
