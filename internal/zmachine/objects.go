@@ -16,13 +16,21 @@ const (
 )
 
 type zObject struct {
-	num        byte
-	name       string
-	attr       [32]bool
-	parent     byte
-	sibling    byte
-	child      byte
-	properties map[byte][]byte
+	num         byte
+	description string
+	attr        [32]bool
+	parent      byte
+	sibling     byte
+	child       byte
+	properties  []*property
+	propMap     map[byte]*property
+}
+
+type property struct {
+	num  byte
+	size byte
+	data []byte
+	addr uint16 // address in memory where this property is stored
 }
 
 // Parses the object table and initializes the objects in the machine
@@ -54,7 +62,8 @@ func (m *Machine) initObjects() {
 		objCount++
 		obj := &zObject{
 			num:        byte(objCount),
-			properties: make(map[byte][]byte),
+			properties: make([]*property, 0), // max 64 properties
+			propMap:    make(map[byte]*property),
 		}
 
 		// Read attributes bit at a time (4 bytes, 32 bits total)
@@ -87,7 +96,7 @@ func (m *Machine) initObjects() {
 			word := decode.GetWord(m.mem, currPropAddr+1+i*2)
 			descWords[i] = word
 		}
-		obj.name = decode.String(descWords) // decode string literal
+		obj.description = decode.String(descWords) // decode string literal
 		currPropAddr += 1 + uint16(descSize)*2
 
 		// Now read properties until we hit a 0 size byte in the header
@@ -105,14 +114,22 @@ func (m *Machine) initObjects() {
 			for i := byte(0); i < propSize; i++ {
 				propData[i] = m.mem[currPropAddr+1+uint16(i)]
 			}
-			obj.properties[propNum] = propData
+
+			prop := &property{
+				num:  propNum,
+				size: propSize,
+				data: propData,
+				addr: currPropAddr + 1, // Point to data not header
+			}
+			obj.properties = append(obj.properties, prop)
+			obj.propMap[propNum] = prop
 
 			currPropAddr += 1 + uint16(propSize)
 		}
 
 		// Debug output
 		m.trace("Parsed object '%s' (%d): parent=%d, sibling=%d, child=%d, props=%04x, attr=%v\n",
-			obj.name, obj.num, obj.parent, obj.sibling, obj.child, propAddr, obj.attr)
+			obj.description, obj.num, obj.parent, obj.sibling, obj.child, propAddr, obj.attr)
 		m.trace("%s\n\n", obj.propDebugDump())
 
 		// We assume objects are in order by number
@@ -181,4 +198,56 @@ func (o *zObject) removeObjectFromParent(m *Machine) {
 	// Clear this object's parent and sibling pointers
 	o.parent = NULL_OBJECT
 	o.sibling = NULL_OBJECT
+}
+
+func (o *zObject) insertIntoParent(m *Machine, newParentNum byte) {
+	// First remove from current parent if any
+	o.removeObjectFromParent(m)
+
+	// Set new parent
+	o.parent = newParentNum
+	newParentObj := m.getObject(newParentNum)
+	if newParentObj == nil {
+		return // New parent object not found
+	}
+
+	// Insert as first child of new parent
+	o.sibling = newParentObj.child
+	newParentObj.child = o.num
+}
+
+func (o *zObject) getPropertyValue(propNum byte, defaults []uint16) uint16 {
+	prop, exists := o.propMap[propNum]
+	if !exists {
+		// Return default value if property not found
+		if int(propNum) < len(defaults) {
+			return defaults[propNum-1]
+		}
+		return 0
+	}
+
+	// Return property value as uint16 (assuming properties are at most 2 bytes)
+	if prop.size == 1 {
+		return uint16(prop.data[0])
+	} else if prop.size == 2 {
+		return decode.GetWord(prop.data, 0)
+	}
+
+	return 0 // Unsupported property size
+}
+
+func (o *zObject) setPropertyValue(propNum byte, value uint16) {
+	prop, exists := o.propMap[propNum]
+	if !exists {
+		// Property does not exist, cannot set
+		return
+	}
+
+	// Set property value (assuming properties are at most 2 bytes)
+	if prop.size == 1 {
+		prop.data[0] = byte(value & 0xFF)
+	} else if prop.size == 2 {
+		prop.data[0] = byte((value >> 8) & 0xFF)
+		prop.data[1] = byte(value & 0xFF)
+	}
 }

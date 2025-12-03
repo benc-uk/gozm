@@ -14,17 +14,14 @@ Object -> -> worm "squirmy worm"
 ! The purpose of this story is to simply test some basic functionality
 ! =============================================================================
 
-Global g1 = -1;
-!Global g2;
+!Global g1 = -1;
+Global g2 = 2;
 !Global foo = "bar wibble baz";
 
-[main;
-  remove tree;
-  ! @print_obj tree;
-  g1 = test();
-  print "g1 = ", g1, "^";
-];
+[main n i;
+   n = 5; i = 66;
+   @load i sp;
+   @pull n;
 
-[test;
-  return 6;
+   print n; " ", i, "^";
 ];

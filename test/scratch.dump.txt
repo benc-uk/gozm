@@ -4,7 +4,7 @@
 Filename:                                  ./test/scratch.z3
 Compiled With:                             Inform 6.41
 Z-machine version:                         3
-Calculated checksum:                       0x7B90, checksum ok
+Calculated checksum:                       0x7874, checksum ok
 Object count:                              8
 Unique verbs count:                        0
 Grammar table version:                     No syntax/grammar identified
@@ -13,10 +13,10 @@ Dictionary word count:                     0
 Scanning for routines from:                0x00528
 Found first routine at address:            0x00528
 Lowest routine address (immediate call) :  0x00530
-Highest routine address (immediate call):  0x00546
-Strings start at address:                  0x00550
+Highest routine address (immediate call):  0x00530
+Strings start at address:                  0x00554
 Highest used global in z-code:             240
-Number of used globals in z-code:          2
+Number of used globals in z-code:          1
 Number of unique properties:               1
 
 ***** MEMORY MAP *****
@@ -36,9 +36,9 @@ Number of unique properties:               1
    0051F-00520 Unidentified data, 2 bytes.
    00521-00527 Vocabulary/Dictionary, 7 bytes.
 
-00528-005AD HIGH MEMORY
-   00528-0054F Z-code, 40 bytes.
-   00550-005AD Static strings, 94 bytes.
+00528-005B1 HIGH MEMORY
+   00528-00553 Z-code, 44 bytes.
+   00554-005B1 Static strings, 94 bytes.
 
 
 ***** HEADER (00000-0003F, 64 bytes) *****
@@ -53,10 +53,10 @@ Number of unique properties:               1
 0000C 03 3F                   GLOBALS Global variables table:    0x033F
 0000E 05 1F                   PURBOT  Base of static memory:     0x051F
 00010 00 00                   FLAGS   Flags 2:                   0x0000
-00012 32 35 31 32 30 32       SERIAL  Serial number:             251202
+00012 32 35 31 32 30 33       SERIAL  Serial number:             251203
 00018 00 42                   FWORDS  Abbreviations table:       0x0042
-0001A 02 D7                   PLENTH  Length of file:            0x05AE
-0001C 7B 90                   PCHKSM  Checksum of file:          0x7B90
+0001A 02 D9                   PLENTH  Length of file:            0x05B2
+0001C 78 74                   PCHKSM  Checksum of file:          0x7874
 0001E 00                      INTWRD  Interpreter number:        0
 0001F 00                              Interpreter version:       0
 00020 00                      SCRWRD  Screen height (lines):     0
@@ -423,7 +423,7 @@ Object: 8
 ***** UNIDENTIFIED DATA (0021A-0033E, 293 bytes) *****
 
 00210                               00 01 00 02 00 03            ......
-00220 00 04 00 00 00 4D 02 B1 00 00 00 00 00 00 00 00  .....M..........
+00220 00 04 00 00 00 4D 02 B3 00 00 00 00 00 00 00 00  .....M..........
 00230 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
 00240 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
 00250 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
@@ -431,8 +431,8 @@ Object: 8
 00270 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
 00280 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
 00290 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
-002A0 00 00 00 00 02 B3 02 B5 02 B8 02 BB 02 BE 02 C0  ................
-002B0 02 C2 02 C4 02 CA 02 CC 02 CF 02 D3 02 D5 00 00  ................
+002A0 00 00 00 00 02 B5 02 B7 02 BA 02 BD 02 C0 02 C2  ................
+002B0 02 C4 02 C6 02 CC 02 CE 02 D1 02 D5 02 D7 00 00  ................
 002C0 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
 002D0 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
 002E0 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
@@ -445,7 +445,7 @@ Object: 8
 
 ***** GLOBAL VARIABLES TABLE (0033F-0051E, 480 bytes) *****
 
-0033F FF FF                    G00, Global #1 =   0xFFFF
+0033F 00 02                    G00, Global #1 =   0x0002 (This global is not refered to from z-code.)
 00341 00 00                    G01, Global #2 =   0x0000 (This global is not refered to from z-code.)
 00343 00 00                    G02, Global #3 =   0x0000 (This global is not refered to from z-code.)
 00345 00 00                    G03, Global #4 =   0x0000 (This global is not refered to from z-code.)
@@ -702,7 +702,7 @@ Object: 8
 
 
 
-***** Z-CODE (00528-0054F, 40 bytes) *****
+***** Z-CODE (00528-00553, 44 bytes) *****
 
 Main routine: 0x00528
 00528 00                       No locals
@@ -714,45 +714,43 @@ Padding:
 0052F 00 
 
 Routine: 0x00530               Called from routine(s) at 0x00528
-00530 00                       No locals
+00530 02                       2 locals
+00531 00 00 00 00              L00=0x0000 L01=0x0000 
 
-00531 99 05                    REMOVE_OBJ OBJECT5
-00533 E0 3F 02 A3 10           CALL 0x0546 -> G0
-00538 B2 30 A9 00 A6 87 A0     PRINT "g1 = "
-0053F E6 BF 10                 PRINT_NUM G00
-00542 B2 94 E5                 PRINT "^"
-00545 B0                       RTRUE
-
-Routine: 0x00546               Called from routine(s) at 0x00530
-00546 00                       No locals
-
-00547 9B 06                    RET 0x06
+00535 0D 01 05                 STORE L00 0x05
+00538 0D 02 42                 STORE L01 0x42
+0053B 9E 02 00                 LOAD L01 -> -(SP)
+0053E E9 7F 01                 PULL L00
+00541 E6 BF 01                 PRINT_NUM L00
+00544 B2 80 A5                 PRINT
+00547 E6 BF 02                 PRINT_NUM L01
+0054A B3 94 E5                 PRINT_RET "^"
 
 Padding:
-00549 00 
+0054D 00 
 
-Routine: 0x0054A
-0054A 02                       2 locals
-0054B 00 00 00 00              L00=0x0000 L01=0x0000 
+Routine: 0x0054E
+0054E 02                       2 locals
+0054F 00 00 00 00              L00=0x0000 L01=0x0000 
 
-0054F B1                       RFALSE
+00553 B1                       RFALSE
 
 
-***** STATIC STRINGS (00550-005AD, 94 bytes) *****
+***** STATIC STRINGS (00554-005B1, 94 bytes) *****
 
-00550 S0001 "<unknown attribute>"
-00562 S0002 "name"
-00566 S0003 "create"
-0056A S0004 "recreate"
-00570 S0005 "destroy"
-00576 S0006 "remaining"
-0057C S0007 "copy"
-00580 S0008 "call"
-00584 S0009 "print"
-00588 S0010 "print_to_array"
-00594 S0011 "height"
-00598 S0012 "wingspan"
-0059E S0013 "worms_eaten"
-005A6 S0014 "size"
-005AA S0015 "length"
+00554 S0001 "<unknown attribute>"
+00566 S0002 "name"
+0056A S0003 "create"
+0056E S0004 "recreate"
+00574 S0005 "destroy"
+0057A S0006 "remaining"
+00580 S0007 "copy"
+00584 S0008 "call"
+00588 S0009 "print"
+0058C S0010 "print_to_array"
+00598 S0011 "height"
+0059C S0012 "wingspan"
+005A2 S0013 "worms_eaten"
+005AA S0014 "size"
+005AE S0015 "length"
 

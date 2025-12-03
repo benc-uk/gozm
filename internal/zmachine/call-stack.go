@@ -15,19 +15,24 @@ type callFrame struct {
 }
 
 // Push a value onto the call frame stack
-func (sf *callFrame) Push(val uint16) {
-	sf.stack = append(sf.stack, val)
+func (cf *callFrame) Push(val uint16) {
+	cf.stack = append(cf.stack, val)
 }
 
 // Pop a value from the call frame stack
-func (sf *callFrame) Pop() uint16 {
-	if len(sf.locals) == 0 {
+func (cf *callFrame) Pop() uint16 {
+	if len(cf.locals) == 0 {
 		// TODO: Maybe panic here?
 		return 0
 	}
 
-	val := sf.stack[len(sf.stack)-1]
-	sf.stack = sf.stack[:len(sf.stack)-1]
+	if len(cf.stack) == 0 {
+		return 0
+	}
+
+	val := cf.stack[len(cf.stack)-1]
+	cf.stack = cf.stack[:len(cf.stack)-1]
+
 	return val
 }
 
@@ -37,14 +42,17 @@ func (m *Machine) getCallFrame() *callFrame {
 		panic("Frame underflow, no current call frame!")
 	}
 
-	return &m.callStack[len(m.callStack)-1]
+	cf := &m.callStack[len(m.callStack)-1]
+	m.trace("Get call frame, depth=%d %+v\n", len(m.callStack), cf)
+
+	return cf
 }
 
 // Helper to add a new empty call frame to machine call stack
 func (m *Machine) addCallFrame(localCount int) *callFrame {
 	frame := callFrame{
 		returnAddr: 0,
-		locals:     make([]uint16, localCount),
+		locals:     make([]uint16, 15), //localCount),
 		stack:      make([]uint16, 0),
 	}
 
