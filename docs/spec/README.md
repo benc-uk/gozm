@@ -2,6 +2,8 @@
 
 This directory contains the complete Z-Machine Standards Document, converted to markdown format for easy reference. The Z-machine is a virtual machine designed by Infocom for text adventure games, most famously used for the Zork series.
 
+I claim no copyright over the original content, which was created by Graham Nelson. This markdown version is scraped from the modernized presentation by Jared Reisinger at https://zspec.jaredreisinger.com/.
+
 ## Introduction
 
 - [Preface](001-preface.md) - Introduction to the Z-machine and standardization

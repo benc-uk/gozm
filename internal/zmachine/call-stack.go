@@ -36,6 +36,22 @@ func (cf *callFrame) Pop() uint16 {
 	return val
 }
 
+func (cf *callFrame) Peek() uint16 {
+	if len(cf.stack) == 0 {
+		return 0
+	}
+
+	return cf.stack[len(cf.stack)-1]
+}
+
+func (cf *callFrame) SetTop(val uint16) {
+	if len(cf.stack) == 0 {
+		return
+	}
+
+	cf.stack[len(cf.stack)-1] = val
+}
+
 // Helper to get the current call frame
 func (m *Machine) getCallFrame() *callFrame {
 	if len(m.callStack) == 0 {

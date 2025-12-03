@@ -10,6 +10,7 @@ package zmachine
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"os"
 
 	"github.com/benc-uk/gozm/internal/decode"
@@ -31,6 +32,7 @@ type Machine struct {
 	ext          External
 	propDefaults []uint16
 	objects      []*zObject
+	rand         *rand.Rand
 
 	version     byte
 	highAddr    uint16
@@ -45,7 +47,6 @@ type Machine struct {
 }
 
 func NewMachine(data []byte, debugLevel int, ext External) *Machine {
-
 	m := &Machine{
 		mem:          data,
 		pc:           decode.GetWord(data, 0x06),
@@ -54,6 +55,7 @@ func NewMachine(data []byte, debugLevel int, ext External) *Machine {
 		ext:          ext,
 		propDefaults: make([]uint16, 31),
 		objects:      make([]*zObject, 0),
+		rand:         rand.New(rand.NewPCG(123, 456)),
 
 		version:     data[0x00],
 		highAddr:    decode.GetWord(data, 0x04),
@@ -277,8 +279,8 @@ func (m *Machine) step() {
 	// LOAD
 	case 0x8E, 0x9E, 0xAE:
 		opVal := inst.operands[0]
-		actualVal := m.getVar(uint16(opVal)) // This seems wrong!
-		varLoc := m.mem[m.pc+inst.len]       // destination in next byte
+		actualVal := m.getVarInPlace(opVal)
+		varLoc := m.mem[m.pc+inst.len] // destination in next byte
 		m.storeVar(uint16(varLoc), actualVal)
 		m.pc += inst.len + 1 // +1 for dest byte
 
@@ -338,6 +340,12 @@ func (m *Machine) step() {
 		childObj := m.getObject(childObjNum)
 		m.branchHandler(inst.len, childObj.parent == parentObjNum)
 
+	// TEST
+	case 0x07, 0x27, 0x47, 0x67, 0xC7:
+		bitmap := inst.operands[0]
+		flags := inst.operands[1]
+		m.branchHandler(inst.len, (bitmap&flags) == flags)
+
 	// OR (BITWISE)
 	case 0x08, 0x28, 0x48, 0x68, 0xC8:
 		v1 := inst.operands[0]
@@ -385,7 +393,7 @@ func (m *Machine) step() {
 		v := inst.operands[0]
 		s := inst.operands[1]
 
-		m.storeVar(v, s)
+		m.setVarInPlace(v, s)
 		m.pc += inst.len
 
 	// INSERT_OBJ
@@ -598,6 +606,21 @@ func (m *Machine) step() {
 		m.ext.TextOut(fmt.Sprintf("%d", int16(v))) // Print as signed number
 		m.pc += inst.len
 
+	// RANDOM
+	case 0xE7:
+		maxVal := int16(inst.operands[0])
+		var result uint16
+		if maxVal <= 0 {
+			// Reseed random number generator
+			m.rand = rand.New(rand.NewPCG(uint64(maxVal), 0))
+			result = 0
+		} else {
+			result = uint16(m.rand.IntN(int(maxVal)))
+		}
+		dest := m.mem[m.pc+inst.len] // destination in next byte
+		m.storeVar(uint16(dest), result)
+		m.pc += inst.len + 1 // +1 for dest byte
+
 	// PUSH
 	case 0xE8:
 		val := inst.operands[0]
@@ -608,7 +631,7 @@ func (m *Machine) step() {
 	case 0xE9:
 		val := m.getCallFrame().Pop()
 		varLoc := inst.operands[0]
-		m.storeVar(varLoc, val)
+		m.setVarInPlace(varLoc, val)
 		m.pc += inst.len
 
 	// Unimplemented instruction!
@@ -657,6 +680,36 @@ func (m *Machine) getVar(loc uint16) uint16 {
 	}
 }
 
+func (m *Machine) getVarInPlace(loc uint16) uint16 {
+	// We made loc uint16 for ease of use, now restrict to valid range
+	if loc > 0xFF {
+		panic(fmt.Sprintf("Variable location out of range: %02x", loc))
+	}
+
+	if loc == 0 {
+		// Stack variable
+		val := m.getCallFrame().Peek()
+		return val
+	}
+
+	return m.getVar(loc)
+}
+
+func (m *Machine) setVarInPlace(loc uint16, val uint16) {
+	// We made loc uint16 for ease of use, now restrict to valid range
+	if loc > 0xFF {
+		panic(fmt.Sprintf("Variable location out of range: %02x", loc))
+	}
+
+	if loc == 0 {
+		// Stack variable
+		m.getCallFrame().SetTop(val)
+		return
+	}
+
+	m.storeVar(loc, val)
+}
+
 func (m *Machine) addToVar(loc uint16, val int16) int16 {
 	// We made loc uint16 for ease of use, now restrict to valid range
 	if loc > 0xFF {
@@ -665,9 +718,9 @@ func (m *Machine) addToVar(loc uint16, val int16) int16 {
 
 	cf := m.getCallFrame()
 	if loc == 0 {
-		// Stack variable
-		curr := int16(cf.Pop())
-		cf.Push(uint16(curr + val))
+		// Top of stack update in place
+		curr := int16(cf.Peek())
+		cf.SetTop(uint16(int16(curr) + val))
 		return int16(curr + val)
 	} else if loc > 0 && loc < 0x10 {
 		// check local variable exists
