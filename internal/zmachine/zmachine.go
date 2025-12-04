@@ -43,7 +43,8 @@ type Machine struct {
 	outputStream int
 	inputStream  int
 	TracedOps    []byte
-	TracedObjs   []uint16
+	TracedObjs   []byte
+	Breakpoint   uint16
 	//memStreamAddrStack []uint16
 
 	version     byte
@@ -71,7 +72,7 @@ func NewMachine(data []byte, debugLevel int, ext External) *Machine {
 		outputStream: OUTPUT_STREAM_SCREEN,
 		inputStream:  INPUT_STREAM_KEYBOARD,
 		TracedOps:    make([]byte, 0),
-		TracedObjs:   make([]uint16, 0),
+		TracedObjs:   make([]byte, 0),
 		//memStreamAddrStack: make([]uint16, 0),
 
 		version:     data[0x00],
@@ -100,8 +101,10 @@ func NewMachine(data []byte, debugLevel int, ext External) *Machine {
 	// Initialize objects, property defaults table
 	m.initObjects()
 
-	obj := m.getObject(46)
-	fmt.Printf("Traced Object %d '%s':\n%s\n", obj.num, obj.description, obj.propDebugDump())
+	for _, o := range m.TracedObjs {
+		obj := m.getObject(o)
+		fmt.Printf("Traced Object %d '%s':\n%s\n", obj.num, obj.description, obj.propDebugDump())
+	}
 
 	m.debug("Z-machine initialized...\nVersion: %d, Size: %d\n", data[0x00], len(data))
 	m.debug(" - High Memory Address: %04x\n", m.highAddr)
@@ -155,7 +158,7 @@ func (m *Machine) step() {
 	// PRINT_RET (literal string)
 	case 0xB3:
 		str, _ := m.readStringLiteral(m.pc + 1)
-		m.print(str)
+		m.print(str + "\n")
 		m.returnFromCall(1)
 
 	// NOP (Never used!)
@@ -305,7 +308,6 @@ func (m *Machine) step() {
 	case 0x8D, 0x9D, 0xAD:
 		packedAddr := inst.operands[0]
 		addr := decode.PackedAddress(packedAddr)
-		m.trace(" - print_paddr from %04x\n", addr)
 		str, _ := m.readStringLiteral(addr)
 		m.print(str)
 		m.pc += inst.len
@@ -461,7 +463,13 @@ func (m *Machine) step() {
 		propNum := byte(inst.operands[1])
 		dest := m.mem[m.pc+inst.len] // destination in next byte
 		obj := m.getObject(objNum)
-		m.storeVar(uint16(dest), uint16(obj.propMap[propNum].addr))
+		// Property address is address of property data, not header & it may not exist
+		prop, exist := obj.propMap[propNum]
+		addr := uint16(0)
+		if exist {
+			addr = prop.addr
+		}
+		m.storeVar(uint16(dest), uint16(addr))
 		m.pc += inst.len + 1 // +1 for dest byte
 
 	// GET_NEXT_PROP

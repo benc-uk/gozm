@@ -101,11 +101,12 @@ func String(words []uint16) string {
 			// In Versions 3 and later, Z-characters 1, 2 and 3 represent abbreviations
 			// See: https://zspec.jaredreisinger.com/03-text#3_3
 			abbrIndex := (int(zchar)-1)*32 + int(zchars[i+1])
-			//if abbrIndex < len(abbreviations) {
-			result += abbreviations[abbrIndex]
-			//}
+			if abbrIndex < len(abbreviations) {
+				result += abbreviations[abbrIndex]
+			}
 			i++ // Skip next zchar
-			// continue
+			alphabet = 0
+			continue
 		case 4:
 			alphabet = 1 // Switch to upper case
 			continue

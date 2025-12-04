@@ -35,5 +35,7 @@ func main() {
 	}
 
 	machine := zmachine.NewMachine(data, debugLevel, NewTerminal())
+	//machine.TracedOps = []byte{0x11, 0x31, 0x51, 0x71, 0xD1}
+	//machine.Breakpoint = 0x00C51 // Example breakpoint
 	machine.Run()
 }

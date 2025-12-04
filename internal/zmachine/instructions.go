@@ -50,6 +50,11 @@ func (m *Machine) decodeInst() instruction {
 		}
 	}
 
+	// Breakpoint check
+	if m.Breakpoint != 0 && m.pc == m.Breakpoint {
+		m.debugLevel = DEBUG_TRACE
+	}
+
 	if inst.code == 0 {
 		return inst
 	}

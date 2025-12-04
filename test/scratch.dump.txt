@@ -4,7 +4,7 @@
 Filename:                                  ./test/scratch.z3
 Compiled With:                             Inform 6.41
 Z-machine version:                         3
-Calculated checksum:                       0x7874, checksum ok
+Calculated checksum:                       0x8EBA, checksum ok
 Object count:                              8
 Unique verbs count:                        0
 Grammar table version:                     No syntax/grammar identified
@@ -14,7 +14,8 @@ Scanning for routines from:                0x00528
 Found first routine at address:            0x00528
 Lowest routine address (immediate call) :  0x00530
 Highest routine address (immediate call):  0x00530
-Strings start at address:                  0x00554
+Lowest string address (immediate address): 0x00540
+Strings start at address:                  0x00540
 Highest used global in z-code:             240
 Number of used globals in z-code:          1
 Number of unique properties:               1
@@ -36,9 +37,9 @@ Number of unique properties:               1
    0051F-00520 Unidentified data, 2 bytes.
    00521-00527 Vocabulary/Dictionary, 7 bytes.
 
-00528-005B1 HIGH MEMORY
-   00528-00553 Z-code, 44 bytes.
-   00554-005B1 Static strings, 94 bytes.
+00528-008DB HIGH MEMORY
+   00528-0053F Z-code, 24 bytes.
+   00540-008DB Static strings, 924 bytes.
 
 
 ***** HEADER (00000-0003F, 64 bytes) *****
@@ -53,10 +54,10 @@ Number of unique properties:               1
 0000C 03 3F                   GLOBALS Global variables table:    0x033F
 0000E 05 1F                   PURBOT  Base of static memory:     0x051F
 00010 00 00                   FLAGS   Flags 2:                   0x0000
-00012 32 35 31 32 30 33       SERIAL  Serial number:             251203
+00012 32 35 31 32 30 34       SERIAL  Serial number:             251204
 00018 00 42                   FWORDS  Abbreviations table:       0x0042
-0001A 02 D9                   PLENTH  Length of file:            0x05B2
-0001C 78 74                   PCHKSM  Checksum of file:          0x7874
+0001A 04 6E                   PLENTH  Length of file:            0x08DC
+0001C 8E BA                   PCHKSM  Checksum of file:          0x8EBA
 0001E 00                      INTWRD  Interpreter number:        0
 0001F 00                              Interpreter version:       0
 00020 00                      SCRWRD  Screen height (lines):     0
@@ -423,7 +424,7 @@ Object: 8
 ***** UNIDENTIFIED DATA (0021A-0033E, 293 bytes) *****
 
 00210                               00 01 00 02 00 03            ......
-00220 00 04 00 00 00 4D 02 B3 00 00 00 00 00 00 00 00  .....M..........
+00220 00 04 00 00 00 4D 04 48 00 00 00 00 00 00 00 00  .....M.H........
 00230 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
 00240 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
 00250 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
@@ -431,14 +432,14 @@ Object: 8
 00270 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
 00280 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
 00290 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
-002A0 00 00 00 00 02 B5 02 B7 02 BA 02 BD 02 C0 02 C2  ................
-002B0 02 C4 02 C6 02 CC 02 CE 02 D1 02 D5 02 D7 00 00  ................
-002C0 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
-002D0 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
-002E0 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
-002F0 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
-00300 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
-00310 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 48  ...............H
+002A0 00 00 00 00 04 4A 04 4C 04 4F 04 52 04 55 04 57  .....J.L.O.R.U.W
+002B0 04 59 04 5B 04 61 04 63 04 66 04 6A 04 6C 04 3F  .Y.[.a.c.f.j.l.?
+002C0 04 3F 04 3F 04 3F 04 3F 04 3F 04 3F 04 3F 04 3F  .?.?.?.?.?.?.?.?
+002D0 04 3F 04 3F 04 3F 04 3F 04 3F 04 3F 04 3F 04 3F  .?.?.?.?.?.?.?.?
+002E0 04 3F 04 3F 04 3F 04 3F 04 3F 04 3F 04 3F 04 3F  .?.?.?.?.?.?.?.?
+002F0 04 3F 04 3F 04 3F 04 3F 04 3F 04 3F 04 3F 04 3F  .?.?.?.?.?.?.?.?
+00300 04 3F 04 3F 04 3F 04 3F 04 3F 04 3F 04 3F 04 3F  .?.?.?.?.?.?.?.?
+00310 04 3F 04 3F 04 3F 04 3F 04 3F 04 3F 04 3F 00 48  .?.?.?.?.?.?.?.H
 00320 02 00 DE 00 00 00 49 02 00 05 00 4A 02 00 00 00  ......I....J....
 00330 00 00 4B 02 00 05 00 00 00 4C 02 00 03 00 00     ..K......L.....
 
@@ -702,7 +703,7 @@ Object: 8
 
 
 
-***** Z-CODE (00528-00553, 44 bytes) *****
+***** Z-CODE (00528-0053F, 24 bytes) *****
 
 Main routine: 0x00528
 00528 00                       No locals
@@ -717,40 +718,35 @@ Routine: 0x00530               Called from routine(s) at 0x00528
 00530 02                       2 locals
 00531 00 00 00 00              L00=0x0000 L01=0x0000 
 
-00535 0D 01 05                 STORE L00 0x05
-00538 0D 02 42                 STORE L01 0x42
-0053B 9E 02 00                 LOAD L01 -> -(SP)
-0053E E9 7F 01                 PULL L00
-00541 E6 BF 01                 PRINT_NUM L00
-00544 B2 80 A5                 PRINT
-00547 E6 BF 02                 PRINT_NUM L01
-0054A B3 94 E5                 PRINT_RET "^"
+00535 8D 02 A0                 PRINT_PADDR S0001 "Starting scratch story. You awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your window"
+00538 B0                       RTRUE
 
 Padding:
-0054D 00 
+00539 00 
 
-Routine: 0x0054E
-0054E 02                       2 locals
-0054F 00 00 00 00              L00=0x0000 L01=0x0000 
+Routine: 0x0053A
+0053A 02                       2 locals
+0053B 00 00 00 00              L00=0x0000 L01=0x0000 
 
-00553 B1                       RFALSE
+0053F B1                       RFALSE
 
 
-***** STATIC STRINGS (00554-005B1, 94 bytes) *****
+***** STATIC STRINGS (00540-008DB, 924 bytes) *****
 
-00554 S0001 "<unknown attribute>"
-00566 S0002 "name"
-0056A S0003 "create"
-0056E S0004 "recreate"
-00574 S0005 "destroy"
-0057A S0006 "remaining"
-00580 S0007 "copy"
-00584 S0008 "call"
-00588 S0009 "print"
-0058C S0010 "print_to_array"
-00598 S0011 "height"
-0059C S0012 "wingspan"
-005A2 S0013 "worms_eaten"
-005AA S0014 "size"
-005AE S0015 "length"
+00540 S0001 "Starting scratch story. You awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your window"
+0087E S0002 "<unknown attribute>"
+00890 S0003 "name"
+00894 S0004 "create"
+00898 S0005 "recreate"
+0089E S0006 "destroy"
+008A4 S0007 "remaining"
+008AA S0008 "copy"
+008AE S0009 "call"
+008B2 S0010 "print"
+008B6 S0011 "print_to_array"
+008C2 S0012 "height"
+008C6 S0013 "wingspan"
+008CC S0014 "worms_eaten"
+008D4 S0015 "size"
+008D8 S0016 "length"
 

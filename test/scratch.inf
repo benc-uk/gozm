@@ -18,10 +18,7 @@ Object -> -> worm "squirmy worm"
 Global g2 = 2;
 !Global foo = "bar wibble baz";
 
-[main n i;
-   n = 5; i = 66;
-   @load i sp;
-   @pull n;
 
-   print n; " ", i, "^";
+[main n i;
+   print "Starting scratch story. You awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your windowYou awake to a thunderous boom. Looking out your window";
 ];
