@@ -31,6 +31,12 @@ var alphabets = [][]rune{
 	},
 }
 
+var abbreviations = []string{}
+
+func InitAbbreviations(abbrevs []string) {
+	abbreviations = abbrevs
+}
+
 // GetWord reads a 2-byte big-endian integer from the given byte slice at the specified offset.
 func GetWord(b []byte, offset uint16) uint16 {
 	return uint16(b[offset])<<8 | uint16(b[offset+1])
@@ -91,12 +97,15 @@ func String(words []uint16) string {
 		case 0:
 			result += " " // Z-char 0 is space
 			continue
-		case 1:
-			// Abbreviation handling would go here
-		case 2:
-			// Abbreviation handling would go here
-		case 3:
-			// Abbreviation handling would go here
+		case 1, 2, 3:
+			// In Versions 3 and later, Z-characters 1, 2 and 3 represent abbreviations
+			// See: https://zspec.jaredreisinger.com/03-text#3_3
+			abbrIndex := (int(zchar)-1)*32 + int(zchars[i+1])
+			if abbrIndex < len(abbreviations) {
+				result += abbreviations[abbrIndex]
+			}
+			i++ // Skip next zchar
+			continue
 		case 4:
 			alphabet = 1 // Switch to upper case
 			continue
@@ -107,7 +116,7 @@ func String(words []uint16) string {
 			// See https://zspec.jaredreisinger.com/03-text#3_4
 			if alphabet == 2 {
 				zc10 := (zchars[i+1] << 5) | zchars[i+2]
-				result += getZSCIIChar(zc10)
+				result += GetZSCIIChar(zc10)
 				i += 2 // Skip next two zchars
 				alphabet = 0
 				continue
@@ -124,7 +133,7 @@ func String(words []uint16) string {
 	return string(result)
 }
 
-func getZSCIIChar(zchar byte) string {
+func GetZSCIIChar(zchar byte) string {
 	if zchar >= 32 && zchar <= 126 {
 		return string(rune(zchar))
 	}

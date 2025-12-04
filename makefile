@@ -17,6 +17,10 @@ build: # 🔨 Build the Go binary
 test: # 🧪 Run tests
 	go test -v ./...
 
+test-czech: build # 🔬 Run tests with Czech test suite
+	clear
+	./bin/gozm -file=stories/czech.z3 -debug=$(DEBUG)
+
 run: # 🚀 Run the terminal app
 	clear
 	go run $(PACKAGE)/impl/terminal -file=test/$(STORY).z3 -debug=$(DEBUG)

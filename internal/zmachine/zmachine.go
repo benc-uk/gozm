@@ -12,15 +12,22 @@ import (
 	"fmt"
 	"math/rand/v2"
 	"os"
+	"strings"
 
 	"github.com/benc-uk/gozm/internal/decode"
 )
 
 // enum for debug levels
 const (
-	DEBUG_NONE  = 0
-	DEBUG_STEP  = 1
-	DEBUG_TRACE = 2
+	DEBUG_NONE               = 0
+	DEBUG_STEP               = 1
+	DEBUG_TRACE              = 2
+	OUTPUT_STREAM_SCREEN     = 1
+	OUTPUT_STREAM_FILE       = 2
+	OUTPUT_STREAM_MEMORY     = 3
+	OUTPUT_STREAM_MEMORY_MAX = 16
+	INPUT_STREAM_KEYBOARD    = 1
+	INPUT_STREAM_FILE        = 2
 )
 
 // Machine represents the state of a Z-machine interpreter
@@ -33,6 +40,9 @@ type Machine struct {
 	propDefaults []uint16
 	objects      []*zObject
 	rand         *rand.Rand
+	outputStream int
+	inputStream  int
+	//memStreamAddrStack []uint16
 
 	version     byte
 	highAddr    uint16
@@ -56,6 +66,9 @@ func NewMachine(data []byte, debugLevel int, ext External) *Machine {
 		propDefaults: make([]uint16, 31),
 		objects:      make([]*zObject, 0),
 		rand:         rand.New(rand.NewPCG(123, 456)),
+		outputStream: OUTPUT_STREAM_SCREEN,
+		inputStream:  INPUT_STREAM_KEYBOARD,
+		//memStreamAddrStack: make([]uint16, 0),
 
 		version:     data[0x00],
 		highAddr:    decode.GetWord(data, 0x04),
@@ -72,10 +85,22 @@ func NewMachine(data []byte, debugLevel int, ext External) *Machine {
 	// Initialize objects, property defaults table
 	m.initObjects()
 
+	// Initialize abbreviations from the abbreviation table
+	abbr := make([]string, 96)
+	for i := uint16(0); i < 96; i++ {
+		// Abbreviation table contains word addresses, need to multiply by 2
+		// See: https://zspec.jaredreisinger.com/01-memory-map#1_2_2
+		abbrStringAddr := decode.GetWord(m.mem, m.abbrvAddr+i*2) * 2
+		s, _ := m.readStringLiteral(abbrStringAddr)
+		abbr[i] = s
+	}
+	decode.InitAbbreviations(abbr)
+
 	m.debug("Z-machine initialized...\nVersion: %d, Size: %d\n", data[0x00], len(data))
 	m.debug(" - High Memory Address: %04x\n", m.highAddr)
 	m.debug(" - Initial PC: %04x\n", m.initialPC)
 	m.debug(" - Globals Address: %04x\n", m.globalsAddr)
+	m.debug(" - Checksum: %04X, valid:%t\n", m.checksum, m.validateChecksum())
 
 	// Initialize the stack with the main__ call frame
 	m.addCallFrame(0)
@@ -116,13 +141,13 @@ func (m *Machine) step() {
 	// PRINT (literal string)
 	case 0xB2:
 		str, wordCount := m.readStringLiteral(m.pc + 1)
-		m.ext.TextOut(str)
+		m.print(str)
 		m.pc += uint16(wordCount*2) + 1 // Advance PC past the string
 
 	// PRINT_RET (literal string)
 	case 0xB3:
 		str, _ := m.readStringLiteral(m.pc + 1)
-		m.ext.TextOut(str)
+		m.print(str)
 		m.returnFromCall(1)
 
 	// NOP (Never used!)
@@ -152,7 +177,7 @@ func (m *Machine) step() {
 
 	// NEW_LINE
 	case 0xBB:
-		m.ext.TextOut("\n")
+		m.print("\n")
 		m.pc += inst.len
 
 	// SHOW_STATUS
@@ -160,12 +185,13 @@ func (m *Machine) step() {
 		score := m.getVar(17) // global variable 17 is score
 		turns := m.getVar(16) // global variable 16 is turns
 		// TODO: Placeholder for scoreboard/status line handling, use ansi code to invert colors
-		m.ext.TextOut(fmt.Sprintf("\n\033[32m\033[7m Unknown location                  score:%d turns:%d \033[27m\033[0m\n", score, turns))
+		m.print(fmt.Sprintf("\n\033[32m\033[7m Unknown location                  score:%d turns:%d \033[27m\033[0m\n", score, turns))
 		m.pc += inst.len
 
 	// VERIFY
 	case 0xBD:
-		m.pc += inst.len // Not worth implementing, just skip
+		res := true //m.validateChecksum()
+		m.branchHandler(inst.len, res)
 
 	// RET_POPPED
 	case 0xB8:
@@ -241,7 +267,7 @@ func (m *Machine) step() {
 		addr := inst.operands[0]
 		m.trace(" - print_addr from %04x\n", addr)
 		str, _ := m.readStringLiteral(addr)
-		m.ext.TextOut(str)
+		m.print(str)
 		m.pc += inst.len
 
 	// REMOVE_OBJ
@@ -254,7 +280,7 @@ func (m *Machine) step() {
 	case 0x8A, 0x9A, 0xAA:
 		objNum := byte(inst.operands[0])
 		obj := m.getObject(objNum)
-		m.ext.TextOut(obj.description)
+		m.print(obj.description)
 		m.pc += inst.len
 
 	// RET
@@ -273,13 +299,20 @@ func (m *Machine) step() {
 		addr := decode.PackedAddress(packedAddr)
 		m.trace(" - print_paddr from %04x\n", addr)
 		str, _ := m.readStringLiteral(addr)
-		m.ext.TextOut(str)
+		m.print(str)
 		m.pc += inst.len
 
 	// LOAD
 	case 0x8E, 0x9E, 0xAE:
 		opVal := inst.operands[0]
-		actualVal := m.getVarInPlace(opVal)
+		var actualVal uint16
+		if opVal == 0 {
+			// Stack variable
+			actualVal = m.getCallFrame().Peek()
+		} else {
+			actualVal = m.getVar(opVal)
+		}
+
 		varLoc := m.mem[m.pc+inst.len] // destination in next byte
 		m.storeVar(uint16(varLoc), actualVal)
 		m.pc += inst.len + 1 // +1 for dest byte
@@ -600,10 +633,45 @@ func (m *Machine) step() {
 		obj.setPropertyValue(propNum, val)
 		m.pc += inst.len
 
+	// SREAD aka READ in v3
+	case 0xE4:
+		textAddr := inst.operands[0]
+		// parseAddr := inst.operands[1]
+		maxLen := m.mem[textAddr]
+		if maxLen == 0 {
+			panic("READ called with zero max length")
+		}
+		maxLen-- // Weirdly, the first byte is the max length, so reduce by 1 for actual input
+
+		// Read input from user
+		input := m.readString()
+		input = strings.ToLower(input)
+		input = strings.Trim(input, "\r\n")
+
+		// Copy input into memory, and null terminate, important!
+		copy(m.mem[textAddr+1:textAddr+uint16(maxLen)], input)
+		m.mem[textAddr+1+uint16(len(input))] = 0
+
+		for i, tok := range strings.Split(input, " ") {
+			if len(tok) == 0 {
+				continue
+			}
+			fmt.Printf(" - token %d: '%s'\n", i, tok)
+		}
+
+		m.pc += inst.len
+
+	// PRINT_CHAR
+	case 0xE5:
+		charCode := byte(inst.operands[0])
+		r := decode.GetZSCIIChar(charCode)
+		m.print(string(r))
+		m.pc += inst.len
+
 	// PRINT_NUM
 	case 0xE6:
 		v := inst.operands[0]
-		m.ext.TextOut(fmt.Sprintf("%d", int16(v))) // Print as signed number
+		m.print(fmt.Sprintf("%d", int16(v))) // Print as signed number
 		m.pc += inst.len
 
 	// RANDOM
@@ -632,6 +700,14 @@ func (m *Machine) step() {
 		val := m.getCallFrame().Pop()
 		varLoc := inst.operands[0]
 		m.setVarInPlace(varLoc, val)
+		m.pc += inst.len
+
+	// OUTPUT_STREAM
+	case 0xF3:
+		panic("NOT_IMPLEMENTED: OUTPUT_STREAM")
+		streamNum := byte(inst.operands[0])
+		tableAddr := inst.operands[1]
+		fmt.Printf("\033[31m !!!! output_stream to %d table at %04x\033[0m\n", streamNum, tableAddr)
 		m.pc += inst.len
 
 	// Unimplemented instruction!
@@ -680,29 +756,8 @@ func (m *Machine) getVar(loc uint16) uint16 {
 	}
 }
 
-func (m *Machine) getVarInPlace(loc uint16) uint16 {
-	// We made loc uint16 for ease of use, now restrict to valid range
-	if loc > 0xFF {
-		panic(fmt.Sprintf("Variable location out of range: %02x", loc))
-	}
-
-	if loc == 0 {
-		// Stack variable
-		val := m.getCallFrame().Peek()
-		return val
-	}
-
-	return m.getVar(loc)
-}
-
 func (m *Machine) setVarInPlace(loc uint16, val uint16) {
-	// We made loc uint16 for ease of use, now restrict to valid range
-	if loc > 0xFF {
-		panic(fmt.Sprintf("Variable location out of range: %02x", loc))
-	}
-
 	if loc == 0 {
-		// Stack variable
 		m.getCallFrame().SetTop(val)
 		return
 	}
@@ -799,5 +854,64 @@ func (m *Machine) branchHandler(instLen uint16, condition bool) {
 	} else {
 		m.pc += instLen + uint16(branchDataLen)
 		m.debug("   -> no branch, next pc %04x\n", m.pc)
+	}
+}
+
+// validateChecksum computes and validates the checksum of the loaded Z-machine file
+func (m *Machine) validateChecksum() bool {
+	checksum := uint16(0)
+	// Calculate checksum from byte 0x40 (64) onwards to end of file
+	for i := 0x40; i < len(m.mem); i++ {
+		checksum = (checksum + uint16(m.mem[i])&0xFFFF)
+	}
+	return checksum == m.checksum
+}
+
+func (m *Machine) print(s string) {
+	if m.outputStream == OUTPUT_STREAM_SCREEN {
+		m.ext.TextOut(s)
+	} else if m.outputStream == OUTPUT_STREAM_MEMORY {
+		// NOT IMPLEMENTED
+	}
+}
+
+func (m *Machine) readString() string {
+	if m.inputStream == INPUT_STREAM_KEYBOARD {
+		return m.ext.ReadInput()
+	} else if m.inputStream == INPUT_STREAM_FILE {
+		panic("NOT_IMPLEMENTED: input stream from file")
+	}
+	return ""
+}
+
+func (m *Machine) tokenizeInput(input string, parseAddr uint16) {
+	// Simple tokenizer: split on spaces, no dictionary lookup
+	words := strings.Fields(input)
+
+	// First byte of parse buffer is max words
+	maxWords := m.mem[parseAddr]
+	numWords := byte(len(words))
+	if numWords > maxWords {
+		numWords = maxWords
+	}
+	m.mem[parseAddr+1] = numWords
+
+	// Each word entry is 4 bytes: 1 byte length, 1 byte position, 2 bytes dictionary index (we set to 0)
+	currPos := byte(0)
+	for i := byte(0); i < numWords; i++ {
+		word := words[i]
+		wordLen := byte(len(word))
+		if wordLen > 15 {
+			wordLen = 15 // truncate to 15 chars
+		}
+
+		// Write length
+		m.mem[parseAddr+2+uint16(i*4)] = wordLen
+		// Write position
+		m.mem[parseAddr+2+uint16(i*4)+1] = currPos
+		// Write dictionary index (2 bytes) as 0 for now
+		decode.SetWord(m.mem, parseAddr+2+uint16(i*4)+2, 0)
+
+		currPos += wordLen + 1 // +1 for space
 	}
 }

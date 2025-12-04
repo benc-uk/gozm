@@ -19,6 +19,11 @@ func (c *TestTerminal) ReadInput() string {
 	return ""
 }
 
+func (c *TestTerminal) SetOutputStream(streamNum byte, tableAddr uint16, m *Machine) {
+	// For testing, just output what would be set
+	m.debug("SetOutputStream called with streamNum=%d, tableAddr=%04x\n", streamNum, tableAddr)
+}
+
 const globalVarStart = uint16(0x10)
 
 func makeTestStory() []byte {

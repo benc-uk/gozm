@@ -30,7 +30,7 @@ func (m *Machine) debug(format string, a ...interface{}) {
 
 func (m *Machine) trace(format string, a ...interface{}) {
 	if m.debugLevel == DEBUG_TRACE {
-		fmt.Printf("\033[36m"+format+"\033[0m", a...)
+		fmt.Printf("\033[31m"+format+"\033[0m", a...)
 	}
 }
 

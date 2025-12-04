@@ -4,6 +4,8 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+
+	"github.com/benc-uk/gozm/internal/zmachine"
 )
 
 // Implements a simple terminal interface for Z-machine IO
@@ -20,9 +22,11 @@ func (c *Terminal) TextOut(text string) {
 
 // ReadInput reads a line of input from the console
 func (c *Terminal) ReadInput() string {
-	scanner := bufio.NewScanner(os.Stdin)
-	scanner.Scan()
-	text := scanner.Text()
-	fmt.Println(text)
+	reader := bufio.NewReader(os.Stdin)
+	text, _ := reader.ReadString('\n')
 	return text
+}
+
+func (c *Terminal) SetOutputStream(streamNum byte, tableAddr uint16, m *zmachine.Machine) {
+	fmt.Printf("SetOutputStream called with streamNum=%d, tableAddr=%04x\n", streamNum, tableAddr)
 }

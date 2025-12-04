@@ -7,9 +7,7 @@
 
 package zmachine
 
-import (
-	"github.com/benc-uk/gozm/internal/decode"
-)
+import "github.com/benc-uk/gozm/internal/decode"
 
 const (
 	NULL_OBJECT = 0
