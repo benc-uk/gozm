@@ -94,7 +94,7 @@ func NewMachine(data []byte, debugLevel int, ext External) *Machine {
 		// See: https://zspec.jaredreisinger.com/01-memory-map#1_2_2
 		abbrStringAddr := decode.GetWord(m.mem, m.abbrvAddr+i*2) * 2
 		s, _ := m.readStringLiteral(abbrStringAddr)
-		abbr[i] = fmt.Sprintf("\033[33m%s\033[0m", s)
+		abbr[i] = s
 	}
 	decode.InitAbbreviations(abbr)
 
@@ -130,7 +130,7 @@ func (m *Machine) Run() {
 
 // step executes a single instruction at the current program counter
 func (m *Machine) step() {
-	m.debugLevel = DEBUG_NONE
+	//m.debugLevel = DEBUG_NONE
 	inst := m.decodeInst()
 	m.debug("\n%04X: %s\n", m.pc, inst.String())
 
@@ -850,24 +850,27 @@ func (m *Machine) branchHandler(instLen uint16, condition bool) {
 		offset = decode.Convert14BitToSigned(offset14)
 	}
 
-	// If offset is 0 or 1, this is a special case meaning return false or true
-	switch offset {
-	case 0:
-		m.debug(" - branch offset is 0, returning false\n")
-		m.returnFromCall(0)
-		return
-	case 1:
-		m.debug(" - branch offset is 1, returning true\n")
-		m.returnFromCall(1)
-		return
-	}
-
 	m.debug(" - branchOnTrue: %t, condition: %t (info:%02x) offset:%d\n", branchOnTrue, condition, branchInfo, offset)
 
+	// Branch is taken
 	if condition == branchOnTrue {
+		// If offset is 0 or 1, this is a special case meaning return false or true
+		// GOTCHA: It only applies if the branch would be taken!
+		switch offset {
+		case 0:
+			m.debug("   -> branch offset is 0, returning false\n")
+			m.returnFromCall(0)
+			return
+		case 1:
+			m.debug("   -> branch offset is 1, returning true\n")
+			m.returnFromCall(1)
+			return
+		}
+
 		m.pc = uint16(int16(m.pc) + int16(instLen) + branchDataLen + offset - 2)
 		m.debug("   -> branching to %04x\n", m.pc)
 	} else {
+		// Branch not taken, continue to next instruction
 		m.pc += instLen + uint16(branchDataLen)
 		m.debug("   -> no branch, next pc %04x\n", m.pc)
 	}
