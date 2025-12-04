@@ -591,6 +591,14 @@ func (m *Machine) step() {
 	case 0xE0:
 		routineAddr := decode.PackedAddress(inst.operands[0])
 
+		// When the address 0 is called as a routine, nothing happens and the return value is false
+		if routineAddr == 0 {
+			m.debug(" - call to NULL routine, returning false\n")
+			m.getCallFrame().Push(0)
+			m.pc += inst.len
+			return
+		}
+
 		// Count locals from routine header
 		numLocals := m.mem[routineAddr]
 		m.debug(" - call to %04x with %d locals\n", routineAddr, numLocals)
