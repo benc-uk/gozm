@@ -59,7 +59,7 @@ func (m *Machine) getCallFrame() *callFrame {
 	}
 
 	cf := &m.callStack[len(m.callStack)-1]
-	m.trace("Get call frame, depth=%d %+v\n", len(m.callStack), cf)
+	m.trace("Get call frame, depth=%d retaddr=%04x %+v\n", len(m.callStack), cf.returnAddr, cf)
 
 	return cf
 }
@@ -84,6 +84,7 @@ func (m *Machine) returnFromCall(val uint16) {
 
 	// The next byte after a CALL is the variable to store the result in
 	resultStoreLoc := m.mem[m.pc]
+	// f := m.getVar(uint16(resultStoreLoc))
 	m.trace("Result %04x into %d\n", val, resultStoreLoc)
 
 	m.storeVar(uint16(resultStoreLoc), val)

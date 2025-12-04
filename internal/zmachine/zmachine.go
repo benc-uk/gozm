@@ -42,6 +42,8 @@ type Machine struct {
 	rand         *rand.Rand
 	outputStream int
 	inputStream  int
+	TracedOps    []byte
+	TracedObjs   []uint16
 	//memStreamAddrStack []uint16
 
 	version     byte
@@ -68,6 +70,8 @@ func NewMachine(data []byte, debugLevel int, ext External) *Machine {
 		rand:         rand.New(rand.NewPCG(123, 456)),
 		outputStream: OUTPUT_STREAM_SCREEN,
 		inputStream:  INPUT_STREAM_KEYBOARD,
+		TracedOps:    make([]byte, 0),
+		TracedObjs:   make([]uint16, 0),
 		//memStreamAddrStack: make([]uint16, 0),
 
 		version:     data[0x00],
@@ -82,9 +86,6 @@ func NewMachine(data []byte, debugLevel int, ext External) *Machine {
 		checksum:    decode.GetWord(data, 0x1C),
 	}
 
-	// Initialize objects, property defaults table
-	m.initObjects()
-
 	// Initialize abbreviations from the abbreviation table
 	abbr := make([]string, 96)
 	for i := uint16(0); i < 96; i++ {
@@ -92,9 +93,15 @@ func NewMachine(data []byte, debugLevel int, ext External) *Machine {
 		// See: https://zspec.jaredreisinger.com/01-memory-map#1_2_2
 		abbrStringAddr := decode.GetWord(m.mem, m.abbrvAddr+i*2) * 2
 		s, _ := m.readStringLiteral(abbrStringAddr)
-		abbr[i] = s
+		abbr[i] = fmt.Sprintf("\033[33m%s\033[0m", s)
 	}
 	decode.InitAbbreviations(abbr)
+
+	// Initialize objects, property defaults table
+	m.initObjects()
+
+	obj := m.getObject(46)
+	fmt.Printf("Traced Object %d '%s':\n%s\n", obj.num, obj.description, obj.propDebugDump())
 
 	m.debug("Z-machine initialized...\nVersion: %d, Size: %d\n", data[0x00], len(data))
 	m.debug(" - High Memory Address: %04x\n", m.highAddr)
@@ -120,6 +127,7 @@ func (m *Machine) Run() {
 
 // step executes a single instruction at the current program counter
 func (m *Machine) step() {
+	m.debugLevel = DEBUG_NONE
 	inst := m.decodeInst()
 	m.debug("\n%04X: %s\n", m.pc, inst.String())
 
@@ -705,10 +713,10 @@ func (m *Machine) step() {
 	// OUTPUT_STREAM
 	case 0xF3:
 		panic("NOT_IMPLEMENTED: OUTPUT_STREAM")
-		streamNum := byte(inst.operands[0])
-		tableAddr := inst.operands[1]
-		fmt.Printf("\033[31m !!!! output_stream to %d table at %04x\033[0m\n", streamNum, tableAddr)
-		m.pc += inst.len
+		// streamNum := byte(inst.operands[0])
+		// tableAddr := inst.operands[1]
+		// fmt.Printf("\033[31m !!!! output_stream to %d table at %04x\033[0m\n", streamNum, tableAddr)
+		// m.pc += inst.len
 
 	// Unimplemented instruction!
 	default:

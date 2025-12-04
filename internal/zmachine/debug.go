@@ -30,15 +30,15 @@ func (m *Machine) debug(format string, a ...interface{}) {
 
 func (m *Machine) trace(format string, a ...interface{}) {
 	if m.debugLevel == DEBUG_TRACE {
-		fmt.Printf("\033[31m"+format+"\033[0m", a...)
+		fmt.Printf("  \033[31m"+format+"\033[0m", a...)
 	}
 }
 
 // Internal helper to dump object properties for debugging
 func (o *zObject) propDebugDump() string {
 	result := ""
-	for propNum, propData := range o.properties {
-		result += fmt.Sprintf("    Prop %d: %X\n", propNum, propData)
+	for _, propData := range o.properties {
+		result += fmt.Sprintf("    Prop num:%d, size:%d, data:%x\n", propData.num, propData.size, propData.data)
 	}
 	return result
 }

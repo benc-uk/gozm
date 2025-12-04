@@ -43,6 +43,13 @@ func (m *Machine) decodeInst() instruction {
 		len:  1, // start with 1 for the opcode byte
 	}
 
+	// Debug ops if they are being traced
+	for _, op := range m.TracedOps {
+		if m.mem[m.pc] == op {
+			m.debugLevel = DEBUG_TRACE
+		}
+	}
+
 	if inst.code == 0 {
 		return inst
 	}
@@ -71,7 +78,7 @@ func (m *Machine) decodeInst() instruction {
 			operandPtr += opLen
 		}
 
-		m.trace("\nDecode var: %02x typeByte:%02x\n", inst.code, opTypesByte)
+		m.trace("Decode var: %02x typeByte:%02x\n", inst.code, opTypesByte)
 
 		return inst
 	}
@@ -81,7 +88,7 @@ func (m *Machine) decodeInst() instruction {
 		inst.form = FORM_SHORT
 		// Get bits 4 and 5 for operand type
 		opType := (inst.code >> 4) & 0x3
-		m.trace("\nDecode short: %02x opType:%02x\n", inst.code, opType)
+		m.trace("Decode short: %02x opType:%02x\n", inst.code, opType)
 
 		if opType == OPTYPE_OMITTED {
 			return inst // No operands, this is a 0OP instruction
@@ -102,7 +109,7 @@ func (m *Machine) decodeInst() instruction {
 	op1Type := (inst.code>>6)&0x1 + 1 // +1 to map 0->1, 1->2
 	op2Type := (inst.code>>5)&0x1 + 1
 
-	m.trace("\nDecode long: %02x opType1:%d opType2:%d\n", inst.code, op1Type, op2Type)
+	m.trace("Decode long: %02x opType1:%d opType2:%d\n", inst.code, op1Type, op2Type)
 
 	op1, _ := fetchOperand(m, op1Type, m.pc+1)
 	op2, _ := fetchOperand(m, op2Type, m.pc+2)

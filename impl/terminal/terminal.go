@@ -17,7 +17,7 @@ func NewTerminal() *Terminal {
 
 // TextOut outputs text to the console
 func (c *Terminal) TextOut(text string) {
-	fmt.Print(text)
+	fmt.Printf("%s", text)
 }
 
 // ReadInput reads a line of input from the console
