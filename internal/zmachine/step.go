@@ -19,6 +19,22 @@ import (
 func (m *Machine) step() {
 	m.debugLevel = DEBUG_NONE
 	inst := m.decodeInst()
+
+	// trap panic in case of errors
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Printf("💥 Runtime error at %04X: %s\n", m.pc, inst.String())
+			m.DumpMem(m.pc, 12)
+			// Print stack trace
+			fmt.Printf("Stack trace:\n")
+			for i := len(m.callStack) - 1; i >= 0; i-- {
+				frame := m.callStack[i]
+				fmt.Printf(" - Frame %d: return to %04X\n", i, frame.returnAddr)
+			}
+			panic(r)
+		}
+	}()
+
 	m.debug("\n%04X: %s\n", m.pc, inst.String())
 
 	// Decode and execute instructions!
@@ -486,6 +502,10 @@ func (m *Machine) step() {
 
 		// Count locals from routine header
 		numLocals := m.mem[routineAddr]
+		if numLocals > 15 {
+			panic(fmt.Sprintf("Attempted to call routine at %04x with invalid local count %d", routineAddr, numLocals))
+		}
+
 		m.debug(" - call to %04x with %d locals\n", routineAddr, numLocals)
 
 		// Push new stack frame
@@ -604,35 +624,36 @@ func (m *Machine) step() {
 
 		// Now we have tokens, look them up in the dictionary
 
-		dictEntries := []dictEntry{}
+		dictHits := []dictEntry{}
 		for _, token := range tokens {
-			dictEntry := m.lookupWordInDict(token)
-			//fmt.Printf(" - Token: %q -> dict addr: %04x\n", token, dictEntry.address)
-			dictEntries = append(dictEntries, dictEntry)
+			dictHits = append(dictHits, m.lookupWordInDict(token))
 		}
 		//fmt.Printf(" - Dictionary results: %v\n", dictEntries)
 
-		// Write token count to parse table
-		m.mem[parseAddr+1] = byte(len(dictEntries))
-		//fmt.Printf(" - Writing %d words to parse table at %04x\n", len(dictEntries), parseAddr+1)
+		// Write token count to parse table, after max tokens byte
+		m.mem[parseAddr+1] = byte(len(dictHits))
 
-		// Write each dictionary entry to parse table
-		parseOffset := parseAddr + 2
-		for i, dictWord := range dictEntries {
+		// Write each dictionary entry to parse table, each is 4 bytes
+		parseOffset := parseAddr + 2 // Skip max tokens & count bytes
+		for i, dictHit := range dictHits {
 			entryOffset := parseOffset + uint16(i*4)
 
 			// Write dictionary address (2 bytes)
-			decode.SetWord(m.mem, entryOffset, dictWord.address)
+			decode.SetWord(m.mem, entryOffset, dictHit.address)
 
 			// Write word length (1 byte)
-			m.mem[entryOffset+2] = byte(len(dictWord.word))
+			word := dictHit.word
+			if dictHit.address == 0 {
+				word = tokens[i] // Use original token if not found
+			}
+			m.mem[entryOffset+2] = byte(len(word))
 
 			// Write position in text buffer (1 byte), 1-based index
 			// Need to find the position of the word in the original input
 			position := byte(0)
 			searchOffset := uint16(1) // Start after max length byte
 			for pos, _ := range input {
-				if strings.HasPrefix(input[searchOffset-1:], dictWord.word) {
+				if strings.HasPrefix(input[searchOffset-1:], word) {
 					position = byte(pos + 1) // 1-based index
 					break
 				}
@@ -687,10 +708,6 @@ func (m *Machine) step() {
 	// OUTPUT_STREAM
 	case 0xF3:
 		panic("NOT_IMPLEMENTED: OUTPUT_STREAM")
-		// streamNum := byte(inst.operands[0])
-		// tableAddr := inst.operands[1]
-		// fmt.Printf("\033[31m !!!! output_stream to %d table at %04x\033[0m\n", streamNum, tableAddr)
-		// m.pc += inst.len
 
 	// Unimplemented instruction!
 	default:
