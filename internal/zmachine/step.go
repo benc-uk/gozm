@@ -17,7 +17,7 @@ import (
 )
 
 func (m *Machine) step() {
-	//m.debugLevel = DEBUG_NONE
+	m.debugLevel = DEBUG_NONE
 	inst := m.decodeInst()
 	m.debug("\n%04X: %s\n", m.pc, inst.String())
 
@@ -252,7 +252,6 @@ func (m *Machine) step() {
 		varLoc := inst.operands[0]
 		compareVal := int16(inst.operands[1])
 		newVal := m.addToVar(varLoc, -1)
-		// newVal := int16(m.getVar(varLoc))
 		m.branchHandler(inst.len, newVal < compareVal)
 
 	// INC_CHK
@@ -260,7 +259,6 @@ func (m *Machine) step() {
 		varLoc := inst.operands[0]
 		compareVal := int16(inst.operands[1])
 		newVal := m.addToVar(varLoc, 1)
-		//newVal := int16(m.getVar(varLoc))
 		m.branchHandler(inst.len, newVal > compareVal)
 
 	// JIN
@@ -609,7 +607,7 @@ func (m *Machine) step() {
 		dictEntries := []dictEntry{}
 		for _, token := range tokens {
 			dictEntry := m.lookupWordInDict(token)
-			fmt.Printf(" - Token: %q -> dict addr: %04x\n", token, dictEntry.address)
+			//fmt.Printf(" - Token: %q -> dict addr: %04x\n", token, dictEntry.address)
 			dictEntries = append(dictEntries, dictEntry)
 		}
 		//fmt.Printf(" - Dictionary results: %v\n", dictEntries)

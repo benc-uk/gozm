@@ -38,6 +38,7 @@ type property struct {
 // Parses the object table and initializes the objects in the machine
 // This is called once during machine initialization
 func (m *Machine) initObjects() {
+	fmt.Printf("Initializing object table at %04x\n", m.objectsAddr)
 	if len(m.objects) > 0 || m.objectsAddr == 0 {
 		return // Already initialized or we have no object table
 	}
@@ -154,10 +155,10 @@ func (m *Machine) getObject(objNum byte) *zObject {
 }
 
 func (o *zObject) hasAttribute(attrNum byte) bool {
-
 	if attrNum > 31 {
 		return false
 	}
+
 	return o.attr[attrNum]
 }
 
@@ -165,6 +166,7 @@ func (o *zObject) setAttribute(attrNum byte, value bool) {
 	if attrNum > 31 {
 		return
 	}
+
 	o.attr[attrNum] = value
 }
 

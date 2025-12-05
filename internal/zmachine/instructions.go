@@ -29,11 +29,9 @@ const OPTYPE_OMITTED = 0x03
 
 // instruction represents a decoded Z-machine instruction
 type instruction struct {
-	code byte // opcode byte
-	//number   byte     // instruction number, not used yet
+	code     byte     // opcode byte
 	operands []uint16 // operand values for the instruction
 	len      uint16   // total length of instruction + operands in bytes
-	form     byte     // form of the instruction, not used yet
 }
 
 // Decodes the instruction at the current program counter
@@ -49,7 +47,6 @@ func (m *Machine) decodeInst() instruction {
 
 	// VAR form has $11 in the top bits, and a following operand types byte
 	if inst.code&0xC0 == 0xC0 {
-		inst.form = FORM_VAR
 		opTypesByte := m.mem[m.pc+1]
 		inst.len++ // for operand types byte
 
@@ -78,7 +75,6 @@ func (m *Machine) decodeInst() instruction {
 
 	// SHORT form has $10 in the top bits
 	if inst.code&0xC0 == 0x80 {
-		inst.form = FORM_SHORT
 		// Get bits 4 and 5 for operand type
 		opType := (inst.code >> 4) & 0x3
 		m.trace("Decode short: %02x opType:%02x\n", inst.code, opType)
@@ -96,7 +92,6 @@ func (m *Machine) decodeInst() instruction {
 
 	// LONG form otherwise, this form is always 2OP
 	// https://zspec.jaredreisinger.com/04-instructions#4_3
-	inst.form = FORM_LONG
 	// Value of bits 6 & 5 indicates types of 2 operands
 	// GOTCHA: Horrible - https://zspec.jaredreisinger.com/04-instructions#4_4_2
 	op1Type := (inst.code>>6)&0x1 + 1 // +1 to map 0->1, 1->2
@@ -134,7 +129,7 @@ func fetchOperand(m *Machine, operandType byte, loc uint16) (uint16, uint16) {
 
 // String representation of the instruction
 func (inst *instruction) String() string {
-	return fmt.Sprintf("%s (code=%02x, operands=%v, len=%d, form=%d)", opcodeNames[inst.code], inst.code, inst.operands, inst.len, inst.form)
+	return fmt.Sprintf("%s (code=%02x, operands=%v, len=%d)", opcodeNames[inst.code], inst.code, inst.operands, inst.len)
 }
 
 // Map opcodes to names

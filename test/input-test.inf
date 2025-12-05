@@ -5,6 +5,7 @@
 
 Array text_array -> 63;
 Array parse_array -> 42;
+
 [ Main w x length position dict c;
   w = 'mary'; w = 'had'; w = 'a//'; w = 'little'; w = 'lamb';
   for (::) {

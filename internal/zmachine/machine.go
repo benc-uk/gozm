@@ -108,11 +108,6 @@ func NewMachine(data []byte, debugLevel int, ext External) *Machine {
 	entryLen := m.mem[m.dictAddr+1+uint16(numSepBytes)]
 	numEntries := decode.GetWord(m.mem, m.dictAddr+2+uint16(numSepBytes))
 
-	fmt.Printf("m.dictAddr = %04x\n", m.dictAddr)
-	fmt.Printf(" - Num Sep Bytes: %d\n", numSepBytes)
-	fmt.Printf(" - Entry Length: %d\n", entryLen)
-	fmt.Printf(" - Num Entries: %d\n", numEntries)
-
 	// Load dictionary entries
 	m.dict = make([]dictEntry, numEntries)
 	m.dictStartAddr = m.dictAddr + 2 + uint16(numSepBytes) + 2
@@ -124,11 +119,6 @@ func NewMachine(data []byte, debugLevel int, ext External) *Machine {
 			address: entryAddr,
 		}
 	}
-
-	// debug dictionary entries
-	// for _, entry := range m.dict {
-	// 	fmt.Printf(" - Dict Entry: %q at %04x\n", entry.word, entry.address)
-	// }
 
 	m.debug("Z-machine initialized...\nVersion: %d, Size: %d\n", data[0x00], len(data))
 	m.debug(" - High Memory Address: %04x\n", m.highAddr)
@@ -328,21 +318,37 @@ func (m *Machine) readString() string {
 // Returns a dictEntry with address 0 if the word is not found
 // If multiple words match, returns the longest matching word
 // See: https://zspec.jaredreisinger.com/13-dictionary
+// TODO: This needs to be optimized for large dictionaries!
 func (m *Machine) lookupWordInDict(word string) dictEntry {
-	longestMatch := dictEntry{word: word, address: 0}
-	longestMatchLen := 0
+	longestMatch := dictEntry{address: 0}
 
-	// Search through all dictionary entries
+	// Normalize the input word to lowercase for comparison
+	word = strings.ToLower(word)
+
 	for _, entry := range m.dict {
-		// Check if the dictionary word matches the start of the input word
-		if strings.HasPrefix(word, entry.word) {
-			// Keep track of the longest match
-			if len(entry.word) > longestMatchLen {
-				longestMatch = entry
-				longestMatchLen = len(entry.word)
+		entryWord := strings.ToLower(entry.word)
+
+		// Check if the dictionary entry matches the start of the word
+		// but ensure we're matching complete words, not substrings
+		if strings.HasPrefix(word, entryWord) {
+			// Check that it's a complete word match (either exact or followed by separator/space)
+			if len(word) == len(entryWord) ||
+				(len(word) > len(entryWord) && m.isSeparator(string(word[len(entryWord)]))) {
+				// Keep the longest match
+				if len(entryWord) > len(longestMatch.word) {
+					longestMatch = entry
+				}
 			}
 		}
 	}
-
 	return longestMatch
+}
+
+func (m *Machine) isSeparator(ch string) bool {
+	for _, sep := range m.dictSep {
+		if ch == sep {
+			return true
+		}
+	}
+	return false
 }
