@@ -85,7 +85,7 @@ func (m *Machine) returnFromCall(val uint16) {
 	// The next byte after a CALL is the variable to store the result in
 	resultStoreLoc := m.mem[m.pc]
 	// f := m.getVar(uint16(resultStoreLoc))
-	m.trace("Result %04x into %d\n", val, resultStoreLoc)
+	m.trace("Return: PC restored to %04X, store byte=%02X, will advance to %04X\n", frame.returnAddr, resultStoreLoc, frame.returnAddr+1)
 
 	m.storeVar(uint16(resultStoreLoc), val)
 	m.pc += 1

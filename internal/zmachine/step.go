@@ -495,8 +495,10 @@ func (m *Machine) step() {
 		// When the address 0 is called as a routine, nothing happens and the return value is false
 		if routineAddr == 0 {
 			m.debug(" - call to NULL routine, returning false\n")
-			m.getCallFrame().Push(0)
-			m.pc += inst.len
+			// Store byte is at PC + inst.len, store 0 (false) there
+			dest := m.mem[m.pc+inst.len]
+			m.storeVar(uint16(dest), 0)
+			m.pc += inst.len + 1 // +1 for store byte
 			return
 		}
 
