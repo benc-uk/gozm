@@ -1,7 +1,7 @@
 ROOT_DIR := $(shell git rev-parse --show-toplevel)
 DEV_DIR := $(ROOT_DIR)/.dev
 PACKAGE := github.com/benc-uk/gozm
-STORY ?= scratch
+STORY ?= input-test
 DEBUG ?= 0
 
 .DEFAULT_GOAL := help

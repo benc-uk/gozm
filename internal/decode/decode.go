@@ -6,8 +6,6 @@
 
 package decode
 
-import "fmt"
-
 // Lookups used for decoding z-chars, see: https://zspec.jaredreisinger.com/03-text#3_5_3
 var alphabets = [][]rune{
 	{
@@ -31,12 +29,6 @@ var alphabets = [][]rune{
 	},
 }
 
-var abbreviations = []string{}
-
-func InitAbbreviations(abbrevs []string) {
-	abbreviations = abbrevs
-}
-
 // GetWord reads a 2-byte big-endian integer from the given byte slice at the specified offset.
 func GetWord(b []byte, offset uint16) uint16 {
 	return uint16(b[offset])<<8 | uint16(b[offset+1])
@@ -56,27 +48,10 @@ func PackedAddress(addr uint16) uint16 {
 	return uint16(addr) * 2
 }
 
-// Helper to decode a Z-machine encoded string from a byte slice
-func StringBytes(data []byte) string {
-	words := []uint16{}
-	for i := uint16(0); int(i) < len(data); i += 2 {
-		word := GetWord(data, i)
-		words = append(words, word)
-
-		// If the high bit is set, this is the end of the string
-		if word&0x8000 != 0 {
-			break
-		}
-	}
-	fmt.Printf("Decoded words: %v\n", words)
-
-	return String(words)
-}
-
 // String decodes a Z-machine encoded string from the given slice of 16-bit words
 // each containing three 5-bit Z-characters. It's weird AF
 // https://zspec.jaredreisinger.com/03-text
-func String(words []uint16) string {
+func String(words []uint16, abbr []string) string {
 	result := ""
 	zchars := make([]byte, len(words)*3)
 
@@ -100,13 +75,15 @@ func String(words []uint16) string {
 		case 1, 2, 3:
 			// In Versions 3 and later, Z-characters 1, 2 and 3 represent abbreviations
 			// See: https://zspec.jaredreisinger.com/03-text#3_3
-			abbrIndex := (int(zchar)-1)*32 + int(zchars[i+1])
-			if abbrIndex < len(abbreviations) {
-				result += abbreviations[abbrIndex]
+			if i < len(zchars)-1 {
+				abbrIndex := (int(zchar)-1)*32 + int(zchars[i+1])
+				if abbrIndex < len(abbr) {
+					result += abbr[abbrIndex]
+				}
+				i++ // Skip next zchar
+				alphabet = 0
+				continue
 			}
-			i++ // Skip next zchar
-			alphabet = 0
-			continue
 		case 4:
 			alphabet = 1 // Switch to upper case
 			continue
@@ -116,11 +93,13 @@ func String(words []uint16) string {
 		case 6:
 			// See https://zspec.jaredreisinger.com/03-text#3_4
 			if alphabet == 2 {
-				zc10 := (zchars[i+1] << 5) | zchars[i+2]
-				result += GetZSCIIChar(zc10)
-				i += 2 // Skip next two zchars
-				alphabet = 0
-				continue
+				if i < len(zchars)-2 {
+					zc10 := (zchars[i+1] << 5) | zchars[i+2]
+					result += ZSCIIChar(zc10)
+					i += 2 // Skip next two zchars
+					alphabet = 0
+					continue
+				}
 			}
 
 			fallthrough
@@ -134,7 +113,7 @@ func String(words []uint16) string {
 	return string(result)
 }
 
-func GetZSCIIChar(zchar byte) string {
+func ZSCIIChar(zchar byte) string {
 	if zchar >= 32 && zchar <= 126 {
 		return string(rune(zchar))
 	}

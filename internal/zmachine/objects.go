@@ -8,6 +8,8 @@
 package zmachine
 
 import (
+	"fmt"
+
 	"github.com/benc-uk/gozm/internal/decode"
 )
 
@@ -96,7 +98,7 @@ func (m *Machine) initObjects() {
 			word := decode.GetWord(m.mem, currPropAddr+1+i*2)
 			descWords[i] = word
 		}
-		obj.description = decode.String(descWords) // decode string literal
+		obj.description = decode.String(descWords, m.abbr) // decode string literal
 		currPropAddr += 1 + uint16(descSize)*2
 
 		// Now read properties until we hit a 0 size byte in the header
@@ -145,13 +147,14 @@ func (m *Machine) initObjects() {
 // Helper to get an object by its number
 func (m *Machine) getObject(objNum byte) *zObject {
 	if objNum == NULL_OBJECT || int(objNum) > len(m.objects) {
-		return nil
+		panic(fmt.Sprintf("FATAL: Attempt to access object %d", objNum))
 	}
 
 	return m.objects[objNum-1]
 }
 
 func (o *zObject) hasAttribute(attrNum byte) bool {
+
 	if attrNum > 31 {
 		return false
 	}

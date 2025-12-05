@@ -11,7 +11,6 @@ package zmachine
 import (
 	"fmt"
 	"math/rand/v2"
-	"strings"
 
 	"github.com/benc-uk/gozm/internal/decode"
 )
@@ -31,31 +30,35 @@ const (
 
 // Machine represents the state of a Z-machine interpreter
 type Machine struct {
-	mem          []byte
-	pc           uint16 // Actually think this probably needs to be a uint32
-	callStack    []callFrame
-	debugLevel   int
-	ext          External
-	propDefaults []uint16
-	objects      []*zObject
-	rand         *rand.Rand
-	outputStream int
-	inputStream  int
-	TracedOps    []byte
-	TracedObjs   []byte
-	Breakpoint   uint16
-	//memStreamAddrStack []uint16
+	mem           []byte      // Z-machine memory
+	pc            uint16      // Actually think this probably needs to be a uint32
+	callStack     []callFrame // Call stack of routines
+	debugLevel    int         // Debug verbosity level
+	ext           External    // External interface for I/O
+	propDefaults  []uint16    // Property defaults table
+	objects       []*zObject  // Objects table
+	rand          *rand.Rand  // Random number generator
+	outputStream  int         // Current output stream
+	inputStream   int         // Current input stream
+	abbr          []string    // Abbreviation table
+	dict          []dictEntry // Dictionary entries
+	dictSep       []string    // Dictionary separator characters
+	dictStartAddr uint16      // Start address of dictionary entries
 
-	version     byte
-	highAddr    uint16
-	initialPC   uint16
-	dictAddr    uint16
-	objectsAddr uint16
-	globalsAddr uint16
-	staticAddr  uint16
-	abbrvAddr   uint16
-	fileLen     uint16
-	checksum    uint16
+	version     byte   // Header: version number
+	highAddr    uint16 // Header: high memory address
+	initialPC   uint16 // Header: initial program counter
+	dictAddr    uint16 // Header: dictionary table start address
+	objectsAddr uint16 // Header: objects table address
+	globalsAddr uint16 // Header: global variables table address
+	abbrvAddr   uint16 // Header: abbreviation table address
+	fileLen     uint16 // Header: file length in words
+	checksum    uint16 // Header: checksum
+}
+
+type dictEntry struct {
+	word    string
+	address uint16
 }
 
 func NewMachine(data []byte, debugLevel int, ext External) *Machine {
@@ -70,9 +73,6 @@ func NewMachine(data []byte, debugLevel int, ext External) *Machine {
 		rand:         rand.New(rand.NewPCG(123, 456)),
 		outputStream: OUTPUT_STREAM_SCREEN,
 		inputStream:  INPUT_STREAM_KEYBOARD,
-		TracedOps:    make([]byte, 0),
-		TracedObjs:   make([]byte, 0),
-		//memStreamAddrStack: make([]uint16, 0),
 
 		version:     data[0x00],
 		highAddr:    decode.GetWord(data, 0x04),
@@ -80,36 +80,61 @@ func NewMachine(data []byte, debugLevel int, ext External) *Machine {
 		dictAddr:    decode.GetWord(data, 0x08),
 		objectsAddr: decode.GetWord(data, 0x0A),
 		globalsAddr: decode.GetWord(data, 0x0C),
-		staticAddr:  decode.GetWord(data, 0x0E),
 		abbrvAddr:   decode.GetWord(data, 0x18),
 		fileLen:     decode.GetWord(data, 0x1A),
 		checksum:    decode.GetWord(data, 0x1C),
 	}
 
 	// Initialize abbreviations from the abbreviation table
-	abbr := make([]string, 96)
+	m.abbr = make([]string, 96)
 	for i := uint16(0); i < 96; i++ {
 		// Abbreviation table contains word addresses, need to multiply by 2
 		// See: https://zspec.jaredreisinger.com/01-memory-map#1_2_2
 		abbrStringAddr := decode.GetWord(m.mem, m.abbrvAddr+i*2) * 2
 		s, _ := m.readStringLiteral(abbrStringAddr)
-		abbr[i] = s
+		m.abbr[i] = s
 	}
-	decode.InitAbbreviations(abbr)
 
 	// Initialize objects, property defaults table
 	m.initObjects()
 
-	for _, o := range m.TracedObjs {
-		obj := m.getObject(o)
-		fmt.Printf("Traced Object %d '%s':\n%s\n", obj.num, obj.description, obj.propDebugDump())
+	// Dictionary initialization
+	numSepBytes := m.mem[m.dictAddr]
+	m.dictSep = make([]string, numSepBytes)
+	for i := byte(0); i < numSepBytes; i++ {
+		m.dictSep[i] = string(m.mem[m.dictAddr+1+uint16(i)])
 	}
+	entryLen := m.mem[m.dictAddr+1+uint16(numSepBytes)]
+	numEntries := decode.GetWord(m.mem, m.dictAddr+2+uint16(numSepBytes))
+
+	fmt.Printf("m.dictAddr = %04x\n", m.dictAddr)
+	fmt.Printf(" - Num Sep Bytes: %d\n", numSepBytes)
+	fmt.Printf(" - Entry Length: %d\n", entryLen)
+	fmt.Printf(" - Num Entries: %d\n", numEntries)
+
+	// Load dictionary entries
+	m.dict = make([]dictEntry, numEntries)
+	m.dictStartAddr = m.dictAddr + 2 + uint16(numSepBytes) + 2
+	for i := uint16(0); i < numEntries; i++ {
+		entryAddr := m.dictStartAddr + uint16(i)*uint16(entryLen)
+		s, _ := m.readStringLiteral(entryAddr)
+		m.dict[i] = dictEntry{
+			word:    s,
+			address: entryAddr,
+		}
+	}
+
+	// debug dictionary entries
+	// for _, entry := range m.dict {
+	// 	fmt.Printf(" - Dict Entry: %q at %04x\n", entry.word, entry.address)
+	// }
 
 	m.debug("Z-machine initialized...\nVersion: %d, Size: %d\n", data[0x00], len(data))
 	m.debug(" - High Memory Address: %04x\n", m.highAddr)
 	m.debug(" - Initial PC: %04x\n", m.initialPC)
 	m.debug(" - Globals Address: %04x\n", m.globalsAddr)
 	m.debug(" - Checksum: %04X, valid:%t\n", m.checksum, m.validateChecksum())
+	m.debug(" - Dictionary: %d entries, %d separators\n", numEntries, numSepBytes)
 
 	// Initialize the stack with the main__ call frame
 	m.addCallFrame(0)
@@ -221,7 +246,7 @@ func (m *Machine) readStringLiteral(addr uint16) (string, int) {
 		}
 	}
 
-	return decode.String(words), len(words)
+	return decode.String(words, m.abbr), len(words)
 }
 
 func (m *Machine) branchHandler(instLen uint16, condition bool) {
@@ -296,36 +321,4 @@ func (m *Machine) readString() string {
 		panic("NOT_IMPLEMENTED: input stream from file")
 	}
 	return ""
-}
-
-func (m *Machine) tokenizeInput(input string, parseAddr uint16) {
-	// Simple tokenizer: split on spaces, no dictionary lookup
-	words := strings.Fields(input)
-
-	// First byte of parse buffer is max words
-	maxWords := m.mem[parseAddr]
-	numWords := byte(len(words))
-	if numWords > maxWords {
-		numWords = maxWords
-	}
-	m.mem[parseAddr+1] = numWords
-
-	// Each word entry is 4 bytes: 1 byte length, 1 byte position, 2 bytes dictionary index (we set to 0)
-	currPos := byte(0)
-	for i := byte(0); i < numWords; i++ {
-		word := words[i]
-		wordLen := byte(len(word))
-		if wordLen > 15 {
-			wordLen = 15 // truncate to 15 chars
-		}
-
-		// Write length
-		m.mem[parseAddr+2+uint16(i*4)] = wordLen
-		// Write position
-		m.mem[parseAddr+2+uint16(i*4)+1] = currPos
-		// Write dictionary index (2 bytes) as 0 for now
-		decode.SetWord(m.mem, parseAddr+2+uint16(i*4)+2, 0)
-
-		currPos += wordLen + 1 // +1 for space
-	}
 }

@@ -464,7 +464,7 @@ func (m *Machine) step() {
 	case 0x10, 0x30, 0x50, 0x70, 0xD0:
 		arrayAddr := inst.operands[0]
 		index := inst.operands[1]
-		byteAddr := arrayAddr + uint16(index)
+		byteAddr := uint16(arrayAddr) + uint16(index)
 		val := m.mem[byteAddr]
 		dest := m.mem[m.pc+inst.len] // destination in next byte
 		m.debug(" - loadb from %04x dest var:%d\n", byteAddr, dest)
@@ -547,7 +547,7 @@ func (m *Machine) step() {
 	// SREAD aka READ in v3
 	case 0xE4:
 		textAddr := inst.operands[0]
-		// parseAddr := inst.operands[1]
+		parseAddr := inst.operands[1]
 		maxLen := m.mem[textAddr]
 		if maxLen == 0 {
 			panic("READ called with zero max length")
@@ -563,11 +563,84 @@ func (m *Machine) step() {
 		copy(m.mem[textAddr+1:textAddr+uint16(maxLen)], input)
 		m.mem[textAddr+1+uint16(len(input))] = 0
 
-		for i, tok := range strings.Split(input, " ") {
-			if len(tok) == 0 {
-				continue
+		// Tokenize the input string by dictionary separators
+		var tokens []string
+		currentWord := ""
+
+		for _, char := range input {
+			// Check if this character is a separator
+			isSep := false
+			for _, sep := range m.dictSep {
+				if char == rune(sep[0]) {
+					isSep = true
+					break
+				}
 			}
-			fmt.Printf(" - token %d: '%s'\n", i, tok)
+
+			if isSep {
+				// Add current word if not empty
+				if currentWord != "" {
+					tokens = append(tokens, currentWord)
+					currentWord = ""
+				}
+				// Add separator as a token (but not spaces)
+				if char != ' ' {
+					tokens = append(tokens, string(char))
+				}
+			} else if char == ' ' {
+				// Space ends a word but is not added as a token
+				if currentWord != "" {
+					tokens = append(tokens, currentWord)
+					currentWord = ""
+				}
+			} else {
+				// Regular character, add to current word
+				currentWord += string(char)
+			}
+		}
+
+		// Don't forget the last word
+		if currentWord != "" {
+			tokens = append(tokens, currentWord)
+		}
+
+		// Now we have tokens, look them up in the dictionary
+
+		dictEntries := []dictEntry{}
+		for _, token := range tokens {
+			dictEntry := m.lookupWordInDict(token)
+			fmt.Printf(" - Token: %q -> dict addr: %04x\n", token, dictEntry.address)
+			dictEntries = append(dictEntries, dictEntry)
+		}
+		//fmt.Printf(" - Dictionary results: %v\n", dictEntries)
+
+		// Write token count to parse table
+		m.mem[parseAddr+1] = byte(len(dictEntries))
+		//fmt.Printf(" - Writing %d words to parse table at %04x\n", len(dictEntries), parseAddr+1)
+
+		// Write each dictionary entry to parse table
+		parseOffset := parseAddr + 2
+		for i, dictWord := range dictEntries {
+			entryOffset := parseOffset + uint16(i*4)
+
+			// Write dictionary address (2 bytes)
+			decode.SetWord(m.mem, entryOffset, dictWord.address)
+
+			// Write word length (1 byte)
+			m.mem[entryOffset+2] = byte(len(dictWord.word))
+
+			// Write position in text buffer (1 byte), 1-based index
+			// Need to find the position of the word in the original input
+			position := byte(0)
+			searchOffset := uint16(1) // Start after max length byte
+			for pos, _ := range input {
+				if strings.HasPrefix(input[searchOffset-1:], dictWord.word) {
+					position = byte(pos + 1) // 1-based index
+					break
+				}
+				searchOffset++
+			}
+			m.mem[entryOffset+3] = position
 		}
 
 		m.pc += inst.len
@@ -575,7 +648,7 @@ func (m *Machine) step() {
 	// PRINT_CHAR
 	case 0xE5:
 		charCode := byte(inst.operands[0])
-		r := decode.GetZSCIIChar(charCode)
+		r := decode.ZSCIIChar(charCode)
 		m.print(string(r))
 		m.pc += inst.len
 
@@ -625,4 +698,27 @@ func (m *Machine) step() {
 	default:
 		panic(fmt.Sprintf("\n💥 Unimplemented instruction: %02x", inst.code))
 	}
+}
+
+// lookupWordInDict searches the dictionary for a word and returns its address
+// Returns a dictEntry with address 0 if the word is not found
+// If multiple words match, returns the longest matching word
+// See: https://zspec.jaredreisinger.com/13-dictionary
+func (m *Machine) lookupWordInDict(word string) dictEntry {
+	longestMatch := dictEntry{word: word, address: 0}
+	longestMatchLen := 0
+
+	// Search through all dictionary entries
+	for _, entry := range m.dict {
+		// Check if the dictionary word matches the start of the input word
+		if strings.HasPrefix(word, entry.word) {
+			// Keep track of the longest match
+			if len(entry.word) > longestMatchLen {
+				longestMatch = entry
+				longestMatchLen = len(entry.word)
+			}
+		}
+	}
+
+	return longestMatch
 }

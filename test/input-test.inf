@@ -13,22 +13,22 @@ Array parse_array -> 42;
       read text_array parse_array;
       print "^You entered: ";
       for (x=0:x<text_array->0:x++) {
-           c = text_array->(2+x);
+           c = text_array->(1+x);
            print (char) c; 
       }
 
       print "^Parsed into ", parse_array->1, " words:^";
 
       for (w=1:w<=parse_array->1:w++) {
-          print "!!!!!!!!! Word ", w, ": ";
+          print "Word ", w, ": ";
           length = parse_array->(4*w);
           position = parse_array->(4*w + 1);
           dict = parse_array-->(w*2-1);
           for (x=0:x<length:x++)
               print (char) text_array->(position+x);
           print " (length ", length, ")";
-          if (dict) print "!!!!! equals '", (address) dict, "'^";
-          else print "!!!!!!!!!! is not in the dictionary^";
+          if (dict) print " equals '", (address) dict, "'^";
+          else print " is not in the dictionary^";
       }
   }
 ];

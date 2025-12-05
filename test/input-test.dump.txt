@@ -1,10 +1,10 @@
 
 ***** ANALYZING *****
 
-Filename:                                  ./test/scratch.z3
+Filename:                                  ./test/input-test.z3
 Compiled With:                             Inform 6.41
 Z-machine version:                         3
-Calculated checksum:                       0xD222, checksum ok
+Calculated checksum:                       0xBA63, checksum ok
 Object count:                              4
 Unique verbs count:                        0
 Grammar table version:                     No syntax/grammar identified
@@ -14,8 +14,7 @@ Scanning for routines from:                0x00526
 Found first routine at address:            0x00526
 Lowest routine address (immediate call) :  0x0052E
 Highest routine address (immediate call):  0x0052E
-Lowest string address (immediate address): 0x0065C
-Strings start at address:                  0x0065C
+Strings start at address:                  0x00658
 Highest used global in z-code:             240
 Number of used globals in z-code:          2
 Number of unique properties:               0
@@ -39,9 +38,9 @@ Number of unique properties:               0
    004FB-00524 Vocabulary/Dictionary, 42 bytes.
    00525-00525 Padding, 1 byte.
 
-00526-006CF HIGH MEMORY
-   00526-0065B Z-code, 310 bytes.
-   0065C-006CF Static strings, 116 bytes.
+00526-006AB HIGH MEMORY
+   00526-00657 Z-code, 306 bytes.
+   00658-006AB Static strings, 84 bytes.
 
 
 ***** HEADER (00000-0003F, 64 bytes) *****
@@ -58,8 +57,8 @@ Number of unique properties:               0
 00010 00 00                   FLAGS   Flags 2:                   0x0000
 00012 32 35 31 32 30 35       SERIAL  Serial number:             251205
 00018 00 42                   FWORDS  Abbreviations table:       0x0042
-0001A 03 68                   PLENTH  Length of file:            0x06D0
-0001C D2 22                   PCHKSM  Checksum of file:          0xD222
+0001A 03 56                   PLENTH  Length of file:            0x06AC
+0001C BA 63                   PCHKSM  Checksum of file:          0xBA63
 0001E 00                      INTWRD  Interpreter number:        0
 0001F 00                              Interpreter version:       0
 00020 00                      SCRWRD  Screen height (lines):     0
@@ -378,7 +377,7 @@ Object: 4
 ***** UNIDENTIFIED DATA (001A8-002AF, 264 bytes) *****
 
 001A0                         00 00 00 00 00 00 22 00          ......".
-001B0 04 00 00 01 00 02 00 03 00 04 00 00 00 48 03 47  .............H.G
+001B0 04 00 00 01 00 02 00 03 00 04 00 00 00 48 03 35  .............H.5
 001C0 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
 001D0 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
 001E0 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
@@ -386,14 +385,14 @@ Object: 4
 00200 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
 00210 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
 00220 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
-00230 00 00 00 00 00 00 00 00 00 00 00 00 03 49 03 4B  .............I.K
-00240 03 4E 03 51 03 54 03 56 03 58 03 5A 03 3E 03 3E  .N.Q.T.V.X.Z.>.>
-00250 03 3E 03 3E 03 3E 03 3E 03 3E 03 3E 03 3E 03 3E  .>.>.>.>.>.>.>.>
-00260 03 3E 03 3E 03 3E 03 3E 03 3E 03 3E 03 3E 03 3E  .>.>.>.>.>.>.>.>
-00270 03 3E 03 3E 03 3E 03 3E 03 3E 03 3E 03 3E 03 3E  .>.>.>.>.>.>.>.>
-00280 03 3E 03 3E 03 3E 03 3E 03 3E 03 3E 03 3E 03 3E  .>.>.>.>.>.>.>.>
-00290 03 3E 03 3E 03 3E 03 3E 03 3E 03 3E 03 3E 03 3E  .>.>.>.>.>.>.>.>
-002A0 03 3E 03 3E 03 3E 03 3E 03 3E 03 3E 03 60 03 64  .>.>.>.>.>.>.`.d
+00230 00 00 00 00 00 00 00 00 00 00 00 00 03 37 03 39  .............7.9
+00240 03 3C 03 3F 03 42 03 44 03 46 03 48 00 00 00 00  .<.?.B.D.F.H....
+00250 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
+00260 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
+00270 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
+00280 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
+00290 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
+002A0 00 00 00 00 00 00 00 00 00 00 00 00 03 4E 03 52  .............N.R
 
 
 ***** GLOBAL VARIABLES TABLE (002B0-0048F, 480 bytes) *****
@@ -680,7 +679,7 @@ opcodes loadw/GET, loadb/GETB, storew/PUT, storeb/PUTB and globals):
 00520                00                                                    .
 
 
-***** Z-CODE (00526-0065B, 310 bytes) *****
+***** Z-CODE (00526-00657, 306 bytes) *****
 
 Main routine: 0x00526
 00526 00                       No locals
@@ -711,7 +710,7 @@ Routine: 0x0052E               Called from routine(s) at 0x00526
 0057E 0D 02 00                 STORE L01 0x00
 00581 D0 1F 04 90 00 00        LOADB 0x0490 0x00 -> -(SP)
 00587 62 02 00 54              JL L01 (SP)+ [FALSE] 0x059D
-0058B 34 02 02 00              ADD 0x02 L01 -> -(SP)
+0058B 34 01 02 00              ADD 0x01 L01 -> -(SP)
 0058F D0 2F 04 90 00 06        LOADB 0x0490 (SP)+ -> L5
 00595 E5 BF 06                 PRINT_CHAR L05
 00598 95 02                    INC L01
@@ -724,62 +723,61 @@ Routine: 0x0052E               Called from routine(s) at 0x00526
       A5                       PRINT " words:^"
 005BA 0D 01 01                 STORE L00 0x01
 005BD D0 1F 04 CF 01 00        LOADB 0x04CF 0x01 -> -(SP)
-005C3 63 01 00 80 8D           JG L00 (SP)+ [TRUE] 0x0653
-005C8 B2 16 85 50 B4 16 85 50 
-      B4 16 85 50 B4 00 9C 52 
-      E9 80 A5                 PRINT "!!!!!!!!! Word "
-005DB E6 BF 01                 PRINT_NUM L00
-005DE B2 97 A0                 PRINT ": "
-005E1 36 04 01 00              MUL 0x04 L00 -> -(SP)
-005E5 D0 2F 04 CF 00 03        LOADB 0x04CF (SP)+ -> L2
-005EB 36 04 01 00              MUL 0x04 L00 -> -(SP)
-005EF 54 00 01 00              ADD (SP)+ 0x01 -> -(SP)
-005F3 D0 2F 04 CF 00 04        LOADB 0x04CF (SP)+ -> L3
-005F9 56 01 02 00              MUL L00 0x02 -> -(SP)
-005FD 55 00 01 00              SUB (SP)+ 0x01 -> -(SP)
-00601 CF 2F 04 CF 00 05        LOADW 0x04CF (SP)+ -> L4
-00607 0D 02 00                 STORE L01 0x00
-0060A 62 02 03 54              JL L01 L02 [FALSE] 0x0620
-0060E 74 04 02 00              ADD L03 L01 -> -(SP)
-00612 D0 2F 04 90 00 00        LOADB 0x0490 (SP)+ -> -(SP)
-00618 E5 BF 00                 PRINT_CHAR (SP)+
-0061B 95 02                    INC L01
-0061D 8C FF EC                 JUMP 0x060A
-00620 B2 00 BE 45 53 33 2D 80 
+005C3 63 01 00 80 89           JG L00 (SP)+ [TRUE] 0x064F
+005C8 B2 13 94 DD 20           PRINT "Word "
+005CD E6 BF 01                 PRINT_NUM L00
+005D0 B2 97 A0                 PRINT ": "
+005D3 36 04 01 00              MUL 0x04 L00 -> -(SP)
+005D7 D0 2F 04 CF 00 03        LOADB 0x04CF (SP)+ -> L2
+005DD 36 04 01 00              MUL 0x04 L00 -> -(SP)
+005E1 54 00 01 00              ADD (SP)+ 0x01 -> -(SP)
+005E5 D0 2F 04 CF 00 04        LOADB 0x04CF (SP)+ -> L3
+005EB 56 01 02 00              MUL L00 0x02 -> -(SP)
+005EF 55 00 01 00              SUB (SP)+ 0x01 -> -(SP)
+005F3 CF 2F 04 CF 00 05        LOADW 0x04CF (SP)+ -> L4
+005F9 0D 02 00                 STORE L01 0x00
+005FC 62 02 03 54              JL L01 L02 [FALSE] 0x0612
+00600 74 04 02 00              ADD L03 L01 -> -(SP)
+00604 D0 2F 04 90 00 00        LOADB 0x0490 (SP)+ -> -(SP)
+0060A E5 BF 00                 PRINT_CHAR (SP)+
+0060D 95 02                    INC L01
+0060F 8C FF EC                 JUMP 0x05FC
+00612 B2 00 BE 45 53 33 2D 80 
       A5                       PRINT " (length "
-00629 E6 BF 03                 PRINT_NUM L02
-0062C B2 97 E5                 PRINT ")"
-0062F A0 05 DB                 JZ L04 [TRUE] 0x064B
-00632 B2 16 85 50 B4 16 85 50 
-      0A 5B 46 47 00 97 05     PRINT "!!!!! equals '"
-00641 A7 05                    PRINT_ADDR L04
-00643 B2 17 05 9C A5           PRINT "'^"
-00648 8C 00 05                 JUMP 0x064E
-0064B 8D 03 2E                 PRINT_PADDR S0001 "!!!!!!!!!! is not in the dictionary^"
-0064E 95 01                    INC L00
-00650 8C FF 6C                 JUMP 0x05BD
-00653 8C FF 00                 JUMP 0x0554
+0061B E6 BF 03                 PRINT_NUM L02
+0061E B2 97 E5                 PRINT ")"
+00621 A0 05 D5                 JZ L04 [TRUE] 0x0637
+00624 B2 01 56 68 D1 60 05 E0 
+      A5                       PRINT " equals '"
+0062D A7 05                    PRINT_ADDR L04
+0062F B2 17 05 9C A5           PRINT "'^"
+00634 8C 00 15                 JUMP 0x064A
+00637 B2 01 D8 02 74 64 0E 4C 
+      19 35 40 25 C8 65 D4 4C 
+      D7 F8 A7                 PRINT " is not in the dictionary^"
+0064A 95 01                    INC L00
+0064C 8C FF 70                 JUMP 0x05BD
+0064F 8C FF 04                 JUMP 0x0554
 
-Routine: 0x00656
-00656 02                       2 locals
-00657 00 00 00 00              L00=0x0000 L01=0x0000 
+Routine: 0x00652
+00652 02                       2 locals
+00653 00 00 00 00              L00=0x0000 L01=0x0000 
 
-0065B B1                       RFALSE
+00657 B1                       RFALSE
 
 
-***** STATIC STRINGS (0065C-006CF, 116 bytes) *****
+***** STATIC STRINGS (00658-006AB, 84 bytes) *****
 
-0065C S0001 "!!!!!!!!!! is not in the dictionary^"
-0067C S0002 "<unknown attribute>"
-0068E S0003 "name"
-00692 S0004 "create"
-00696 S0005 "recreate"
-0069C S0006 "destroy"
-006A2 S0007 "remaining"
-006A8 S0008 "copy"
-006AC S0009 "call"
-006B0 S0010 "print"
-006B4 S0011 "print_to_array"
-006C0 S0012 "text_array"
-006C8 S0013 "parse_array"
+00658 S0001 "<unknown attribute>"
+0066A S0002 "name"
+0066E S0003 "create"
+00672 S0004 "recreate"
+00678 S0005 "destroy"
+0067E S0006 "remaining"
+00684 S0007 "copy"
+00688 S0008 "call"
+0068C S0009 "print"
+00690 S0010 "print_to_array"
+0069C S0011 "text_array"
+006A4 S0012 "parse_array"
 

@@ -43,18 +43,6 @@ func (m *Machine) decodeInst() instruction {
 		len:  1, // start with 1 for the opcode byte
 	}
 
-	// Debug ops if they are being traced
-	for _, op := range m.TracedOps {
-		if m.mem[m.pc] == op {
-			m.debugLevel = DEBUG_TRACE
-		}
-	}
-
-	// Breakpoint check
-	if m.Breakpoint != 0 && m.pc == m.Breakpoint {
-		m.debugLevel = DEBUG_TRACE
-	}
-
 	if inst.code == 0 {
 		return inst
 	}
