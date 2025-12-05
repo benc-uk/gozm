@@ -328,19 +328,16 @@ func (m *Machine) lookupWordInDict(word string) dictEntry {
 	for _, entry := range m.dict {
 		entryWord := strings.ToLower(entry.word)
 
-		// Check if the dictionary entry matches the start of the word
-		// but ensure we're matching complete words, not substrings
+		// Dictionary entries are truncated (e.g., "leafle" for "leaflet" in v3)
+		// Check if the input word starts with the dictionary entry
 		if strings.HasPrefix(word, entryWord) {
-			// Check that it's a complete word match (either exact or followed by separator/space)
-			if len(word) == len(entryWord) ||
-				(len(word) > len(entryWord) && m.isSeparator(string(word[len(entryWord)]))) {
-				// Keep the longest match
-				if len(entryWord) > len(longestMatch.word) {
-					longestMatch = entry
-				}
+			// Keep the longest match
+			if len(entryWord) > len(longestMatch.word) {
+				longestMatch = entry
 			}
 		}
 	}
+
 	return longestMatch
 }
 

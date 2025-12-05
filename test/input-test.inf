@@ -15,6 +15,7 @@ Array parse_array -> 42;
       print "^You entered: ";
       for (x=0:x<text_array->0:x++) {
            c = text_array->(1+x);
+           if (c == 0) break;
            print (char) c; 
       }
 

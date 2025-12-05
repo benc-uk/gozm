@@ -123,13 +123,13 @@ func fetchOperand(m *Machine, operandType byte, loc uint16) (uint16, uint16) {
 	case OPTYPE_OMITTED: // omitted, should not happen here
 		return 0, 0
 	default:
-		panic(fmt.Sprintf("Invalid operand type: %02x", operandType))
+		panic(fmt.Sprintf("Invalid operand type: %02X", operandType))
 	}
 }
 
 // String representation of the instruction
 func (inst *instruction) String() string {
-	return fmt.Sprintf("%s (code=%02x, operands=%v, len=%d)", opcodeNames[inst.code], inst.code, inst.operands, inst.len)
+	return fmt.Sprintf("%s (code=%02X, operands=%04X, len=%d)", opcodeNames[inst.code], inst.code, inst.operands, inst.len)
 }
 
 // Map opcodes to names
