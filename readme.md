@@ -23,7 +23,7 @@ GOZM is a Z-Machine interpreter written in Go with a focus on version 3 story fi
 - `internal/decode/` – helpers for unpacking V3 headers, operands, and text (abbreviations, ZSCII tables).
 - `impl/terminal/` – CLI runner that wires stdin/stdout to the interpreter and exposes debug flags.
 - `impl/web/` – experimental WASM entry point for a browser UI (under active development).
-- `docs/spec/` & `docs/guide/` – annotated spec excerpts and a tutorial series documenting implementation details.
+- [`docs/spec/`](docs/spec/README.md) & [`docs/guide/`](docs/guide/part-01.md) – annotated spec excerpts and a tutorial series documenting implementation details.
 
 ## Getting Started
 
