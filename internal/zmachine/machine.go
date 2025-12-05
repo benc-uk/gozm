@@ -11,6 +11,7 @@ package zmachine
 import (
 	"fmt"
 	"math/rand/v2"
+	"strings"
 
 	"github.com/benc-uk/gozm/internal/decode"
 )
@@ -321,4 +322,27 @@ func (m *Machine) readString() string {
 		panic("NOT_IMPLEMENTED: input stream from file")
 	}
 	return ""
+}
+
+// lookupWordInDict searches the dictionary for a word and returns its address
+// Returns a dictEntry with address 0 if the word is not found
+// If multiple words match, returns the longest matching word
+// See: https://zspec.jaredreisinger.com/13-dictionary
+func (m *Machine) lookupWordInDict(word string) dictEntry {
+	longestMatch := dictEntry{word: word, address: 0}
+	longestMatchLen := 0
+
+	// Search through all dictionary entries
+	for _, entry := range m.dict {
+		// Check if the dictionary word matches the start of the input word
+		if strings.HasPrefix(word, entry.word) {
+			// Keep track of the longest match
+			if len(entry.word) > longestMatchLen {
+				longestMatch = entry
+				longestMatchLen = len(entry.word)
+			}
+		}
+	}
+
+	return longestMatch
 }
