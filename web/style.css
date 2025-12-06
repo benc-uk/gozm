@@ -33,42 +33,44 @@ nav {
 pre {
   font-family: "Ubuntu Mono", "Courier New", Courier, monospace;
   display: inline-block;
-  width: 90%;
+  width: 80%;
   height: 100%;
   overflow-y: hidden;
   background-color: #1b1d1c;
   color: #49db75;
-  padding: 1rem;
-  margin: 0.2rem 3rem;
+  padding: 0.3rem;
+  margin: 0.2rem auto;
   font-size: 1.4rem;
   white-space: pre-wrap;
   user-select: text;
   flex-grow: 1;
   cursor: text;
   border: inset 6px #646464;
+  box-sizing: border-box;
 }
 
 input[type="text"] {
   font-family: "Ubuntu Mono", "Courier New", Courier, monospace;
-  width: 91%;
-  padding: 0.2rem;
-  margin: 0.2rem 3rem;
-  font-size: 1.8rem;
+  width: 80%;
+  padding: 0.2 rem;
+  margin: 0.2rem auto;
+  font-size: 1.6rem;
   background: #000000;
   color: #49db75;
   outline: none;
   border: inset 6px #646464;
+  box-sizing: border-box;
 }
 
 @media (max-width: 768px) {
   pre {
     margin: 0rem;
-    width: 100%;
+    width: 99%;
     overflow-y: hidden;
   }
 
   input[type="text"] {
     margin: 0rem;
-    width: 100%;
+    width: 99%;
   }
 }
