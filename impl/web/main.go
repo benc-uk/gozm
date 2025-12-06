@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"syscall/js"
 
 	"github.com/benc-uk/gozm/internal/zmachine"
 )
@@ -29,6 +30,13 @@ func main() {
 		return
 	}
 
-	m := zmachine.NewMachine(data, 0, NewWebExternal())
+	ext := NewWebExternal()
+	m := zmachine.NewMachine(data, 0, ext)
+
+	// Set up inputSend BEFORE running the machine
+	js.Global().Set("inputSend", js.FuncOf(ext.ReceiveInput))
+
 	m.Run()
+
+	select {} // keep running
 }

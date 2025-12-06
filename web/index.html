@@ -13,27 +13,43 @@
 
     <script src="wasm_exec.js"></script>
     <script>
-      const outArea = document.querySelector("pre");
+      let outArea;
 
       function textOut(text) {
-        const pre = document.querySelector("pre");
-        pre.textContent += text;
-        pre.scrollTop = pre.scrollHeight;
+        outArea.textContent += text;
+        requestAnimationFrame(() => {
+          outArea.scrollTop = outArea.scrollHeight;
+        });
+      }
+
+      function requestInput() {
+        const inputBox = document.querySelector("input");
+        inputBox.style.display = "block";
+        inputBox.focus();
+
+        inputBox.onkeydown = function (e) {
+          if (e.key === "Enter") {
+            const value = inputBox.value + "\n";
+            inputBox.value = "";
+            inputBox.style.display = "none";
+            inputSend(value);
+          }
+        };
       }
 
       const go = new Go();
-
-      // go.argv = ["roms/" + msg.data.programName, debugLevel, msg.data.speed, pixelSize, msg.data.fgColour, msg.data.bgColour, palletteName];
-
       WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject).then((result) => {
         go.run(result.instance);
+        outArea = document.querySelector("pre");
       });
     </script>
   </head>
 
   <body>
     <nav>File &nbsp; Edit &nbsp; View &nbsp; About</nav>
-    <pre></pre>
-    <input type="text" />
+    <div class="column">
+      <pre></pre>
+      <input type="text" />
+    </div>
   </body>
 </html>
