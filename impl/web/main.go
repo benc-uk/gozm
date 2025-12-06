@@ -7,16 +7,18 @@ import (
 	"io"
 	"net/http"
 	"syscall/js"
+	"time"
 
 	"github.com/benc-uk/gozm/internal/zmachine"
 )
 
 func main() {
-	// fmt.Println(os.Args)
-	// // Load the z3 file using HTTP GET request URL in first argument.
-	// url := os.Args[0]
-	// fmt.Println("Loading story file from:", url)
-	url := "moonglow.z3"
+	ext := NewWebExternal()
+
+	url := "minizork.z3"
+	ext.TextOut("Loading: " + url + "\n")
+	js.Global().Set("inputSend", js.FuncOf(ext.ReceiveInput))
+
 	resp, err := http.Get(url)
 	if err != nil {
 		fmt.Printf("Error loading story file: %v\n", err)
@@ -30,13 +32,18 @@ func main() {
 		return
 	}
 
-	ext := NewWebExternal()
+	// Sleep based on file size to allow loading message to be visible
+	sleepDuration := time.Duration(len(data)/10) * time.Millisecond
+	if sleepDuration < 2000*time.Millisecond {
+		sleepDuration = 2000 * time.Millisecond
+	}
+	time.Sleep(sleepDuration)
+
+	js.Global().Call("clearScreen")
+
 	m := zmachine.NewMachine(data, 0, ext)
-
-	// Set up inputSend BEFORE running the machine
-	js.Global().Set("inputSend", js.FuncOf(ext.ReceiveInput))
-
 	m.Run()
 
-	select {} // keep running
+	// Prevent main from exiting
+	select {}
 }

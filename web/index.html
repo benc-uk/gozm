@@ -37,10 +37,14 @@
         };
       }
 
+      function clearScreen() {
+        outArea.textContent = "";
+      }
+
       const go = new Go();
       WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject).then((result) => {
-        go.run(result.instance);
         outArea = document.querySelector("pre");
+        go.run(result.instance);
       });
     </script>
   </head>
@@ -48,7 +52,15 @@
   <body>
     <nav>File &nbsp; Edit &nbsp; View &nbsp; About</nav>
     <div class="column">
-      <pre></pre>
+      <pre>
+Power on sequence...
+System booting...
+64K dynamic memory available.
+I/O buffers flushed.
+
+Loading: GOZM v0.1.0 WASM subsystem...
+</pre
+      >
       <input type="text" />
     </div>
   </body>
