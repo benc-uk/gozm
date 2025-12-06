@@ -3,15 +3,13 @@ linters:
   enable:
     - bodyclose
     - gosec
-    - misspell
+    # - misspell
     - nilerr
     - nilnil
     - revive
     - staticcheck
-    - wsl_v5
+    #- wsl_v5
   settings:
-    misspell:
-      locale: UK
     revive:
       confidence: 0.5
       severity: error
@@ -39,6 +37,10 @@ linters:
         text: G402
       - path: (.+)\.go$
         text: ST1019
+      - path: (.+)\.go$
+        text: QF1003
+      - path: (.+)\.go$
+        text: var-naming
     paths:
       - third_party$
       - builtin$

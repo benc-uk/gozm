@@ -34,6 +34,11 @@ func GetWord(b []byte, offset uint16) uint16 {
 	return uint16(b[offset])<<8 | uint16(b[offset+1])
 }
 
+// GetWord reads a 2-byte big-endian integer from the given byte slice at the specified offset.
+func GetWord32(b []byte, offset uint32) uint16 {
+	return uint16(b[offset])<<8 | uint16(b[offset+1])
+}
+
 func GetWordSigned(b []byte, offset uint16) int16 {
 	return int16(b[offset])<<8 | int16(b[offset+1])
 }
@@ -44,8 +49,9 @@ func SetWord(b []byte, offset uint16, value uint16) {
 	b[offset+1] = byte(value & 0xFF)
 }
 
-func PackedAddress(addr uint16) uint16 {
-	return uint16(addr) * 2
+// Packed address in v3 is multiplied by 2 https://zspec.jaredreisinger.com/01-memory-map#1_2_3
+func PackedAddress(addr uint16) uint32 {
+	return uint32(addr) * 2
 }
 
 // String decodes a Z-machine encoded string from the given slice of 16-bit words

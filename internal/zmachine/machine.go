@@ -1,7 +1,6 @@
 // =======================================================================
 // Package: zmachine - Core Z-machine interpreter
 // zmachine.go - Main code, structs and core execution loop
-// Note: This file probably needs to be split up more later!
 //
 // Copyright (c) 2025 Ben Coleman. Licensed under the MIT License
 // =======================================================================
@@ -55,6 +54,7 @@ type Machine struct {
 	abbrvAddr   uint16 // Header: abbreviation table address
 	fileLen     uint16 // Header: file length in words
 	checksum    uint16 // Header: checksum
+	flagStatus  bool   // Header: Is the status line shown?
 }
 
 type dictEntry struct {
@@ -86,13 +86,16 @@ func NewMachine(data []byte, debugLevel int, ext External) *Machine {
 		checksum:    decode.GetWord(data, 0x1C),
 	}
 
+	// Decode flag byte at 0x01, and status line flag is bit 4
+	m.flagStatus = (data[0x01] & 0x10) != 0
+
 	// Initialize abbreviations from the abbreviation table
 	m.abbr = make([]string, 96)
 	for i := uint16(0); i < 96; i++ {
 		// Abbreviation table contains word addresses, need to multiply by 2
 		// See: https://zspec.jaredreisinger.com/01-memory-map#1_2_2
 		abbrStringAddr := decode.GetWord(m.mem, m.abbrvAddr+i*2) * 2
-		s, _ := m.readStringLiteral(abbrStringAddr)
+		s, _ := m.readStringLiteral(uint32(abbrStringAddr))
 		m.abbr[i] = s
 	}
 
@@ -113,7 +116,7 @@ func NewMachine(data []byte, debugLevel int, ext External) *Machine {
 	m.dictStartAddr = m.dictAddr + 2 + uint16(numSepBytes) + 2
 	for i := uint16(0); i < numEntries; i++ {
 		entryAddr := m.dictStartAddr + uint16(i)*uint16(entryLen)
-		s, _ := m.readStringLiteral(entryAddr)
+		s, _ := m.readStringLiteral(uint32(entryAddr))
 		m.dict[i] = dictEntry{
 			word:    s,
 			address: entryAddr,
@@ -121,11 +124,10 @@ func NewMachine(data []byte, debugLevel int, ext External) *Machine {
 	}
 
 	m.debug("Z-machine initialized...\nVersion: %d, Size: %d\n", data[0x00], len(data))
-	m.debug(" - High Memory Address: %04x\n", m.highAddr)
-	m.debug(" - Initial PC: %04x\n", m.initialPC)
-	m.debug(" - Globals Address: %04x\n", m.globalsAddr)
 	m.debug(" - Checksum: %04X, valid:%t\n", m.checksum, m.validateChecksum())
+	m.debug(" - Objects/rooms: %d\n", len(m.objects))
 	m.debug(" - Dictionary: %d entries, %d separators\n", numEntries, numSepBytes)
+	m.debug(" - Abbreviations loaded: %d\n", len(m.abbr))
 
 	// Initialize the stack with the main__ call frame
 	m.addCallFrame(0)
@@ -225,10 +227,11 @@ func (m *Machine) addToVar(loc uint16, val int16) int16 {
 
 // Read a Z-machine string literal: 2byte pairs from the current PC
 // Returns the decoded string and number of words read
-func (m *Machine) readStringLiteral(addr uint16) (string, int) {
+// Note: This takes a uint32 address to allow for strings in high memory
+func (m *Machine) readStringLiteral(addr uint32) (string, int) {
 	words := []uint16{}
-	for i := uint16(0); int(i) < len(m.mem); i += 2 {
-		word := decode.GetWord(m.mem, addr+i)
+	for i := uint32(0); int(i) < len(m.mem); i += 2 {
+		word := decode.GetWord32(m.mem, addr+i)
 		words = append(words, word)
 
 		// If the high bit is set, this is the end of the string
@@ -240,6 +243,8 @@ func (m *Machine) readStringLiteral(addr uint16) (string, int) {
 	return decode.String(words, m.abbr), len(words)
 }
 
+// This is a complex helper used by all branch instructions
+// See: https://zspec.jaredreisinger.com/04-instructions#4_7
 func (m *Machine) branchHandler(instLen uint16, condition bool) {
 	branchInfo := m.mem[m.pc+instLen]
 	// Decode branch info
@@ -341,11 +346,19 @@ func (m *Machine) lookupWordInDict(word string) dictEntry {
 	return longestMatch
 }
 
-func (m *Machine) isSeparator(ch string) bool {
-	for _, sep := range m.dictSep {
-		if ch == sep {
-			return true
-		}
+// And unfinished show status line function
+// Almost no Z-machine games use this, so I'm leaving it unfinished
+func (m *Machine) showStatus() {
+	if !m.flagStatus {
+		return
 	}
-	return false
+	m.print("\033[2J") // Clear screen
+
+	score := m.getVar(17)  // global variable 17 is score
+	turns := m.getVar(18)  // global variable 16 is turns
+	objNum := m.getVar(16) // global variable 1 is the current object
+
+	obj := m.getObject(byte(objNum))
+	m.print(fmt.Sprintf("\n\033[32m\033[7m %s                             score:%d turns:%d \033[27m\033[0m\n", obj.description, score, turns))
+
 }

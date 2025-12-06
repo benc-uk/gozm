@@ -1,10 +1,11 @@
-# GOZM – Go Z-Machine Runtime
+# GOZM – Go Z-Machine Runtime & Engine
 
-GOZM is a Z-Machine interpreter written in Go with a focus on version 3 story files. It now executes real games end-to-end (tested with the bundled Infocom classics and custom Inform 6 stories) while keeping the codebase approachable for anyone curious about the architecture of the original Infocom virtual machine.
+GOZM is a Z-Machine interpreter & engine written in Go with a focus on version 3 story files. It executes real games end-to-end (tested with the bundled Infocom classics and custom Inform 6 stories)
+while keeping the codebase approachable for anyone curious about the architecture of the original Infocom virtual machine.
 
 ## Current Status
 
-- Runs Z3 story files via a terminal frontend (`impl/terminal`) with blocking input, status line updates, and buffered output.
+- Runs Z3 story files via a terminal frontend (`impl/terminal`) with blocking input, text output, and core engine loop.
 - Opcode coverage includes branching, routine calls, stack and object tree handling, text decoding, abbreviations, and dictionary lookup logic as required by V3.
 - Command-line debug levels (`-debug 0|1|2`) expose instruction tracing and state dumps to aid reverse engineering and spec validation.
 - Comprehensive guide material documents the journey from bytecode loading to full execution.

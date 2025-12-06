@@ -5,7 +5,7 @@
 // Copyright (c) 2025 Ben Coleman. Licensed under the MIT License
 // =======================================================================
 
-package zmachine // step executes a single instruction at the current program counter
+package zmachine
 
 import (
 	"fmt"
@@ -20,7 +20,7 @@ func (m *Machine) step() {
 	m.debugLevel = DEBUG_NONE
 	inst := m.decodeInst()
 
-	// trap panic in case of errors
+	// Trap panic in case of errors and provide debugging info
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Printf("💥 Runtime error at %04X: %s\n", m.pc, inst.String())
@@ -31,13 +31,13 @@ func (m *Machine) step() {
 				frame := m.callStack[i]
 				fmt.Printf(" - Frame %d: return to %04X\n", i, frame.returnAddr)
 			}
-			panic(r)
+			panic(r) // Re-panic to get full stack trace
 		}
 	}()
 
 	m.debug("\n%04X: %s\n", m.pc, inst.String())
 
-	// Decode and execute instructions!
+	// HUGE switch to decode and execute instructions!
 	switch inst.code {
 	// ===================== 0OP INSTRUCTIONS =====================
 	// NOP
@@ -54,19 +54,18 @@ func (m *Machine) step() {
 
 	// PRINT (literal string)
 	case 0xB2:
-		str, wordCount := m.readStringLiteral(m.pc + 1)
+		str, wordCount := m.readStringLiteral(uint32(m.pc + 1))
 		m.print(str)
 		m.pc += uint16(wordCount*2) + 1 // Advance PC past the string
 
 	// PRINT_RET (literal string)
 	case 0xB3:
-		str, _ := m.readStringLiteral(m.pc + 1)
+		str, _ := m.readStringLiteral(uint32(m.pc + 1))
 		m.print(str + "\n")
 		m.returnFromCall(1)
 
 	// NOP (Never used!)
 	case 0xB4:
-		m.debug("++ NOP (B4)\n")
 		m.pc += inst.len
 
 	// SAVE
@@ -96,10 +95,7 @@ func (m *Machine) step() {
 
 	// SHOW_STATUS
 	case 0xBC:
-		score := m.getVar(17) // global variable 17 is score
-		turns := m.getVar(16) // global variable 16 is turns
-		// TODO: Placeholder for scoreboard/status line handling, use ansi code to invert colors
-		m.print(fmt.Sprintf("\n\033[32m\033[7m Unknown location                  score:%d turns:%d \033[27m\033[0m\n", score, turns))
+		m.showStatus()
 		m.pc += inst.len
 
 	// VERIFY
@@ -180,7 +176,7 @@ func (m *Machine) step() {
 	case 0x87, 0x97, 0xA7:
 		addr := inst.operands[0]
 		m.trace(" - print_addr from %04x\n", addr)
-		str, _ := m.readStringLiteral(addr)
+		str, _ := m.readStringLiteral(uint32(addr))
 		m.print(str)
 		m.pc += inst.len
 
@@ -220,12 +216,11 @@ func (m *Machine) step() {
 		opVal := inst.operands[0]
 		var actualVal uint16
 		if opVal == 0 {
-			// Stack variable
+			// Stack variable, LOAD should not push or pop, just peek
 			actualVal = m.getCallFrame().Peek()
 		} else {
 			actualVal = m.getVar(opVal)
 		}
-
 		varLoc := m.mem[m.pc+inst.len] // destination in next byte
 		m.storeVar(uint16(varLoc), actualVal)
 		m.pc += inst.len + 1 // +1 for dest byte
@@ -294,7 +289,6 @@ func (m *Machine) step() {
 	case 0x08, 0x28, 0x48, 0x68, 0xC8:
 		v1 := inst.operands[0]
 		v2 := inst.operands[1]
-
 		dest := m.mem[m.pc+inst.len] // destination in next byte
 		m.debug(" - or dest var:%d\n", dest)
 		m.storeVar(uint16(dest), v1|v2)
@@ -336,7 +330,6 @@ func (m *Machine) step() {
 	case 0x0D, 0x2D, 0x4D, 0x6D, 0xCD:
 		v := inst.operands[0]
 		s := inst.operands[1]
-
 		m.setVarInPlace(v, s)
 		m.pc += inst.len
 
@@ -408,7 +401,6 @@ func (m *Machine) step() {
 		s := inst.operands[1]
 		dest := m.mem[m.pc+inst.len] // destination in next byte
 		m.debug(" - add dest var:%d\n", dest)
-
 		m.storeVar(uint16(dest), v+s)
 		m.pc += inst.len + 1 // +1 for dest byte
 
@@ -418,7 +410,6 @@ func (m *Machine) step() {
 		s := inst.operands[1]
 		dest := m.mem[m.pc+inst.len] // destination in next byte
 		m.debug(" - sub dest var:%d\n", dest)
-
 		m.storeVar(uint16(dest), v-s)
 		m.pc += inst.len + 1 // +1 for dest byte
 
@@ -428,7 +419,6 @@ func (m *Machine) step() {
 		s := inst.operands[1]
 		dest := m.mem[m.pc+inst.len] // destination in next byte
 		m.debug(" - mul dest var:%d\n", dest)
-
 		m.storeVar(uint16(dest), v*s)
 		m.pc += inst.len + 1 // +1 for dest byte
 
@@ -470,7 +460,6 @@ func (m *Machine) step() {
 		val := decode.GetWord(m.mem, wordAddr)
 		dest := m.mem[m.pc+inst.len] // destination in next byte
 		m.debug(" - loadw from %04x dest var:%d\n", wordAddr, dest)
-
 		m.storeVar(uint16(dest), val)
 		m.pc += inst.len + 1 // +1 for dest byte
 
@@ -482,7 +471,6 @@ func (m *Machine) step() {
 		val := m.mem[byteAddr]
 		dest := m.mem[m.pc+inst.len] // destination in next byte
 		m.debug(" - loadb from %04x dest var:%d\n", byteAddr, dest)
-
 		m.storeVar(uint16(dest), uint16(val))
 		m.pc += inst.len + 1 // +1 for dest byte
 
@@ -490,7 +478,9 @@ func (m *Machine) step() {
 
 	// CALL
 	case 0xE0:
-		routineAddr := decode.PackedAddress(inst.operands[0])
+		// NOTE: No way to support for CALLs beyond 0xffff
+		// Narrowing from uint32 to uint16 isn't safe but unavoidable
+		routineAddr := uint16(decode.PackedAddress(inst.operands[0]))
 
 		// When the address 0 is called as a routine, nothing happens and the return value is false
 		if routineAddr == 0 {
@@ -578,8 +568,9 @@ func (m *Machine) step() {
 		input := m.readString()
 		input = strings.ToLower(input)
 		input = strings.Trim(input, "\r\n")
+		m.showStatus()
 
-		// Copy input into memory, and null terminate, important!
+		// Copy input into memory at textAddr, and null terminate, important!
 		copy(m.mem[textAddr+1:textAddr+uint16(maxLen)], input)
 		m.mem[textAddr+1+uint16(len(input))] = 0
 
@@ -625,7 +616,6 @@ func (m *Machine) step() {
 		}
 
 		// Now we have tokens, look them up in the dictionary
-
 		dictHits := []dictEntry{}
 		for _, token := range tokens {
 			dictHits = append(dictHits, m.lookupWordInDict(token))
@@ -635,7 +625,7 @@ func (m *Machine) step() {
 		// Write token count to parse table, after max tokens byte
 		m.mem[parseAddr+1] = byte(len(dictHits))
 
-		// Write each dictionary entry to parse table, each is 4 bytes
+		// Write each dictionary entry to parse table in memory, each is 4 bytes
 		parseOffset := parseAddr + 2 // Skip max tokens & count bytes
 		for i, dictHit := range dictHits {
 			entryOffset := parseOffset + uint16(i*4)
