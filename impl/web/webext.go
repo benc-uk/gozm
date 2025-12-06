@@ -10,7 +10,8 @@ import (
 
 // Implements a simple web/wasm interface for Z-machine IO
 type WebExternal struct {
-	inputChan chan string
+	inputChan    chan string
+	inputWaiting bool
 }
 
 func NewWebExternal() *WebExternal {
@@ -21,29 +22,34 @@ func NewWebExternal() *WebExternal {
 	return ext
 }
 
-func (c *WebExternal) TextOut(text string) {
-	//fmt.Printf("|..%s..|", text)
-	if text == "\n>" {
-		return
-	}
-
+func (w *WebExternal) TextOut(text string) {
 	js.Global().Call("textOut", text)
 }
 
-func (c *WebExternal) ReadInput() string {
+func (w *WebExternal) ReadInput() string {
+	w.inputWaiting = true
 	js.Global().Call("requestInput")
 
 	// Wait for input to be sent via the inputChan
-	input := <-c.inputChan
+	input := <-w.inputChan
 	return input
 }
 
-func (c *WebExternal) ReceiveInput(this js.Value, args []js.Value) interface{} {
+func (w *WebExternal) ReceiveInput(this js.Value, args []js.Value) interface{} {
+	if !w.inputWaiting {
+		return nil
+	}
+
 	input := args[0].String()
-	c.inputChan <- input
+
+	// Echo input back to output
+	w.TextOut(input + "\n")
+
+	w.inputChan <- input
+	w.inputWaiting = false
 	return nil
 }
 
-func (c *WebExternal) SetOutputStream(streamNum byte, tableAddr uint16, m *zmachine.Machine) {
+func (w *WebExternal) SetOutputStream(streamNum byte, tableAddr uint16, m *zmachine.Machine) {
 
 }
