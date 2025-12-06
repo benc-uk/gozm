@@ -9,7 +9,7 @@ package zmachine
 
 // callFrame represents a single routine call in the Z-machine call stack
 type callFrame struct {
-	returnAddr uint16
+	returnAddr uint32
 	locals     []uint16
 	stack      []uint16
 }
@@ -59,7 +59,7 @@ func (m *Machine) getCallFrame() *callFrame {
 	}
 
 	cf := &m.callStack[len(m.callStack)-1]
-	m.trace("Get call frame, depth=%d retaddr=%04x %+v\n", len(m.callStack), cf.returnAddr, cf)
+	m.trace("Get call frame, depth=%d retaddr=%08x %+v\n", len(m.callStack), cf.returnAddr, cf)
 
 	return cf
 }
@@ -84,7 +84,7 @@ func (m *Machine) returnFromCall(val uint16) {
 
 	// The next byte after a CALL is the variable to store the result in
 	resultStoreLoc := m.mem[m.pc]
-	m.trace("Return: PC restored to %04X, store byte=%02X, will advance to %04X\n", frame.returnAddr, resultStoreLoc, frame.returnAddr+1)
+	m.trace("Return: PC restored to %08X, store byte=%02X, will advance to %08X\n", frame.returnAddr, resultStoreLoc, frame.returnAddr+1)
 
 	m.storeVar(uint16(resultStoreLoc), val)
 	m.pc += 1

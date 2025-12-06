@@ -23,26 +23,26 @@ func (m *Machine) step() {
 	// Trap panic in case of errors and provide debugging info
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Printf("💥 Runtime error at %04X: %s\n", m.pc, inst.String())
-			m.DumpMem(m.pc, 12)
+			fmt.Printf("💥 Runtime error at %08X: %s\n", m.pc, inst.String())
+			m.DumpMem(uint16(m.pc), 12)
 			// Print stack trace
 			fmt.Printf("Stack trace:\n")
 			for i := len(m.callStack) - 1; i >= 0; i-- {
 				frame := m.callStack[i]
-				fmt.Printf(" - Frame %d: return to %04X\n", i, frame.returnAddr)
+				fmt.Printf(" - Frame %d: return to %08X\n", i, frame.returnAddr)
 			}
 			panic(r) // Re-panic to get full stack trace
 		}
 	}()
 
-	m.debug("\n%04X: %s\n", m.pc, inst.String())
+	m.debug("\n%08X: %s\n", m.pc, inst.String())
 
 	// HUGE switch to decode and execute instructions!
 	switch inst.code {
 	// ===================== 0OP INSTRUCTIONS =====================
 	// NOP
 	case 0x00, 0x20, 0x40, 0x60, 0xC0:
-		m.pc += inst.len
+		m.pc += uint32(inst.len)
 
 	// RET_TRUE
 	case 0xB0:
@@ -54,19 +54,19 @@ func (m *Machine) step() {
 
 	// PRINT (literal string)
 	case 0xB2:
-		str, wordCount := m.readStringLiteral(uint32(m.pc + 1))
+		str, wordCount := m.readStringLiteral(m.pc + 1)
 		m.print(str)
-		m.pc += uint16(wordCount*2) + 1 // Advance PC past the string
+		m.pc += uint32(wordCount*2) + 1 // Advance PC past the string
 
 	// PRINT_RET (literal string)
 	case 0xB3:
-		str, _ := m.readStringLiteral(uint32(m.pc + 1))
+		str, _ := m.readStringLiteral(m.pc + 1)
 		m.print(str + "\n")
 		m.returnFromCall(1)
 
 	// NOP (Never used!)
 	case 0xB4:
-		m.pc += inst.len
+		m.pc += uint32(inst.len)
 
 	// SAVE
 	case 0xB5:
@@ -91,12 +91,12 @@ func (m *Machine) step() {
 	// NEW_LINE
 	case 0xBB:
 		m.print("\n")
-		m.pc += inst.len
+		m.pc += uint32(inst.len)
 
 	// SHOW_STATUS
 	case 0xBC:
 		m.showStatus()
-		m.pc += inst.len
+		m.pc += uint32(inst.len)
 
 	// VERIFY
 	case 0xBD:
@@ -111,7 +111,7 @@ func (m *Machine) step() {
 	// POP
 	case 0xB9:
 		m.getCallFrame().Pop()
-		m.pc += inst.len
+		m.pc += uint32(inst.len)
 
 	// ===================== 1OP INSTRUCTIONS =====================
 
@@ -124,7 +124,7 @@ func (m *Machine) step() {
 	case 0x81, 0x91, 0xA1:
 		objNum := byte(inst.operands[0])
 		sibling := m.getObject(objNum).sibling
-		dest := m.mem[m.pc+inst.len] // destination in next byte
+		dest := m.mem[m.pc+uint32(inst.len)] // destination in next byte
 		m.storeVar(uint16(dest), uint16(sibling))
 		m.branchHandler(inst.len+1, sibling != NULL_OBJECT)
 
@@ -132,7 +132,7 @@ func (m *Machine) step() {
 	case 0x82, 0x92, 0xA2:
 		objNum := byte(inst.operands[0])
 		sibling := m.getObject(objNum).child
-		dest := m.mem[m.pc+inst.len] // destination in next byte
+		dest := m.mem[m.pc+uint32(inst.len)] // destination in next byte
 		m.storeVar(uint16(dest), uint16(sibling))
 		m.branchHandler(inst.len+1, sibling != NULL_OBJECT)
 
@@ -140,9 +140,9 @@ func (m *Machine) step() {
 	case 0x83, 0x93, 0xA3:
 		objNum := byte(inst.operands[0])
 		sibling := m.getObject(objNum).parent
-		dest := m.mem[m.pc+inst.len] // destination in next byte
+		dest := m.mem[m.pc+uint32(inst.len)] // destination in next byte
 		m.storeVar(uint16(dest), uint16(sibling))
-		m.pc += inst.len + 1 // +1 for dest byte
+		m.pc += uint32(inst.len) + 1 // +1 for dest byte
 
 	// GET_PROP_LEN
 	case 0x84, 0x94, 0xA4:
@@ -156,42 +156,42 @@ func (m *Machine) step() {
 			sizeByte := m.mem[propAddr-1]
 			_, length = decode.PropSizeNumber(sizeByte)
 		}
-		dest := m.mem[m.pc+inst.len] // destination in next byte
+		dest := m.mem[m.pc+uint32(inst.len)] // destination in next byte
 		m.storeVar(uint16(dest), uint16(length))
-		m.pc += inst.len + 1 // +1 for dest byte
+		m.pc += uint32(inst.len) + 1 // +1 for dest byte
 
 	// INC
 	case 0x85, 0x95, 0xA5:
 		varLoc := inst.operands[0]
 		m.addToVar(varLoc, 1)
-		m.pc += inst.len
+		m.pc += uint32(inst.len)
 
 	// DEC
 	case 0x86, 0x96, 0xA6:
 		varLoc := inst.operands[0]
 		m.addToVar(varLoc, -1)
-		m.pc += inst.len
+		m.pc += uint32(inst.len)
 
 	// PRINT_ADDR
 	case 0x87, 0x97, 0xA7:
-		addr := inst.operands[0]
-		m.trace(" - print_addr from %04x\n", addr)
-		str, _ := m.readStringLiteral(uint32(addr))
+		addr := uint32(inst.operands[0])
+		m.trace(" - print_addr from %08x\n", addr)
+		str, _ := m.readStringLiteral(addr)
 		m.print(str)
-		m.pc += inst.len
+		m.pc += uint32(inst.len)
 
 	// REMOVE_OBJ
 	case 0x89, 0x99, 0xA9:
 		objNum := byte(inst.operands[0])
 		m.getObject(objNum).removeObjectFromParent(m)
-		m.pc += inst.len
+		m.pc += uint32(inst.len)
 
 	// PRINT_OBJ
 	case 0x8A, 0x9A, 0xAA:
 		objNum := byte(inst.operands[0])
 		obj := m.getObject(objNum)
 		m.print(obj.description)
-		m.pc += inst.len
+		m.pc += uint32(inst.len)
 
 	// RET
 	case 0x8B, 0x9B, 0xAB:
@@ -201,7 +201,7 @@ func (m *Machine) step() {
 	// JUMP
 	case 0x8C, 0x9C, 0xAC:
 		offset := decode.Convert14BitToSigned(inst.operands[0])
-		m.pc = uint16(int16(m.pc) + int16(inst.len) + offset - 2)
+		m.pc = uint32(int32(m.pc) + int32(inst.len) + int32(offset) - 2)
 
 	// PRINT_PADDR
 	case 0x8D, 0x9D, 0xAD:
@@ -209,7 +209,7 @@ func (m *Machine) step() {
 		addr := decode.PackedAddress(packedAddr)
 		str, _ := m.readStringLiteral(addr)
 		m.print(str)
-		m.pc += inst.len
+		m.pc += uint32(inst.len)
 
 	// LOAD
 	case 0x8E, 0x9E, 0xAE:
@@ -221,16 +221,16 @@ func (m *Machine) step() {
 		} else {
 			actualVal = m.getVar(opVal)
 		}
-		varLoc := m.mem[m.pc+inst.len] // destination in next byte
+		varLoc := m.mem[m.pc+uint32(inst.len)] // destination in next byte
 		m.storeVar(uint16(varLoc), actualVal)
-		m.pc += inst.len + 1 // +1 for dest byte
+		m.pc += uint32(inst.len) + 1 // +1 for dest byte
 
 	// NOT (BITWISE)
 	case 0x8F, 0x9F, 0xAF:
 		v := inst.operands[0]
-		varLoc := m.mem[m.pc+inst.len]
+		varLoc := m.mem[m.pc+uint32(inst.len)]
 		m.storeVar(uint16(varLoc), ^v)
-		m.pc += inst.len + 1 // +1 for dest byte
+		m.pc += uint32(inst.len) + 1 // +1 for dest byte
 
 	// ===================== 2OP INSTRUCTIONS =====================
 
@@ -289,19 +289,19 @@ func (m *Machine) step() {
 	case 0x08, 0x28, 0x48, 0x68, 0xC8:
 		v1 := inst.operands[0]
 		v2 := inst.operands[1]
-		dest := m.mem[m.pc+inst.len] // destination in next byte
+		dest := m.mem[m.pc+uint32(inst.len)] // destination in next byte
 		m.debug(" - or dest var:%d\n", dest)
 		m.storeVar(uint16(dest), v1|v2)
-		m.pc += inst.len + 1 // +1 for dest byte
+		m.pc += uint32(inst.len) + 1 // +1 for dest byte
 
 	// AND (BITWISE)
 	case 0x09, 0x29, 0x49, 0x69, 0xC9:
 		v1 := inst.operands[0]
 		v2 := inst.operands[1]
-		dest := m.mem[m.pc+inst.len] // destination in next byte
+		dest := m.mem[m.pc+uint32(inst.len)] // destination in next byte
 		m.debug(" - and dest var:%d\n", dest)
 		m.storeVar(uint16(dest), v1&v2)
-		m.pc += inst.len + 1 // +1 for dest byte
+		m.pc += uint32(inst.len) + 1 // +1 for dest byte
 
 	// TEST_ATTR
 	case 0x0A, 0x2A, 0x4A, 0x6A, 0xCA:
@@ -316,7 +316,7 @@ func (m *Machine) step() {
 		attrNum := byte(inst.operands[1])
 		obj := m.getObject(objNum)
 		obj.setAttribute(attrNum, true)
-		m.pc += inst.len
+		m.pc += uint32(inst.len)
 
 	// CLEAR_ATTR
 	case 0x0C, 0x2C, 0x4C, 0x6C, 0xCC:
@@ -324,14 +324,14 @@ func (m *Machine) step() {
 		attrNum := byte(inst.operands[1])
 		obj := m.getObject(objNum)
 		obj.setAttribute(attrNum, false)
-		m.pc += inst.len
+		m.pc += uint32(inst.len)
 
 	// STORE
 	case 0x0D, 0x2D, 0x4D, 0x6D, 0xCD:
 		v := inst.operands[0]
 		s := inst.operands[1]
 		m.setVarInPlace(v, s)
-		m.pc += inst.len
+		m.pc += uint32(inst.len)
 
 	// INSERT_OBJ
 	case 0x0E, 0x2E, 0x4E, 0x6E, 0xCE:
@@ -339,7 +339,7 @@ func (m *Machine) step() {
 		destParentNum := byte(inst.operands[1])
 		obj := m.getObject(objNum)
 		obj.insertIntoParent(m, destParentNum)
-		m.pc += inst.len
+		m.pc += uint32(inst.len)
 
 	// GET_PROP
 	case 0x11, 0x31, 0x51, 0x71, 0xD1:
@@ -347,15 +347,15 @@ func (m *Machine) step() {
 		propNum := byte(inst.operands[1])
 		obj := m.getObject(objNum)
 		val := obj.getPropertyValue(propNum, m.propDefaults)
-		dest := m.mem[m.pc+inst.len] // destination in next byte
+		dest := m.mem[m.pc+uint32(inst.len)] // destination in next byte
 		m.storeVar(uint16(dest), val)
-		m.pc += inst.len + 1 // +1 for dest byte
+		m.pc += uint32(inst.len) + 1 // +1 for dest byte
 
 	// GET_PROP_ADDR
 	case 0x12, 0x32, 0x52, 0x72, 0xD2:
 		objNum := byte(inst.operands[0])
 		propNum := byte(inst.operands[1])
-		dest := m.mem[m.pc+inst.len] // destination in next byte
+		dest := m.mem[m.pc+uint32(inst.len)] // destination in next byte
 		obj := m.getObject(objNum)
 		// Property address is address of property data, not header & it may not exist
 		prop, exist := obj.propMap[propNum]
@@ -364,7 +364,7 @@ func (m *Machine) step() {
 			addr = prop.addr
 		}
 		m.storeVar(uint16(dest), uint16(addr))
-		m.pc += inst.len + 1 // +1 for dest byte
+		m.pc += uint32(inst.len) + 1 // +1 for dest byte
 
 	// GET_NEXT_PROP
 	case 0x13, 0x33, 0x53, 0x73, 0xD3:
@@ -391,42 +391,42 @@ func (m *Machine) step() {
 			}
 		}
 
-		dest := m.mem[m.pc+inst.len] // destination in next byte
+		dest := m.mem[m.pc+uint32(inst.len)] // destination in next byte
 		m.storeVar(uint16(dest), uint16(nextPropNum))
-		m.pc += inst.len + 1 // +1 for dest byte
+		m.pc += uint32(inst.len) + 1 // +1 for dest byte
 
 	// ADD
 	case 0x14, 0x34, 0x54, 0x74, 0xD4:
 		v := inst.operands[0]
 		s := inst.operands[1]
-		dest := m.mem[m.pc+inst.len] // destination in next byte
+		dest := m.mem[m.pc+uint32(inst.len)] // destination in next byte
 		m.debug(" - add dest var:%d\n", dest)
 		m.storeVar(uint16(dest), v+s)
-		m.pc += inst.len + 1 // +1 for dest byte
+		m.pc += uint32(inst.len) + 1 // +1 for dest byte
 
 	// SUB
 	case 0x15, 0x35, 0x55, 0x75, 0xD5:
 		v := inst.operands[0]
 		s := inst.operands[1]
-		dest := m.mem[m.pc+inst.len] // destination in next byte
+		dest := m.mem[m.pc+uint32(inst.len)] // destination in next byte
 		m.debug(" - sub dest var:%d\n", dest)
 		m.storeVar(uint16(dest), v-s)
-		m.pc += inst.len + 1 // +1 for dest byte
+		m.pc += uint32(inst.len) + 1 // +1 for dest byte
 
 	// MUL
 	case 0x16, 0x36, 0x56, 0x76, 0xD6:
 		v := inst.operands[0]
 		s := inst.operands[1]
-		dest := m.mem[m.pc+inst.len] // destination in next byte
+		dest := m.mem[m.pc+uint32(inst.len)] // destination in next byte
 		m.debug(" - mul dest var:%d\n", dest)
 		m.storeVar(uint16(dest), v*s)
-		m.pc += inst.len + 1 // +1 for dest byte
+		m.pc += uint32(inst.len) + 1 // +1 for dest byte
 
 	// DIV
 	case 0x17, 0x37, 0x57, 0x77, 0xD7:
 		v := inst.operands[0]
 		s := inst.operands[1]
-		dest := m.mem[m.pc+inst.len] // destination in next byte
+		dest := m.mem[m.pc+uint32(inst.len)] // destination in next byte
 		m.debug(" - div dest var:%d\n", dest)
 
 		if s == 0 {
@@ -435,13 +435,13 @@ func (m *Machine) step() {
 
 		// NOTE: div should be signed division
 		m.storeVar(uint16(dest), uint16(int16(v)/int16(s)))
-		m.pc += inst.len + 1 // +1 for dest byte
+		m.pc += uint32(inst.len) + 1 // +1 for dest byte
 
 	// MOD
 	case 0x18, 0x38, 0x58, 0x78, 0xD8:
 		v := inst.operands[0]
 		s := inst.operands[1]
-		dest := m.mem[m.pc+inst.len] // destination in next byte
+		dest := m.mem[m.pc+uint32(inst.len)] // destination in next byte
 		m.debug(" - mod dest var:%d\n", dest)
 
 		if s == 0 {
@@ -450,7 +450,7 @@ func (m *Machine) step() {
 
 		// NOTE: mod should be signed modulus
 		m.storeVar(uint16(dest), uint16(int16(v)%int16(s)))
-		m.pc += inst.len + 1 // +1 for dest byte
+		m.pc += uint32(inst.len) + 1 // +1 for dest byte
 
 	// LOADW (read word from array)
 	case 0x0F, 0x2F, 0x4F, 0x6F, 0xCF:
@@ -458,10 +458,10 @@ func (m *Machine) step() {
 		index := inst.operands[1]
 		wordAddr := arrayAddr + uint16(index*2)
 		val := decode.GetWord(m.mem, wordAddr)
-		dest := m.mem[m.pc+inst.len] // destination in next byte
+		dest := m.mem[m.pc+uint32(inst.len)] // destination in next byte
 		m.debug(" - loadw from %04x dest var:%d\n", wordAddr, dest)
 		m.storeVar(uint16(dest), val)
-		m.pc += inst.len + 1 // +1 for dest byte
+		m.pc += uint32(inst.len) + 1 // +1 for dest byte
 
 	// LOADB (read byte from array)
 	case 0x10, 0x30, 0x50, 0x70, 0xD0:
@@ -469,45 +469,44 @@ func (m *Machine) step() {
 		index := inst.operands[1]
 		byteAddr := uint16(arrayAddr) + uint16(index)
 		val := m.mem[byteAddr]
-		dest := m.mem[m.pc+inst.len] // destination in next byte
+		dest := m.mem[m.pc+uint32(inst.len)] // destination in next byte
 		m.debug(" - loadb from %04x dest var:%d\n", byteAddr, dest)
 		m.storeVar(uint16(dest), uint16(val))
-		m.pc += inst.len + 1 // +1 for dest byte
+		m.pc += uint32(inst.len) + 1 // +1 for dest byte
 
 	// ===================== VAR INSTRUCTIONS =====================
 
 	// CALL
 	case 0xE0:
-		// NOTE: No way to support for CALLs beyond 0xffff
-		// Narrowing from uint32 to uint16 isn't safe but unavoidable
-		routineAddr := uint16(decode.PackedAddress(inst.operands[0]))
+		// Packed address supports 32-bit addressing for routines in high memory
+		routineAddr := decode.PackedAddress(inst.operands[0])
 
 		// When the address 0 is called as a routine, nothing happens and the return value is false
 		if routineAddr == 0 {
 			m.debug(" - call to NULL routine, returning false\n")
 			// Store byte is at PC + inst.len, store 0 (false) there
-			dest := m.mem[m.pc+inst.len]
+			dest := m.mem[m.pc+uint32(inst.len)]
 			m.storeVar(uint16(dest), 0)
-			m.pc += inst.len + 1 // +1 for store byte
+			m.pc += uint32(inst.len) + 1 // +1 for store byte
 			return
 		}
 
 		// Count locals from routine header
 		numLocals := m.mem[routineAddr]
 		if numLocals > 15 {
-			panic(fmt.Sprintf("Attempted to call routine at %04x with invalid local count %d", routineAddr, numLocals))
+			panic(fmt.Sprintf("Attempted to call routine at %08x with invalid local count %d", routineAddr, numLocals))
 		}
 
-		m.debug(" - call to %04x with %d locals\n", routineAddr, numLocals)
+		m.debug(" - call to %08x with %d locals\n", routineAddr, numLocals)
 
 		// Push new stack frame
 		frame := m.addCallFrame(int(numLocals))
-		frame.returnAddr = m.pc + inst.len
+		frame.returnAddr = m.pc + uint32(inst.len)
 
 		// Populate locals (word sized) from the routine header
 		// Note: Many compilers don't initialize locals, so this step may be unnecessary
 		for i := byte(0); i < numLocals; i++ {
-			localVal := decode.GetWord(m.mem, routineAddr+1+uint16(i*2))
+			localVal := decode.GetWord32(m.mem, routineAddr+1+uint32(i*2))
 			m.trace(" - local init %d = %d\n", i, localVal)
 			frame.locals[i] = localVal
 		}
@@ -521,7 +520,7 @@ func (m *Machine) step() {
 		}
 
 		// Set PC to start of routine after header and locals
-		m.pc = routineAddr + 1 + uint16(numLocals*2)
+		m.pc = routineAddr + 1 + uint32(numLocals*2)
 
 	// STOREW
 	case 0xE1:
@@ -532,7 +531,7 @@ func (m *Machine) step() {
 		m.debug(" - storew to %04x value:%04x\n", wordAddr, val)
 
 		decode.SetWord(m.mem, wordAddr, val)
-		m.pc += inst.len
+		m.pc += uint32(inst.len)
 
 	// STOREB
 	case 0xE2:
@@ -543,7 +542,7 @@ func (m *Machine) step() {
 		m.debug(" - storeb to %04x value:%02x\n", byteAddr, val)
 
 		m.mem[byteAddr] = val
-		m.pc += inst.len
+		m.pc += uint32(inst.len)
 
 	// PUT_PROP
 	case 0xE3:
@@ -552,7 +551,7 @@ func (m *Machine) step() {
 		val := inst.operands[2]
 		obj := m.getObject(objNum)
 		obj.setPropertyValue(propNum, val)
-		m.pc += inst.len
+		m.pc += uint32(inst.len)
 
 	// SREAD aka READ in v3
 	case 0xE4:
@@ -654,20 +653,20 @@ func (m *Machine) step() {
 			m.mem[entryOffset+3] = position
 		}
 
-		m.pc += inst.len
+		m.pc += uint32(inst.len)
 
 	// PRINT_CHAR
 	case 0xE5:
 		charCode := byte(inst.operands[0])
 		r := decode.ZSCIIChar(charCode)
 		m.print(string(r))
-		m.pc += inst.len
+		m.pc += uint32(inst.len)
 
 	// PRINT_NUM
 	case 0xE6:
 		v := inst.operands[0]
 		m.print(fmt.Sprintf("%d", int16(v))) // Print as signed number
-		m.pc += inst.len
+		m.pc += uint32(inst.len)
 
 	// RANDOM
 	case 0xE7:
@@ -680,22 +679,22 @@ func (m *Machine) step() {
 		} else {
 			result = uint16(m.rand.IntN(int(maxVal)))
 		}
-		dest := m.mem[m.pc+inst.len] // destination in next byte
+		dest := m.mem[m.pc+uint32(inst.len)] // destination in next byte
 		m.storeVar(uint16(dest), result)
-		m.pc += inst.len + 1 // +1 for dest byte
+		m.pc += uint32(inst.len) + 1 // +1 for dest byte
 
 	// PUSH
 	case 0xE8:
 		val := inst.operands[0]
 		m.getCallFrame().Push(val)
-		m.pc += inst.len
+		m.pc += uint32(inst.len)
 
 	// PULL
 	case 0xE9:
 		val := m.getCallFrame().Pop()
 		varLoc := inst.operands[0]
 		m.setVarInPlace(varLoc, val)
-		m.pc += inst.len
+		m.pc += uint32(inst.len)
 
 	// OUTPUT_STREAM
 	case 0xF3:

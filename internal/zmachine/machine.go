@@ -31,7 +31,7 @@ const (
 // Machine represents the state of a Z-machine interpreter
 type Machine struct {
 	mem           []byte      // Z-machine memory
-	pc            uint16      // Actually think this probably needs to be a uint32
+	pc            uint32      // Program counter, supports 32-bit addressing for larger files
 	callStack     []callFrame // Call stack of routines
 	debugLevel    int         // Debug verbosity level
 	ext           External    // External interface for I/O
@@ -65,7 +65,7 @@ type dictEntry struct {
 func NewMachine(data []byte, debugLevel int, ext External) *Machine {
 	m := &Machine{
 		mem:          data,
-		pc:           decode.GetWord(data, 0x06),
+		pc:           uint32(decode.GetWord(data, 0x06)),
 		callStack:    make([]callFrame, 0),
 		debugLevel:   debugLevel,
 		ext:          ext,
@@ -246,7 +246,7 @@ func (m *Machine) readStringLiteral(addr uint32) (string, int) {
 // This is a complex helper used by all branch instructions
 // See: https://zspec.jaredreisinger.com/04-instructions#4_7
 func (m *Machine) branchHandler(instLen uint16, condition bool) {
-	branchInfo := m.mem[m.pc+instLen]
+	branchInfo := m.mem[m.pc+uint32(instLen)]
 	// Decode branch info
 	branchOnTrue := (branchInfo & 0x80) != 0
 	bit6Set := (branchInfo & 0x40) != 0
@@ -258,7 +258,7 @@ func (m *Machine) branchHandler(instLen uint16, condition bool) {
 		offset = int16(branchInfo & 0x3F)
 	} else {
 		// 14 bit offset from next two bytes
-		nextByte := m.mem[m.pc+instLen+1]
+		nextByte := m.mem[m.pc+uint32(instLen)+1]
 		branchDataLen = 2
 		// If bit 6 is clear, then the offset is a signed 14-bit number given in bits 0 to 5 of the first byte followed by all 8 of the second.
 		offset14 := (uint16(branchInfo&0x3F) << 8) | uint16(nextByte)
@@ -283,12 +283,12 @@ func (m *Machine) branchHandler(instLen uint16, condition bool) {
 			return
 		}
 
-		m.pc = uint16(int16(m.pc) + int16(instLen) + branchDataLen + offset - 2)
-		m.debug("   -> branching to %04x\n", m.pc)
+		m.pc = uint32(int32(m.pc) + int32(instLen) + int32(branchDataLen) + int32(offset) - 2)
+		m.debug("   -> branching to %08x\n", m.pc)
 	} else {
 		// Branch not taken, continue to next instruction
-		m.pc += instLen + uint16(branchDataLen)
-		m.debug("   -> no branch, next pc %04x\n", m.pc)
+		m.pc += uint32(instLen) + uint32(branchDataLen)
+		m.debug("   -> no branch, next pc %08x\n", m.pc)
 	}
 }
 

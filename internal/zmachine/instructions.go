@@ -65,7 +65,7 @@ func (m *Machine) decodeInst() instruction {
 			val, opLen := fetchOperand(m, opType, operandPtr)
 			inst.operands = append(inst.operands, val)
 			inst.len += opLen
-			operandPtr += opLen
+			operandPtr += uint32(opLen)
 		}
 
 		m.trace("Decode var: %02x typeByte:%02x\n", inst.code, opTypesByte)
@@ -109,10 +109,10 @@ func (m *Machine) decodeInst() instruction {
 }
 
 // Helper to fetch an operand based on its type, returning the value and length in bytes
-func fetchOperand(m *Machine, operandType byte, loc uint16) (uint16, uint16) {
+func fetchOperand(m *Machine, operandType byte, loc uint32) (uint16, uint16) {
 	switch operandType {
 	case OPTYPE_LARGE_CONST: // large constant
-		val := decode.GetWord(m.mem, loc)
+		val := decode.GetWord32(m.mem, loc)
 		return val, 2
 	case OPTYPE_SMALL_CONST: // small constant
 		val := uint16(m.mem[loc])
