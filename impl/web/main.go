@@ -14,27 +14,65 @@ import (
 	"github.com/benc-uk/gozm/internal/zmachine"
 )
 
-var version = "0.2.0"
+// Global variable to hold file data passed from JavaScript
+var uploadedFileData []byte
+var fileDataReady chan bool
+
+// Function called from JavaScript to pass file data
+func receiveFileData(this js.Value, args []js.Value) interface{} {
+	if len(args) < 1 {
+		fmt.Println("Error: no file data received")
+		return nil
+	}
+
+	// Get the Uint8Array from JavaScript
+	jsArray := args[0]
+	length := jsArray.Get("length").Int()
+
+	// Allocate Go slice and copy data
+	uploadedFileData = make([]byte, length)
+	js.CopyBytesToGo(uploadedFileData, jsArray)
+
+	fmt.Printf("Received file data: %d bytes\n", len(uploadedFileData))
+
+	// Signal that data is ready
+	if fileDataReady != nil {
+		fileDataReady <- true
+	}
+
+	return nil
+}
 
 func main() {
 	file := os.Args[0]
 	fmt.Printf("Starting GOZM WebAssembly: %s\n", file)
 
 	ext := NewWebExternal()
-
-	url := "stories/" + file
-	ext.TextOut("Loading: DF1:/games/" + url + "\n")
 	js.Global().Set("inputSend", js.FuncOf(ext.ReceiveInput))
+	js.Global().Set("receiveFileData", js.FuncOf(receiveFileData))
 
-	resp, err := http.Get(url)
-	if err != nil {
-		panic(err)
-	}
-	defer resp.Body.Close()
+	var data []byte
+	if file == "tempFile" {
+		// Initialize channel and wait for file data
+		fileDataReady = make(chan bool, 1)
+		fmt.Println("Waiting for file data...")
+		<-fileDataReady
+		fmt.Printf("Loading temporary file: %d bytes\n", len(uploadedFileData))
+		data = uploadedFileData
+	} else {
+		url := "stories/" + file
+		ext.TextOut("Loading: DF1:/games/" + url + "\n")
 
-	data, err := io.ReadAll(resp.Body)
-	if err != nil {
-		panic(err)
+		resp, err := http.Get(url)
+		if err != nil {
+			panic(err)
+		}
+		defer resp.Body.Close()
+
+		data, err = io.ReadAll(resp.Body)
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	// Sleep based on file size to allow loading message to be visible

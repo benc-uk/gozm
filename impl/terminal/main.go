@@ -9,7 +9,7 @@ import (
 	"github.com/benc-uk/gozm/internal/zmachine"
 )
 
-var version = "0.2.0"
+var version = "0.0.0"
 
 func main() {
 	info("GOZM: Go Z-Machine Runtime and VM v%s\n", version)

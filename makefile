@@ -13,7 +13,7 @@ help: # 💬 Show this help message
 	@grep -E '^[a-zA-Z_-]+:.*?# .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?# "}; {printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2}'
 
 build: # 🔨 Build the Go binary
-	go build -o bin/gozm $(PACKAGE)/impl/terminal
+	go build -o bin/gozm -ldflags="-X 'main.version=$(VERSION)'" $(PACKAGE)/impl/terminal
 
 test: # 🧪 Run tests
 	go test -v ./...
@@ -47,13 +47,14 @@ story: # 📚 Compile and dump the story file
 
 web: # 🏗️ Build the web app
 	rm -f web/main.wasm 
-	GOOS=js GOARCH=wasm go build -o web/main.wasm ./impl/web
+	echo "version = \"$(VERSION)\";" > web/version.js
+	GOOS=js GOARCH=wasm go build -o web/main.wasm $(PACKAGE)/impl/web
 
 clean: # 🧹 Clean build artifacts
 	rm -rf bin/
 	rm -f web/main.wasm 
 
-watch-wasm: web # 👀 Watch for changes and build the web app
+watch-web: # 👀 Watch for changes and build the web app
 	clear
 	go tool -modfile=.dev/tools.mod air -c $(DEV_DIR)/air-wasm.toml
 

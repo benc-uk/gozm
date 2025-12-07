@@ -126,3 +126,13 @@ nav a:hover {
 .menuItem:last-child {
   border-bottom: none;
 }
+
+.menuItem:first-child {
+  border-bottom: none;
+}
+
+hr {
+  border: none;
+  border-top: 2px solid #8b7d5f;
+  margin: 0.5rem 0;
+}

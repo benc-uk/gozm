@@ -1,5 +1,6 @@
 let outArea;
 let inputBox;
+const go = new Go();
 
 function textOut(text) {
   outArea.textContent += text;
@@ -16,18 +17,34 @@ function clearScreen() {
   outArea.textContent = "";
 }
 
-async function openFile(filename) {
-  const go = new Go();
+async function openFile(filename, filedata) {
   const result = await WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject);
   if (!result) {
     alert("Failed to load WebAssembly module");
     return;
   }
 
-  boot();
   document.querySelector("#fileMenu").style.display = "none";
   go.argv = [filename];
-  await go.run(result.instance);
+
+  // Start the Go program in the background
+  const runPromise = go.run(result.instance);
+
+  // Give Go a moment to set up its exported functions
+  await new Promise((resolve) => setTimeout(resolve, 50));
+
+  if (filedata) {
+    // Pass the file data to the Go module
+    console.log("Passing file data to WASM, size:", filedata.length);
+    if (typeof receiveFileData === "function") {
+      receiveFileData(filedata); // This function is defined in the Go code
+    } else {
+      console.error("receiveFileData function not available");
+    }
+  }
+
+  // Wait for the program to complete
+  await runPromise;
 
   textOut("Program has exited. Load another file\n");
   inputBox.style.visibility = "hidden";
@@ -35,23 +52,42 @@ async function openFile(filename) {
 }
 
 function loadedFile() {
+  clearScreen();
   inputBox.style.visibility = "visible";
 }
 
 function boot() {
   clearScreen();
   inputBox.value = "";
-  textOut("Power on sequence...\n");
   textOut("System booting...\n");
   textOut("64K dynamic memory available.\n");
   textOut("I/O buffers flushed.\n\n");
-  textOut("Loading: WASM subsystem... complete.\n");
-  textOut("GOZM v0.2.0 - Go Z-Machine Engine (c) Ben Coleman 2025\n\n");
+  textOut("WASM subsystem initializing... complete.\n");
+  textOut(`Go Z-Machine Engine\nGOZM v${version} © Ben Coleman 2025\n\n`);
   textOut("Open a file to begin.\n");
 }
 
 function hideMenus() {
   document.querySelector("#fileMenu").style.display = "none";
+}
+
+function promptFile() {
+  hideMenus();
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = ".z3";
+  input.onchange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) {
+      return;
+    }
+
+    const arrayBuffer = await file.arrayBuffer();
+
+    openFile("tempFile", new Uint8Array(arrayBuffer));
+  };
+
+  input.click();
 }
 
 // When DOM is loaded
