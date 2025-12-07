@@ -2,11 +2,10 @@ root = "."
 tmp_dir = "tmp"
 
 [build]
-  args_bin = ["stories/scratch.z3"]
-  bin = "./tmp/gozm"
-  cmd = "go build -o ./tmp/gozm cmd/cli/main.go"
+  bin = "/bin/true"
+  cmd = "GOOS=js GOARCH=wasm go build -o web/main.wasm ./impl/web"
   delay = 1000
-  exclude_dir = ["test", ".dev", "res", "bin", "misc", "stories"]
+  exclude_dir = ["test", ".dev", "res", "bin", "misc", "stories", "web"]
   kill_delay = "0s"
   log = "build-errors.log"
 

@@ -14,6 +14,8 @@ import (
 	"github.com/benc-uk/gozm/internal/zmachine"
 )
 
+var version = "0.2.0"
+
 func main() {
 	file := os.Args[0]
 	fmt.Printf("Starting GOZM WebAssembly: %s\n", file)
@@ -21,7 +23,7 @@ func main() {
 	ext := NewWebExternal()
 
 	url := "stories/" + file
-	ext.TextOut("Loading: " + url + "\n")
+	ext.TextOut("Loading: DF1:/games/" + url + "\n")
 	js.Global().Set("inputSend", js.FuncOf(ext.ReceiveInput))
 
 	resp, err := http.Get(url)

@@ -3,6 +3,7 @@ DEV_DIR := $(ROOT_DIR)/.dev
 PACKAGE := github.com/benc-uk/gozm
 STORY ?= input-test
 DEBUG ?= 0
+VERSION := $(shell git describe --tags --abbrev=0 --dirty=-dev 2>/dev/null || echo "0.0.0-dev")
 
 .DEFAULT_GOAL := help
 
@@ -52,5 +53,12 @@ clean: # 🧹 Clean build artifacts
 	rm -rf bin/
 	rm -f web/main.wasm 
 
+watch-wasm: web # 👀 Watch for changes and build the web app
+	clear
+	go tool -modfile=.dev/tools.mod air -c $(DEV_DIR)/air-wasm.toml
+
 serve: web # 🌐 Serve the web app
 	npx vite web/
+
+ver: # 🏷️ Show the current version
+	@echo $(VERSION)

@@ -60,7 +60,7 @@ func (w *WebExternal) Load(name string) *zmachine.Machine {
 	// Access localStorage to get saved game data via js
 	savedData := js.Global().Get("localStorage").Call("getItem", name+"_save")
 	if savedData.IsNull() || savedData.IsUndefined() || savedData.String() == "" {
-		panic("No saved game data found in localStorage")
+		w.info("No saved game file found: " + name + "_save\n")
 	}
 
 	var saveData zmachine.SaveState
@@ -88,7 +88,7 @@ func (w *WebExternal) Save(state *zmachine.SaveState) bool {
 
 	js.Global().Get("localStorage").Call("setItem", state.Name+"_save", string(data))
 
-	w.info("Game saved to browser storage as " + state.Name + "_save\n")
+	w.info("Game saved to DF0:/saves/" + state.Name + "_save\n")
 	return true
 }
 

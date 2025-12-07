@@ -46,7 +46,7 @@ function boot() {
   textOut("64K dynamic memory available.\n");
   textOut("I/O buffers flushed.\n\n");
   textOut("Loading: WASM subsystem... complete.\n");
-  textOut("GOZM v0.1.0 - Go Z-Machine Engine (c) Ben Coleman 2025\n\n");
+  textOut("GOZM v0.2.0 - Go Z-Machine Engine (c) Ben Coleman 2025\n\n");
   textOut("Open a file to begin.\n");
 }
 
