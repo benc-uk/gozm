@@ -68,22 +68,23 @@ func (m *Machine) step() {
 
 	// SAVE
 	case 0xB5:
-		fmt.Printf("!!!!! SAVE instruction encountered\n")
-		ok := m.ext.Save(m)
+		m.debug("SAVE instruction encountered, saving game...\n")
+		ok := m.ext.Save(m.GetSaveState())
 		m.branchHandler(inst.len, ok)
 
 	// RESTORE
 	case 0xB6:
+		m.debug("RESTORE instruction encountered, restarting to load saved game...\n")
 		m.exitCode = EXIT_LOAD
 		m.branchHandler(inst.len, true)
 
 	// RESTART
 	case 0xB7:
+		m.debug("RESTART instruction encountered, restarting...\n")
 		m.exitCode = EXIT_RESTART
 
 	// QUIT
 	case 0xBA:
-		m.ext.TextOut("Quitting game...\n")
 		m.debug("QUIT instruction encountered, exiting...\n")
 		if m.debugLevel > DEBUG_NONE {
 			m.DumpMem(m.globalsAddr, 24)
@@ -125,7 +126,7 @@ func (m *Machine) step() {
 	// GET_SIBLING
 	case 0x81, 0x91, 0xA1:
 		objNum := byte(inst.operands[0])
-		sibling := m.getObject(objNum).sibling
+		sibling := m.getObject(objNum).Sibling
 		dest := m.mem[m.pc+uint32(inst.len)] // destination in next byte
 		m.storeVar(uint16(dest), uint16(sibling))
 		m.branchHandler(inst.len+1, sibling != NULL_OBJECT)
@@ -133,7 +134,7 @@ func (m *Machine) step() {
 	// GET_CHILD
 	case 0x82, 0x92, 0xA2:
 		objNum := byte(inst.operands[0])
-		sibling := m.getObject(objNum).child
+		sibling := m.getObject(objNum).Child
 		dest := m.mem[m.pc+uint32(inst.len)] // destination in next byte
 		m.storeVar(uint16(dest), uint16(sibling))
 		m.branchHandler(inst.len+1, sibling != NULL_OBJECT)
@@ -141,7 +142,7 @@ func (m *Machine) step() {
 	// GET_PARENT
 	case 0x83, 0x93, 0xA3:
 		objNum := byte(inst.operands[0])
-		sibling := m.getObject(objNum).parent
+		sibling := m.getObject(objNum).Parent
 		dest := m.mem[m.pc+uint32(inst.len)] // destination in next byte
 		m.storeVar(uint16(dest), uint16(sibling))
 		m.pc += uint32(inst.len) + 1 // +1 for dest byte
@@ -192,7 +193,7 @@ func (m *Machine) step() {
 	case 0x8A, 0x9A, 0xAA:
 		objNum := byte(inst.operands[0])
 		obj := m.getObject(objNum)
-		m.print(obj.description)
+		m.print(obj.Desc)
 		m.pc += uint32(inst.len)
 
 	// RET
@@ -279,7 +280,7 @@ func (m *Machine) step() {
 		childObjNum := byte(inst.operands[0])
 		parentObjNum := byte(inst.operands[1])
 		childObj := m.getObject(childObjNum)
-		m.branchHandler(inst.len, childObj.parent == parentObjNum)
+		m.branchHandler(inst.len, childObj.Parent == parentObjNum)
 
 	// TEST
 	case 0x07, 0x27, 0x47, 0x67, 0xC7:
@@ -360,10 +361,10 @@ func (m *Machine) step() {
 		dest := m.mem[m.pc+uint32(inst.len)] // destination in next byte
 		obj := m.getObject(objNum)
 		// Property address is address of property data, not header & it may not exist
-		prop, exist := obj.propMap[propNum]
+		prop, exist := obj.PropMap[propNum]
 		addr := uint16(0)
 		if exist {
-			addr = prop.addr
+			addr = prop.Addr
 		}
 		m.storeVar(uint16(dest), uint16(addr))
 		m.pc += uint32(inst.len) + 1 // +1 for dest byte
@@ -377,14 +378,14 @@ func (m *Machine) step() {
 
 		if propNum == 0 {
 			// Return first property number
-			if len(obj.properties) > 0 {
-				nextPropNum = obj.properties[0].num
+			if len(obj.Props) > 0 {
+				nextPropNum = obj.Props[0].Num
 			}
 		} else {
-			for i, prop := range obj.properties {
-				if prop.num == propNum {
-					if i+1 < len(obj.properties) {
-						nextPropNum = obj.properties[i+1].num
+			for i, prop := range obj.Props {
+				if prop.Num == propNum {
+					if i+1 < len(obj.Props) {
+						nextPropNum = obj.Props[i+1].Num
 					} else {
 						nextPropNum = 0
 					}
@@ -621,7 +622,6 @@ func (m *Machine) step() {
 		for _, token := range tokens {
 			dictHits = append(dictHits, m.lookupWordInDict(token))
 		}
-		//fmt.Printf(" - Dictionary results: %v\n", dictEntries)
 
 		// Write token count to parse table, after max tokens byte
 		m.mem[parseAddr+1] = byte(len(dictHits))

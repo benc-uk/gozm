@@ -9,10 +9,10 @@ import (
 	"github.com/benc-uk/gozm/internal/zmachine"
 )
 
-var version = "0.0.1alpha"
+var version = "0.2.0"
 
 func main() {
-	fmt.Printf("GOZM: Go Z-Machine Runtime and VM v%s\n", version)
+	info("GOZM: Go Z-Machine Runtime and VM v%s\n", version)
 
 	debugLevel := 0
 	fileName := ""
@@ -41,14 +41,18 @@ func main() {
 	machine := zmachine.NewMachine(data, filenameOnly, debugLevel, ext)
 
 	for {
-		reason := machine.Run()
+		exitCode := machine.Run()
 
-		fmt.Printf("!!!! Z-machine exited with reason: %d\n", reason)
-		if reason == zmachine.EXIT_LOAD {
+		switch exitCode {
+		case zmachine.EXIT_LOAD:
+			info("Loading saved game...\n")
 			machine = ext.Load(filenameOnly)
-			continue
-		} else {
-			break
+		case zmachine.EXIT_QUIT:
+			info("Quitting game...\n")
+			return
+		default:
+			return
 		}
+
 	}
 }

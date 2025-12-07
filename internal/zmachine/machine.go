@@ -29,6 +29,7 @@ const (
 	EXIT_QUIT                = 1
 	EXIT_LOAD                = 2
 	EXIT_RESTART             = 3
+	SYSTEM_CMD_PREFIX        = '/' // Prefix for system commands in input
 )
 
 // Machine represents the state of a Z-machine interpreter
@@ -65,6 +66,14 @@ type Machine struct {
 type dictEntry struct {
 	word    string
 	address uint16
+}
+
+type SaveState struct {
+	PC        uint32
+	CallStack []CallFrame
+	Mem       []byte
+	Name      string
+	Objects   []*zObject
 }
 
 func NewMachine(data []byte, fileName string, debugLevel int, ext External) *Machine {
@@ -322,12 +331,40 @@ func (m *Machine) print(s string) {
 	}
 }
 
+// Wrapper to read input based on current input stream
 func (m *Machine) readString() string {
 	if m.inputStream == INPUT_STREAM_KEYBOARD {
-		return m.ext.ReadInput()
+		input := m.ext.ReadInput()
+
+		// Handle system commands which start SYSTEM_CMD_PREFIX
+		if len(input) > 0 && input[0] == SYSTEM_CMD_PREFIX {
+			cmd := strings.TrimSpace(input[1:])
+			m.debug("System command received: %s\n", cmd)
+			switch strings.ToLower(cmd) {
+			case "quit", "exit":
+				m.exitCode = EXIT_QUIT
+			case "restart":
+				m.exitCode = EXIT_RESTART
+			case "save":
+				ok := m.ext.Save(m.GetSaveState())
+				if ok {
+					m.print("Game saved successfully.\n")
+				} else {
+					m.print("Failed to save game.\n")
+				}
+				return ""
+			case "load":
+				m.exitCode = EXIT_LOAD
+			default:
+				m.debug(" - Unknown system command: %s\n", cmd)
+			}
+		}
+
+		return input
 	} else if m.inputStream == INPUT_STREAM_FILE {
 		panic("NOT_IMPLEMENTED: input stream from file")
 	}
+
 	return ""
 }
 
@@ -370,29 +407,24 @@ func (m *Machine) showStatus() {
 	objNum := m.getVar(16) // global variable 1 is the current object
 
 	obj := m.getObject(byte(objNum))
-	m.print(fmt.Sprintf("\n\033[32m\033[7m %s                             score:%d turns:%d \033[27m\033[0m\n", obj.description, score, turns))
+	m.print(fmt.Sprintf("\n\033[32m\033[7m %s                             score:%d turns:%d \033[27m\033[0m\n", obj.Desc, score, turns))
 }
 
-func (m *Machine) GetMem() []byte {
-	return m.mem
+func (m *Machine) GetSaveState() *SaveState {
+	return &SaveState{
+		PC:        m.pc,
+		CallStack: m.callStack,
+		Mem:       m.mem,
+		Name:      m.name,
+		Objects:   m.objects,
+	}
 }
 
-func (m *Machine) GetPC() uint32 {
-	return m.pc
-}
+func RestoreState(state *SaveState, ext External) *Machine {
+	m := NewMachine(state.Mem, state.Name, DEBUG_NONE, ext)
+	m.pc = state.PC
+	m.callStack = state.CallStack
+	m.objects = state.Objects
 
-func (m *Machine) GetCallStack() []CallFrame {
-	return m.callStack
-}
-
-func (m *Machine) GetName() string {
-	return m.name
-}
-
-func (m *Machine) SetPC(pc uint32) {
-	m.pc = pc
-}
-
-func (m *Machine) SetCallStack(cs []CallFrame) {
-	m.callStack = cs
+	return m
 }

@@ -37,8 +37,8 @@ func (m *Machine) trace(format string, a ...interface{}) {
 // Internal helper to dump object properties for debugging
 func (o *zObject) propDebugDump() string {
 	result := ""
-	for _, propData := range o.properties {
-		result += fmt.Sprintf("    Prop num:%d, size:%d, data:%x\n", propData.num, propData.size, propData.data)
+	for _, propData := range o.Props {
+		result += fmt.Sprintf("    Prop num:%d, size:%d, data:%x\n", propData.Num, propData.Size, propData.Data)
 	}
 	return result
 }
