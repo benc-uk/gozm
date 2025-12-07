@@ -3,7 +3,11 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
 	"syscall/js"
+
+	"github.com/benc-uk/gozm/internal/zmachine"
 )
 
 // Implements a simple web/wasm interface for Z-machine IO
@@ -52,25 +56,42 @@ func (w *WebExternal) PlaySound(soundID uint16, effect uint16, volume uint16) {
 	js.Global().Call("playSound", soundID, effect, volume)
 }
 
-func (w *WebExternal) Save(mem []byte) bool {
-	// Convert mem to a JS Uint8Array
-	uint8Array := js.Global().Get("Uint8Array").New(len(mem))
-	js.CopyBytesToJS(uint8Array, mem)
+func (w *WebExternal) Load(name string) *zmachine.Machine {
+	// Access localStorage to get saved game data via js
+	savedData := js.Global().Get("localStorage").Call("getItem", name+"_save")
+	if savedData.IsNull() || savedData.IsUndefined() || savedData.String() == "" {
+		panic("No saved game data found in localStorage")
+	}
 
-	js.Global().Call("saveGame", uint8Array)
+	var saveData zmachine.SaveState
+
+	err := json.Unmarshal([]byte(savedData.String()), &saveData)
+	if err != nil {
+		panic(fmt.Sprintf("Error decoding save data: %v\n", err))
+	}
+
+	w.info("Game loaded from browser storage: " + name + "_save\n")
+
+	// Restore machine state
+	machine := zmachine.RestoreState(&saveData, w)
+
+	return machine
+}
+
+func (w *WebExternal) Save(state *zmachine.SaveState) bool {
+	// Snapshot all of the machine state to localStorage
+	data, err := json.Marshal(state)
+	if err != nil {
+		fmt.Printf("Error encoding save data: %v\n", err)
+		return false
+	}
+
+	js.Global().Get("localStorage").Call("setItem", state.Name+"_save", string(data))
+
+	w.info("Game saved to browser storage as " + state.Name + "_save\n")
 	return true
 }
 
-func (w *WebExternal) Load() []byte {
-	// Call JS function to get saved game data
-	savedData := js.Global().Call("loadGame")
-	if savedData.IsNull() || savedData.IsUndefined() {
-		return []byte{}
-	}
-
-	// Convert JS Uint8Array back to Go byte slice
-	length := savedData.Get("length").Int()
-	mem := make([]byte, length)
-	js.CopyBytesToGo(mem, savedData)
-	return mem
+func (w *WebExternal) info(format string, a ...interface{}) {
+	w.TextOut(fmt.Sprintf("+++ "+format, a...))
 }

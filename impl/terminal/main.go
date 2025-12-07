@@ -40,6 +40,7 @@ func main() {
 	filenameOnly = filenameOnly[:len(filenameOnly)-len(path.Ext(filenameOnly))]
 	machine := zmachine.NewMachine(data, filenameOnly, debugLevel, ext)
 
+	// We wrap the main run loop to handle restarts and loads
 	for {
 		exitCode := machine.Run()
 
@@ -50,9 +51,11 @@ func main() {
 		case zmachine.EXIT_QUIT:
 			info("Quitting game...\n")
 			return
+		case zmachine.EXIT_RESTART:
+			info("Restarting game...\n")
+			machine = zmachine.NewMachine(data, filenameOnly, debugLevel, ext)
 		default:
 			return
 		}
-
 	}
 }

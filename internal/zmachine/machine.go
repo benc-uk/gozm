@@ -29,6 +29,7 @@ const (
 	EXIT_QUIT                = 1
 	EXIT_LOAD                = 2
 	EXIT_RESTART             = 3
+	EXIT_ERROR               = 4   // TODO: Not yet used
 	SYSTEM_CMD_PREFIX        = '/' // Prefix for system commands in input
 )
 

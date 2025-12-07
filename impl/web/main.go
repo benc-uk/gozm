@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path"
 	"syscall/js"
 	"time"
 
@@ -49,7 +50,29 @@ func main() {
 	js.Global().Call("clearScreen")
 	js.Global().Call("loadedFile")
 
-	m := zmachine.NewMachine(data, file, 0, ext)
-	reason := m.Run() // Note this will block until the Z-machine exits
+	filenameOnly := path.Base(file)
 
+	filenameOnly = filenameOnly[:len(filenameOnly)-len(path.Ext(filenameOnly))]
+	machine := zmachine.NewMachine(data, filenameOnly, zmachine.DEBUG_NONE, ext)
+
+	// We wrap the main run loop to handle restarts and loads
+	for {
+		exitCode := machine.Run()
+
+		js.Global().Call("clearScreen")
+
+		switch exitCode {
+		case zmachine.EXIT_LOAD:
+			ext.info("Loading saved game...\n")
+			machine = ext.Load(filenameOnly)
+		case zmachine.EXIT_QUIT:
+			ext.info("Quitting game...\n")
+			return
+		case zmachine.EXIT_RESTART:
+			ext.info("Restarting game...\n")
+			machine = zmachine.NewMachine(data, filenameOnly, zmachine.DEBUG_NONE, ext)
+		default:
+			return
+		}
+	}
 }

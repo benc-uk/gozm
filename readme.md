@@ -22,6 +22,8 @@ A live deployment of the web version is available at **https://gozm.benc.dev/** 
 - Story loader that validates headers, decodes packed addresses, and hydrates initial game memory from Z3 files.
 - Text decoding pipeline (ZSCII, abbreviations, dictionary lookup) shared by interpreter and tests.
 - Terminal UI providing synchronous input and display, suitable for playing stories directly in the shell.
+- **Save/Load support** – Persistent game state with Quetzal-compatible save files, plus browser localStorage integration for the web version.
+- **System commands** – Special `/` prefixed commands for save, load, restart, and quit operations.
 - Optional debug tooling: instruction tracing, breakpoint hooks, opcode filtering, and pre-generated memory dumps under `misc/` and `test/`.
 
 ## Project Layout
@@ -56,6 +58,17 @@ Add `-debug 1` for single-step logging or `-debug 2` for instruction traces. The
 
 You can also execute directly with `go run ./impl/terminal -file test/core.z3` during development.
 
+#### System Commands
+
+While playing, you can use system commands prefixed with `/` to control the interpreter:
+
+- `/save` – Save the current game state to a file
+- `/load` – Load a previously saved game state
+- `/restart` – Restart the current story from the beginning
+- `/quit` – Exit the interpreter
+
+Note: Game save files are stored in the current working directory by default.
+
 ### Build and Run the Web Version
 
 The web version compiles the Go interpreter to WebAssembly and runs Z-machine games directly in your browser with a retro terminal interface.
@@ -76,6 +89,7 @@ This will launch a development server (using Vite via `npx`) and open the app in
 - A terminal-style display with monospace font rendering game output.
 - An input field for entering commands, with input echoed back to the display.
 - Story files are fetched on demand from the `web/stories/` directory.
+- System commands (`/save`, `/load`, `/restart`, `/quit`) work in the browser just like the terminal version.
 
 The WASM build uses Go's `syscall/js` package to bridge between the Z-machine core and browser JavaScript:
 
@@ -107,11 +121,13 @@ More chapters are planned as work continues on streams, save/restore, and altern
 - [x] Abbreviation tables and ZSCII decoding.
 - [x] Terminal input pipeline.
 - [x] WASM frontend with browser IO and story file selection.
-- [ ] Sound playback stubs.
+- [x] Sound playback stubs.
 - [ ] Output streams (screen/logging) per spec.
-- [ ] SAVE/RESTORE/RESTART handling.
-- [ ] Persistent state in browser (localStorage/IndexedDB).
+- [x] SAVE/RESTORE/RESTART handling.
+- [x] Persistent state in browser (localStorage/IndexedDB).
 - [ ] Regression test suite driven by official specification transcripts.
+- [ ] Browser prefs and theme support.
+- [ ] Acknowledgements & about and credits screen.
 
 ## Tools & References
 
