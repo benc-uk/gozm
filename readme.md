@@ -107,6 +107,7 @@ More chapters are planned as work continues on streams, save/restore, and altern
 - [x] Abbreviation tables and ZSCII decoding.
 - [x] Terminal input pipeline.
 - [x] WASM frontend with browser IO and story file selection.
+- [ ] Sound playback stubs.
 - [ ] Output streams (screen/logging) per spec.
 - [ ] SAVE/RESTORE/RESTART handling.
 - [ ] Persistent state in browser (localStorage/IndexedDB).

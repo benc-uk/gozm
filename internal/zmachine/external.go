@@ -11,4 +11,7 @@ package zmachine
 type External interface {
 	TextOut(text string)
 	ReadInput() string
+	PlaySound(soundID uint16, effect uint16, volume uint16)
+	Save(m *Machine) bool
+	Load(name string) *Machine
 }

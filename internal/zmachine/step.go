@@ -10,14 +10,12 @@ package zmachine
 import (
 	"fmt"
 	"math/rand/v2"
-	"os"
 	"strings"
 
 	"github.com/benc-uk/gozm/internal/decode"
 )
 
 func (m *Machine) step() {
-	m.debugLevel = DEBUG_NONE
 	inst := m.decodeInst()
 
 	// Trap panic in case of errors and provide debugging info
@@ -29,7 +27,7 @@ func (m *Machine) step() {
 			fmt.Printf("Stack trace:\n")
 			for i := len(m.callStack) - 1; i >= 0; i-- {
 				frame := m.callStack[i]
-				fmt.Printf(" - Frame %d: return to %08X\n", i, frame.returnAddr)
+				fmt.Printf(" - Frame %d: return to %08X\n", i, frame.ReturnAddr)
 			}
 			panic(r) // Re-panic to get full stack trace
 		}
@@ -70,23 +68,27 @@ func (m *Machine) step() {
 
 	// SAVE
 	case 0xB5:
-		panic("NOT_IMPLEMENTED: SAVE")
+		fmt.Printf("!!!!! SAVE instruction encountered\n")
+		ok := m.ext.Save(m)
+		m.branchHandler(inst.len, ok)
 
 	// RESTORE
 	case 0xB6:
-		panic("NOT_IMPLEMENTED: RESTORE")
+		m.exitCode = EXIT_LOAD
+		m.branchHandler(inst.len, true)
 
 	// RESTART
 	case 0xB7:
-		panic("NOT_IMPLEMENTED: RESTART")
+		m.exitCode = EXIT_RESTART
 
 	// QUIT
 	case 0xBA:
+		m.ext.TextOut("Quitting game...\n")
 		m.debug("QUIT instruction encountered, exiting...\n")
 		if m.debugLevel > DEBUG_NONE {
 			m.DumpMem(m.globalsAddr, 24)
 		}
-		os.Exit(0)
+		m.exitCode = EXIT_QUIT
 
 	// NEW_LINE
 	case 0xBB:
@@ -500,21 +502,21 @@ func (m *Machine) step() {
 		m.debug(" - call to %08x with %d locals\n", routineAddr, numLocals)
 
 		// Push new stack frame
-		frame := m.addCallFrame(int(numLocals))
-		frame.returnAddr = m.pc + uint32(inst.len)
+		frame := m.addCallFrame()
+		frame.ReturnAddr = m.pc + uint32(inst.len)
 
 		// Populate locals (word sized) from the routine header
 		// Note: Many compilers don't initialize locals, so this step may be unnecessary
 		for i := byte(0); i < numLocals; i++ {
 			localVal := decode.GetWord32(m.mem, routineAddr+1+uint32(i*2))
 			m.trace(" - local init %d = %d\n", i, localVal)
-			frame.locals[i] = localVal
+			frame.Locals[i] = localVal
 		}
 
 		if len(inst.operands) > 1 {
 			// Push arguments into local variables
 			for i, argVal := range inst.operands[1:] {
-				frame.locals[i] = argVal
+				frame.Locals[i] = argVal
 				m.trace(" - arg %d = %d\n", i, argVal)
 			}
 		}
@@ -699,6 +701,14 @@ func (m *Machine) step() {
 	// OUTPUT_STREAM
 	case 0xF3:
 		panic("NOT_IMPLEMENTED: OUTPUT_STREAM")
+
+	case 0xF5:
+		soundID := inst.operands[0]
+		effect := inst.operands[1]
+		volume := inst.operands[2]
+		m.debug(" - play sound ID:%d effect:%d volume:%d\n", soundID, effect, volume)
+		m.ext.PlaySound(soundID, effect, volume)
+		m.pc += uint32(inst.len)
 
 	// Unimplemented instruction!
 	default:

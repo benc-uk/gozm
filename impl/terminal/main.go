@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"path"
 
 	"github.com/benc-uk/gozm/internal/zmachine"
 )
@@ -34,8 +35,20 @@ func main() {
 		os.Exit(1)
 	}
 
-	machine := zmachine.NewMachine(data, debugLevel, NewTerminal())
-	//machine.TracedOps = []byte{0x11, 0x31, 0x51, 0x71, 0xD1}
-	//machine.Breakpoint = 0x00C51 // Example breakpoint
-	machine.Run()
+	ext := NewTerminal()
+	filenameOnly := path.Base(fileName)
+	filenameOnly = filenameOnly[:len(filenameOnly)-len(path.Ext(filenameOnly))]
+	machine := zmachine.NewMachine(data, filenameOnly, debugLevel, ext)
+
+	for {
+		reason := machine.Run()
+
+		fmt.Printf("!!!! Z-machine exited with reason: %d\n", reason)
+		if reason == zmachine.EXIT_LOAD {
+			machine = ext.Load(filenameOnly)
+			continue
+		} else {
+			break
+		}
+	}
 }

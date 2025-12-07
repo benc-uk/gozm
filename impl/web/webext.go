@@ -4,8 +4,6 @@ package main
 
 import (
 	"syscall/js"
-
-	"github.com/benc-uk/gozm/internal/zmachine"
 )
 
 // Implements a simple web/wasm interface for Z-machine IO
@@ -50,6 +48,29 @@ func (w *WebExternal) ReceiveInput(this js.Value, args []js.Value) interface{} {
 	return nil
 }
 
-func (w *WebExternal) SetOutputStream(streamNum byte, tableAddr uint16, m *zmachine.Machine) {
+func (w *WebExternal) PlaySound(soundID uint16, effect uint16, volume uint16) {
+	js.Global().Call("playSound", soundID, effect, volume)
+}
 
+func (w *WebExternal) Save(mem []byte) bool {
+	// Convert mem to a JS Uint8Array
+	uint8Array := js.Global().Get("Uint8Array").New(len(mem))
+	js.CopyBytesToJS(uint8Array, mem)
+
+	js.Global().Call("saveGame", uint8Array)
+	return true
+}
+
+func (w *WebExternal) Load() []byte {
+	// Call JS function to get saved game data
+	savedData := js.Global().Call("loadGame")
+	if savedData.IsNull() || savedData.IsUndefined() {
+		return []byte{}
+	}
+
+	// Convert JS Uint8Array back to Go byte slice
+	length := savedData.Get("length").Int()
+	mem := make([]byte, length)
+	js.CopyBytesToGo(mem, savedData)
+	return mem
 }

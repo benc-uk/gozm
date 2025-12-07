@@ -49,6 +49,7 @@ func main() {
 	js.Global().Call("clearScreen")
 	js.Global().Call("loadedFile")
 
-	m := zmachine.NewMachine(data, 0, ext)
-	m.Run() // Note this will block until the Z-machine exits
+	m := zmachine.NewMachine(data, file, 0, ext)
+	reason := m.Run() // Note this will block until the Z-machine exits
+
 }

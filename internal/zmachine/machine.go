@@ -26,24 +26,29 @@ const (
 	OUTPUT_STREAM_MEMORY_MAX = 16
 	INPUT_STREAM_KEYBOARD    = 1
 	INPUT_STREAM_FILE        = 2
+	EXIT_QUIT                = 1
+	EXIT_LOAD                = 2
+	EXIT_RESTART             = 3
 )
 
 // Machine represents the state of a Z-machine interpreter
 type Machine struct {
+	ext           External    // External interface for I/O
+	name          string      // Name of the loaded Z-machine file
 	mem           []byte      // Z-machine memory
 	pc            uint32      // Program counter, supports 32-bit addressing for larger files
-	callStack     []callFrame // Call stack of routines
+	callStack     []CallFrame // Call stack of routines
 	debugLevel    int         // Debug verbosity level
-	ext           External    // External interface for I/O
 	propDefaults  []uint16    // Property defaults table
 	objects       []*zObject  // Objects table
 	rand          *rand.Rand  // Random number generator
 	outputStream  int         // Current output stream
 	inputStream   int         // Current input stream
 	abbr          []string    // Abbreviation table
-	dict          []dictEntry // Dictionary entries
+	dict          []dictEntry // Dictionary e	ntries
 	dictSep       []string    // Dictionary separator characters
 	dictStartAddr uint16      // Start address of dictionary entries
+	exitCode      int         // Flag to indicate machine termination
 
 	version     byte   // Header: version number
 	highAddr    uint16 // Header: high memory address
@@ -54,7 +59,7 @@ type Machine struct {
 	abbrvAddr   uint16 // Header: abbreviation table address
 	fileLen     uint16 // Header: file length in words
 	checksum    uint16 // Header: checksum
-	flagStatus  bool   // Header: Is the status line shown?
+	flagStatus  bool   // Header: Is the status line shown? Nothing uses this it seems
 }
 
 type dictEntry struct {
@@ -62,11 +67,12 @@ type dictEntry struct {
 	address uint16
 }
 
-func NewMachine(data []byte, debugLevel int, ext External) *Machine {
+func NewMachine(data []byte, fileName string, debugLevel int, ext External) *Machine {
 	m := &Machine{
+		name:         fileName,
 		mem:          data,
 		pc:           uint32(decode.GetWord(data, 0x06)),
-		callStack:    make([]callFrame, 0),
+		callStack:    make([]CallFrame, 0),
 		debugLevel:   debugLevel,
 		ext:          ext,
 		propDefaults: make([]uint16, 31),
@@ -128,20 +134,26 @@ func NewMachine(data []byte, debugLevel int, ext External) *Machine {
 	m.debug(" - Objects/rooms: %d\n", len(m.objects))
 	m.debug(" - Dictionary: %d entries, %d separators\n", numEntries, numSepBytes)
 	m.debug(" - Abbreviations loaded: %d\n", len(m.abbr))
+	m.debug(" - Starting PC %08x\n", m.pc)
 
 	// Initialize the stack with the main__ call frame
-	m.addCallFrame(0)
+	m.addCallFrame()
 
 	return m
 }
 
 // Run starts the main execution loop of the Z-machine
-func (m *Machine) Run() {
+func (m *Machine) Run() int {
 	m.debug("Starting the main execution loop...\n")
 
 	// We just loop forever for now, this is our life
 	for {
 		m.step()
+
+		// Check for exit condition there's been a request to terminate
+		if m.exitCode != 0 {
+			return m.exitCode
+		}
 	}
 }
 
@@ -156,7 +168,7 @@ func (m *Machine) storeVar(loc uint16, val uint16) {
 		m.getCallFrame().Push(val)
 	} else if loc > 0 && loc < 0x10 {
 		// Local variable
-		m.getCallFrame().locals[loc-1] = val
+		m.getCallFrame().Locals[loc-1] = val
 	} else {
 		// Global variable, which are all word sized
 		addr := uint16(m.globalsAddr + (loc-0x10)*2)
@@ -177,7 +189,7 @@ func (m *Machine) getVar(loc uint16) uint16 {
 
 	} else if loc > 0 && loc < 0x10 {
 		// Local variable
-		return m.getCallFrame().locals[loc-1]
+		return m.getCallFrame().Locals[loc-1]
 	} else {
 		// Global variable, which are all word sized
 		addr := uint16(m.globalsAddr + (loc-0x10)*2)
@@ -208,13 +220,13 @@ func (m *Machine) addToVar(loc uint16, val int16) int16 {
 		return int16(curr + val)
 	} else if loc > 0 && loc < 0x10 {
 		// check local variable exists
-		if int(loc-1) >= len(cf.locals) {
-			panic(fmt.Sprintf("Local variable %d does not exist in routine, has %d", loc, len(cf.locals)))
+		if int(loc-1) >= len(cf.Locals) {
+			panic(fmt.Sprintf("Local variable %d does not exist in routine, has %d", loc, len(cf.Locals)))
 		}
 
 		// Local variable
-		curr := int16(cf.locals[loc-1])
-		cf.locals[loc-1] = uint16(curr + val)
+		curr := int16(cf.Locals[loc-1])
+		cf.Locals[loc-1] = uint16(curr + val)
 		return int16(curr + val)
 	} else {
 		// Global variable, which are all word sized
@@ -323,7 +335,6 @@ func (m *Machine) readString() string {
 // Returns a dictEntry with address 0 if the word is not found
 // If multiple words match, returns the longest matching word
 // See: https://zspec.jaredreisinger.com/13-dictionary
-// TODO: This needs to be optimized for large dictionaries!
 func (m *Machine) lookupWordInDict(word string) dictEntry {
 	longestMatch := dictEntry{address: 0}
 
@@ -360,5 +371,28 @@ func (m *Machine) showStatus() {
 
 	obj := m.getObject(byte(objNum))
 	m.print(fmt.Sprintf("\n\033[32m\033[7m %s                             score:%d turns:%d \033[27m\033[0m\n", obj.description, score, turns))
+}
 
+func (m *Machine) GetMem() []byte {
+	return m.mem
+}
+
+func (m *Machine) GetPC() uint32 {
+	return m.pc
+}
+
+func (m *Machine) GetCallStack() []CallFrame {
+	return m.callStack
+}
+
+func (m *Machine) GetName() string {
+	return m.name
+}
+
+func (m *Machine) SetPC(pc uint32) {
+	m.pc = pc
+}
+
+func (m *Machine) SetCallStack(cs []CallFrame) {
+	m.callStack = cs
 }
