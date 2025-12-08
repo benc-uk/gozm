@@ -30,6 +30,7 @@ async function openFile(filename, filedata) {
     alert("Failed to load WebAssembly module");
     return;
   }
+  boot();
 
   document.querySelector("#fileMenu").style.display = "none";
   go.argv = [filename];
@@ -44,7 +45,9 @@ async function openFile(filename, filedata) {
     // Pass the file data to the Go module
     console.log("Passing file data to WASM, size:", filedata.length);
     if (typeof receiveFileData === "function") {
-      receiveFileData(filedata); // This function is defined in the Go code
+      // This function is defined in the Go code,
+      // BUT won't be visible until after go.run() is called!
+      receiveFileData(filedata);
     } else {
       console.error("receiveFileData function not available");
     }
@@ -93,7 +96,6 @@ function promptFile() {
     }
 
     const arrayBuffer = await file.arrayBuffer();
-
     openFile("tempFile", new Uint8Array(arrayBuffer));
   };
 

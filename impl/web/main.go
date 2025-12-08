@@ -15,12 +15,12 @@ import (
 )
 
 // Global variable to hold file data passed from JavaScript
-var uploadedFileData []byte
-var fileDataReady chan bool
+var uploadedFileData []byte // Slice to store uploaded file data
+var fileDataReady chan bool // Channel to signal when file data is ready
 var machine *zmachine.Machine
 var ext *WebExternal
 
-// Function called from JavaScript to pass file data
+// If user selects a file to upload & run, this function is called from JS to pass the data
 func receiveFileData(this js.Value, args []js.Value) interface{} {
 	if len(args) < 1 {
 		fmt.Println("Error: no file data received")
@@ -37,7 +37,7 @@ func receiveFileData(this js.Value, args []js.Value) interface{} {
 
 	fmt.Printf("Received file data: %d bytes\n", len(uploadedFileData))
 
-	// Signal that data is ready
+	// Signal that data is ready, we have to synchronously unblock the main thread
 	if fileDataReady != nil {
 		fileDataReady <- true
 	}
@@ -56,16 +56,18 @@ func main() {
 	js.Global().Set("load", js.FuncOf(load))
 
 	var data []byte
+
+	// We either load from uploaded temp file or from URL
 	if file == "tempFile" {
 		// Initialize channel and wait for file data
 		fileDataReady = make(chan bool, 1)
-		fmt.Println("Waiting for file data...")
+		fmt.Println("Waiting for tempFile data...")
 		<-fileDataReady
-		fmt.Printf("Loading temporary file: %d bytes\n", len(uploadedFileData))
+		ext.TextOut("Loading: RAM:/upload/temp.z3")
 		data = uploadedFileData
 	} else {
 		url := "stories/" + file
-		ext.TextOut("Loading: DF1:/games/" + url + "\n")
+		ext.TextOut("Loading: DF0:/games/" + url + "\n")
 
 		resp, err := http.Get(url)
 		if err != nil {
@@ -80,14 +82,14 @@ func main() {
 	}
 
 	// Sleep based on file size to allow loading message to be visible
-	sleepDuration := time.Duration(len(data)/10) * time.Millisecond
-	ticker := time.NewTicker(150 * time.Millisecond)
+	sleepDuration := time.Duration(len(data)/30) * time.Millisecond
+	ticker := time.NewTicker(80 * time.Millisecond)
 	defer ticker.Stop()
 	elapsed := time.Duration(0)
 	for elapsed < sleepDuration {
 		<-ticker.C
 		ext.TextOut(".")
-		elapsed += 150 * time.Millisecond
+		elapsed += 80 * time.Millisecond
 	}
 	ext.TextOut("\n")
 
