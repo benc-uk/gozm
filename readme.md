@@ -126,7 +126,7 @@ More chapters are planned as work continues on streams, save/restore, and altern
 - [x] SAVE/RESTORE/RESTART handling.
 - [x] Persistent state in browser (localStorage/IndexedDB).
 - [ ] Regression test suite driven by official specification transcripts.
-- [ ] Browser prefs and theme support.
+- [x] Browser prefs and theme support.
 - [ ] Acknowledgements & about and credits screen.
 
 ## Tools & References
