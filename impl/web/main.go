@@ -54,6 +54,7 @@ func main() {
 	js.Global().Set("receiveFileData", js.FuncOf(receiveFileData))
 	js.Global().Set("save", js.FuncOf(save))
 	js.Global().Set("load", js.FuncOf(load))
+	js.Global().Set("printInfo", js.FuncOf(printInfo))
 
 	var data []byte
 
@@ -102,6 +103,12 @@ func main() {
 	machine = zmachine.NewMachine(data, filenameOnly, zmachine.DEBUG_NONE, ext)
 
 	exitCode := machine.Run()
+	if exitCode == zmachine.EXIT_RESTART {
+		ext.TextOut("Restarting the game...\n")
+		// For web, we just reload the page
+		js.Global().Get("location").Call("reload")
+		return
+	}
 	os.Exit(exitCode - 1)
 }
 
@@ -133,6 +140,17 @@ func load(this js.Value, args []js.Value) interface{} {
 	} else {
 		ext.TextOut("Error loading game.\n")
 	}
+
+	return nil
+}
+
+func printInfo(this js.Value, args []js.Value) interface{} {
+	if machine == nil {
+		ext.TextOut("No machine available to print info.\n")
+		return nil
+	}
+
+	ext.TextOut(machine.GetInfo())
 
 	return nil
 }

@@ -21,11 +21,8 @@
 
   <body>
     <nav>
-      <a href="#" id="fileButton">File</a>
-      <a href="#" id="sysButton">System</a>
-      <a href="#" id="prefsButton">Prefs</a>
-      <a href="#" id="infoButton">Info</a>
-      <span style="float: right; font-size: 0.9rem">🔴</span>
+      <a id="fileButton">File</a><a id="sysButton">System</a><a id="prefsButton">Prefs</a><a id="infoButton">Info</a>
+      <span id="powerIndicator">🔴</span>
     </nav>
 
     <div id="fileMenu" class="menu">
@@ -40,23 +37,23 @@
     </div>
 
     <div id="sysMenu" class="menu" style="left: 100px">
-      <div class="menuItem" onclick="save()" id="saveOption">Save</div>
-      <div class="menuItem" onclick="load()" id="loadOption">Restore</div>
+      <div class="menuItem disableNoFile" onclick="save()">Save</div>
+      <div class="menuItem disableNoFile" onclick="load()">Restore</div>
       <hr />
       <div class="menuItem" onclick="reset()">Reset System</div>
     </div>
 
-    <div id="prefsMenu" class="menu" style="left: 170px; width: 250px">
-      <div class="menuItem" onclick="setTheme('RetroGlow')">Theme: Retro Glow</div>
+    <div id="prefsMenu" class="menu" style="left: 150px; width: 250px">
+      <div class="menuItem" onclick="setTheme('RetroGlow')">Theme: Retro Green</div>
       <div class="menuItem" onclick="setTheme('RetroGlowAmber')">Theme: Retro Amber</div>
       <div class="menuItem" onclick="setTheme('RetroPlain')">Theme: Retro No Glow</div>
       <div class="menuItem" onclick="setTheme('Simple')">Theme: Simple</div>
     </div>
 
     <div id="infoMenu" class="menu" style="left: 200px">
-      <div class="menuItem" onclick="blah()" id="saveOption">System Info</div>
-      <div class="menuItem" onclick="blah()" id="saveOption">Help</div>
-      <div class="menuItem" onclick="blah()" id="saveOption">About</div>
+      <div class="menuItem disableNoFile" onclick="hideMenus(); clearScreen(); printInfo()">System Info</div>
+      <div class="menuItem" onclick="hideMenus(); printHelp()">Help</div>
+      <div class="menuItem" onclick="hideMenus(); printAbout()">About</div>
     </div>
 
     <div class="column" onclick="hideMenus()">

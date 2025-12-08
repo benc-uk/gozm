@@ -138,13 +138,6 @@ func NewMachine(data []byte, fileName string, debugLevel int, ext External) *Mac
 		}
 	}
 
-	m.debug("Z-machine initialized...\nVersion: %d, Size: %d\n", data[0x00], len(data))
-	m.debug(" - Checksum: %04X, valid:%t\n", m.checksum, m.validateChecksum())
-	m.debug(" - Objects/rooms: %d\n", len(m.objects))
-	m.debug(" - Dictionary: %d entries, %d separators\n", numEntries, numSepBytes)
-	m.debug(" - Abbreviations loaded: %d\n", len(m.abbr))
-	m.debug(" - Starting PC %08x\n", m.pc)
-
 	// Initialize the stack with the main__ call frame
 	m.addCallFrame()
 
@@ -377,6 +370,9 @@ func (m *Machine) readString() string {
 					m.print("Failed to load game.\n")
 				}
 				return ""
+			case "info":
+				info := m.GetInfo()
+				m.print(info)
 			default:
 				m.debug(" - Unknown system command: %s\n", cmd)
 			}
@@ -449,4 +445,18 @@ func (m *Machine) GetSaveState() *SaveState {
 		Name:      m.name,
 		Objects:   m.objects,
 	}
+}
+
+func (m *Machine) GetInfo() string {
+	r := ""
+	r += fmt.Sprintf("\nFile: %s\n", m.name)
+	r += fmt.Sprintf("Version: %d\n", m.version)
+	r += fmt.Sprintf("Memory size: %d bytes\n", len(m.mem))
+	r += fmt.Sprintf("PC: %08X\n", m.pc)
+	r += fmt.Sprintf("Call stack depth: %d\n", len(m.callStack))
+	r += fmt.Sprintf("Objects: %d\n", len(m.objects))
+	r += fmt.Sprintf("Dictionary entries: %d\n", len(m.dict))
+	r += fmt.Sprintf("High memory: %04X\n", m.highAddr)
+	r += fmt.Sprintf("Checksum: %04X (valid: %t)\n", m.checksum, m.validateChecksum())
+	return r
 }

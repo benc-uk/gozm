@@ -5,6 +5,7 @@
 
 let outArea;
 let inputBox;
+const MAX_OUTBUFFER = 8000;
 
 // WebAssembly Go interface
 const go = new Go();
@@ -14,6 +15,11 @@ function textOut(text) {
   requestAnimationFrame(() => {
     outArea.scrollTop = outArea.scrollHeight;
   });
+
+  // Trim output buffer if too large
+  if (outArea.textContent.length > MAX_OUTBUFFER) {
+    outArea.textContent = outArea.textContent.slice(-MAX_OUTBUFFER);
+  }
 }
 
 function requestInput() {
@@ -120,19 +126,6 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   sysMenuButton.onclick = function () {
     showMenu("sysMenu");
-    // hide options that are not available
-    const saveOption = document.querySelector("#saveOption");
-    if (typeof save === "function") {
-      saveOption.classList.remove("disabled");
-    } else {
-      saveOption.classList.add("disabled");
-    }
-    const loadOption = document.querySelector("#loadOption");
-    if (typeof load === "function") {
-      loadOption.classList.remove("disabled");
-    } else {
-      loadOption.classList.add("disabled");
-    }
   };
 
   prefMenuButton.onclick = function () {
@@ -151,6 +144,23 @@ window.addEventListener("DOMContentLoaded", async () => {
   };
 
   boot();
+
+  // check query params for story file URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const storyUrl = urlParams.get("story");
+  if (storyUrl) {
+    try {
+      const response = await fetch(storyUrl);
+      if (response.ok) {
+        const arrayBuffer = await response.arrayBuffer();
+        openFile(storyUrl, new Uint8Array(arrayBuffer));
+      } else {
+        console.error(`Failed to load story from URL: ${storyUrl}`);
+      }
+    } catch (error) {
+      console.error(`Error loading story from URL: ${storyUrl}`, error);
+    }
+  }
 });
 
 function reset() {
@@ -163,6 +173,14 @@ function showMenu(id) {
   if (menuDiv) {
     menuDiv.style.display = "block";
   }
+
+  // Disable all with class disableNoFile if no file loaded
+  const noFileLoaded = typeof load !== "function";
+  const disableItems = document.querySelectorAll(".disableNoFile");
+  disableItems.forEach((item) => {
+    item.style.pointerEvents = noFileLoaded ? "none" : "auto";
+    item.style.color = noFileLoaded ? "#888888" : "#000000";
+  });
 }
 
 function setTheme(theme) {
@@ -170,4 +188,30 @@ function setTheme(theme) {
   inputBox.className = `theme${theme}`;
 
   hideMenus();
+}
+
+function printAbout() {
+  clearScreen();
+  hideMenus();
+  textOut(`About:\nGo Z-Machine Engine (GOZM) v${version}\n`);
+  textOut("A Z-Machine interpreter written in Go, compiled to WebAssembly.\n");
+  textOut("© Ben Coleman 2025\n");
+  textOut("Github: https://github.com/benc-uk/gozm\n");
+}
+
+function printHelp() {
+  clearScreen();
+  hideMenus();
+  textOut("Help:\n");
+  textOut("Use the File menu to open a Z-Machine story file (.z3),\n");
+  textOut("  or open a supplied adventure file.\n");
+  textOut("Type your commands in the input box and press Enter to send.\n");
+  textOut("Use the System menu to save/load game state.\n");
+  textOut("Use the Preferences menu to change themes.\n");
+  textOut("");
+  textOut("System commands:\n");
+  textOut("  /quit - Exit the game\n");
+  textOut("  /restart - Restart the game\n");
+  textOut("  /save - Save the game\n");
+  textOut("  /load - Load a saved game\n");
 }
