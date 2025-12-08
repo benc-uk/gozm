@@ -17,6 +17,8 @@ import (
 // Global variable to hold file data passed from JavaScript
 var uploadedFileData []byte
 var fileDataReady chan bool
+var machine *zmachine.Machine
+var ext *WebExternal
 
 // Function called from JavaScript to pass file data
 func receiveFileData(this js.Value, args []js.Value) interface{} {
@@ -47,9 +49,11 @@ func main() {
 	file := os.Args[0]
 	fmt.Printf("Starting GOZM WebAssembly: %s\n", file)
 
-	ext := NewWebExternal()
+	ext = NewWebExternal()
 	js.Global().Set("inputSend", js.FuncOf(ext.ReceiveInput))
 	js.Global().Set("receiveFileData", js.FuncOf(receiveFileData))
+	js.Global().Set("save", js.FuncOf(save))
+	js.Global().Set("load", js.FuncOf(load))
 
 	var data []byte
 	if file == "tempFile" {
@@ -77,13 +81,13 @@ func main() {
 
 	// Sleep based on file size to allow loading message to be visible
 	sleepDuration := time.Duration(len(data)/10) * time.Millisecond
-	ticker := time.NewTicker(100 * time.Millisecond)
+	ticker := time.NewTicker(150 * time.Millisecond)
 	defer ticker.Stop()
 	elapsed := time.Duration(0)
 	for elapsed < sleepDuration {
 		<-ticker.C
 		ext.TextOut(".")
-		elapsed += 100 * time.Millisecond
+		elapsed += 150 * time.Millisecond
 	}
 	ext.TextOut("\n")
 
@@ -93,26 +97,40 @@ func main() {
 	filenameOnly := path.Base(file)
 
 	filenameOnly = filenameOnly[:len(filenameOnly)-len(path.Ext(filenameOnly))]
-	machine := zmachine.NewMachine(data, filenameOnly, zmachine.DEBUG_NONE, ext)
+	machine = zmachine.NewMachine(data, filenameOnly, zmachine.DEBUG_NONE, ext)
 
-	// We wrap the main run loop to handle restarts and loads
-	for {
-		exitCode := machine.Run()
+	exitCode := machine.Run()
+	os.Exit(exitCode - 1)
+}
 
-		js.Global().Call("clearScreen")
-
-		switch exitCode {
-		case zmachine.EXIT_LOAD:
-			ext.info("Loading saved game...\n")
-			machine = ext.Load(filenameOnly)
-		case zmachine.EXIT_QUIT:
-			ext.info("Quitting game...\n")
-			return
-		case zmachine.EXIT_RESTART:
-			ext.info("Restarting game...\n")
-			machine = zmachine.NewMachine(data, filenameOnly, zmachine.DEBUG_NONE, ext)
-		default:
-			return
-		}
+func save(this js.Value, args []js.Value) interface{} {
+	if machine == nil || ext == nil {
+		fmt.Println("No machine or external interface available for saving")
+		return nil
 	}
+
+	success := ext.Save(machine.GetSaveState())
+	if success {
+		ext.TextOut("Game saved successfully.\n")
+	} else {
+		ext.TextOut("Error saving game.\n")
+	}
+
+	return nil
+}
+
+func load(this js.Value, args []js.Value) interface{} {
+	if machine == nil || ext == nil {
+		fmt.Println("No machine or external interface available for loading")
+		return nil
+	}
+
+	loadOK := ext.Load(machine.GetName(), machine)
+	if loadOK {
+		ext.TextOut("Game loaded successfully.\n")
+	} else {
+		ext.TextOut("Error loading game.\n")
+	}
+
+	return nil
 }

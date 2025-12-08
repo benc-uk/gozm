@@ -1,5 +1,12 @@
+// ===============================================================
+// GOZM - Go Z-Machine Engine
+// WebAssembly frontend JavaScript code
+// ===============================================================
+
 let outArea;
 let inputBox;
+
+// WebAssembly Go interface
 const go = new Go();
 
 function textOut(text) {
@@ -69,6 +76,9 @@ function boot() {
 
 function hideMenus() {
   document.querySelector("#fileMenu").style.display = "none";
+  document.querySelector("#sysMenu").style.display = "none";
+  document.querySelector("#prefsMenu").style.display = "none";
+  document.querySelector("#infoMenu").style.display = "none";
 }
 
 function promptFile() {
@@ -95,17 +105,40 @@ window.addEventListener("DOMContentLoaded", async () => {
   inputBox = document.querySelector("input");
   outArea = document.querySelector("pre");
   const fileMenuButton = document.querySelector("#fileButton");
+  const sysMenuButton = document.querySelector("#sysButton");
+  const prefMenuButton = document.querySelector("#prefsButton");
+  const infoMenuButton = document.querySelector("#infoButton");
 
   // hide input box initially
   inputBox.style.visibility = "hidden";
 
   fileMenuButton.onclick = function () {
-    const menu = document.querySelector("#fileMenu");
-    if (menu.style.display === "block") {
-      menu.style.display = "none";
+    showMenu("fileMenu");
+  };
+
+  sysMenuButton.onclick = function () {
+    showMenu("sysMenu");
+    // hide options that are not available
+    const saveOption = document.querySelector("#saveOption");
+    if (typeof save === "function") {
+      saveOption.classList.remove("disabled");
     } else {
-      menu.style.display = "block";
+      saveOption.classList.add("disabled");
     }
+    const loadOption = document.querySelector("#loadOption");
+    if (typeof load === "function") {
+      loadOption.classList.remove("disabled");
+    } else {
+      loadOption.classList.add("disabled");
+    }
+  };
+
+  prefMenuButton.onclick = function () {
+    showMenu("prefsMenu");
+  };
+
+  infoMenuButton.onclick = function () {
+    showMenu("infoMenu");
   };
 
   inputBox.onkeydown = function (e) {
@@ -117,3 +150,22 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   boot();
 });
+
+function reset() {
+  window.location.reload();
+}
+
+function showMenu(id) {
+  hideMenus();
+  menuDiv = document.querySelector("#" + id);
+  if (menuDiv) {
+    menuDiv.style.display = "block";
+  }
+}
+
+function setTheme(theme) {
+  outArea.className = `theme${theme}`;
+  inputBox.className = `theme${theme}`;
+
+  hideMenus();
+}

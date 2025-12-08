@@ -56,26 +56,27 @@ func (w *WebExternal) PlaySound(soundID uint16, effect uint16, volume uint16) {
 	js.Global().Call("playSound", soundID, effect, volume)
 }
 
-func (w *WebExternal) Load(name string) *zmachine.Machine {
+func (w *WebExternal) Load(name string, machine *zmachine.Machine) bool {
 	// Access localStorage to get saved game data via js
 	savedData := js.Global().Get("localStorage").Call("getItem", name+"_save")
 	if savedData.IsNull() || savedData.IsUndefined() || savedData.String() == "" {
 		w.info("No saved game file found: " + name + "_save\n")
+		return false
 	}
 
 	var saveData zmachine.SaveState
 
 	err := json.Unmarshal([]byte(savedData.String()), &saveData)
 	if err != nil {
-		panic(fmt.Sprintf("Error decoding save data: %v\n", err))
+		w.info("Error decoding saved game data: " + err.Error() + "\n")
+		return false
 	}
 
 	w.info("Game loaded from browser storage: " + name + "_save\n")
 
 	// Restore machine state
-	machine := zmachine.RestoreState(&saveData, w)
-
-	return machine
+	machine.ReplaceState(&saveData)
+	return true
 }
 
 func (w *WebExternal) Save(state *zmachine.SaveState) bool {

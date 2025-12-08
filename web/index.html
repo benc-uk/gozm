@@ -21,8 +21,10 @@
 
   <body>
     <nav>
-      <a href="#" id="fileButton">File &nbsp;</a> <a href="#" id="sysButton">System &nbsp;</a>
-      <a href="#" id="sysButton">Info &nbsp;</a>
+      <a href="#" id="fileButton">File</a>
+      <a href="#" id="sysButton">System</a>
+      <a href="#" id="prefsButton">Prefs</a>
+      <a href="#" id="infoButton">Info</a>
       <span style="float: right; font-size: 0.9rem">🔴</span>
     </nav>
 
@@ -37,8 +39,28 @@
       <div class="menuItem" onclick="openFile('buccaneers_cache.z3')">Buccaneers Cache</div>
     </div>
 
+    <div id="sysMenu" class="menu" style="left: 100px">
+      <div class="menuItem" onclick="save()" id="saveOption">Save</div>
+      <div class="menuItem" onclick="load()" id="loadOption">Restore</div>
+      <hr />
+      <div class="menuItem" onclick="reset()">Reset System</div>
+    </div>
+
+    <div id="prefsMenu" class="menu" style="left: 170px; width: 250px">
+      <div class="menuItem" onclick="setTheme('RetroGlow')">Theme: Retro Glow</div>
+      <div class="menuItem" onclick="setTheme('RetroGlowAmber')">Theme: Retro Amber</div>
+      <div class="menuItem" onclick="setTheme('RetroPlain')">Theme: Retro No Glow</div>
+      <div class="menuItem" onclick="setTheme('Simple')">Theme: Simple</div>
+    </div>
+
+    <div id="infoMenu" class="menu" style="left: 200px">
+      <div class="menuItem" onclick="blah()" id="saveOption">System Info</div>
+      <div class="menuItem" onclick="blah()" id="saveOption">Help</div>
+      <div class="menuItem" onclick="blah()" id="saveOption">About</div>
+    </div>
+
     <div class="column" onclick="hideMenus()">
-      <pre></pre>
+      <pre class="themeRetroGlow"></pre>
       <input type="text" />
     </div>
   </body>

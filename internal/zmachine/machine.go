@@ -27,9 +27,8 @@ const (
 	INPUT_STREAM_KEYBOARD    = 1
 	INPUT_STREAM_FILE        = 2
 	EXIT_QUIT                = 1
-	EXIT_LOAD                = 2
+	EXIT_ERROR               = 2 // TODO: Not yet used
 	EXIT_RESTART             = 3
-	EXIT_ERROR               = 4   // TODO: Not yet used
 	SYSTEM_CMD_PREFIX        = '/' // Prefix for system commands in input
 )
 
@@ -152,6 +151,17 @@ func NewMachine(data []byte, fileName string, debugLevel int, ext External) *Mac
 	return m
 }
 
+// NewFromSaveState creates a new Machine from a saved state
+func (m *Machine) ReplaceState(state *SaveState) bool {
+	// Mutate machine state from saved state
+	m.mem = state.Mem
+	m.pc = state.PC
+	m.callStack = state.CallStack
+	m.objects = state.Objects
+
+	return true
+}
+
 // Run starts the main execution loop of the Z-machine
 func (m *Machine) Run() int {
 	m.debug("Starting the main execution loop...\n")
@@ -175,6 +185,7 @@ func (m *Machine) storeVar(loc uint16, val uint16) {
 	}
 
 	if loc == 0 {
+		// Stack variable
 		m.getCallFrame().Push(val)
 	} else if loc > 0 && loc < 0x10 {
 		// Local variable
@@ -196,7 +207,6 @@ func (m *Machine) getVar(loc uint16) uint16 {
 	if loc == 0 {
 		// Stack variable
 		return m.getCallFrame().Pop()
-
 	} else if loc > 0 && loc < 0x10 {
 		// Local variable
 		return m.getCallFrame().Locals[loc-1]
@@ -207,6 +217,9 @@ func (m *Machine) getVar(loc uint16) uint16 {
 	}
 }
 
+// TODO: REMOVE
+// setVarInPlace sets a variable location to a value without pushing or popping
+// This fixes a bug in STORE and PULL instructions when loc=0
 func (m *Machine) setVarInPlace(loc uint16, val uint16) {
 	if loc == 0 {
 		m.getCallFrame().SetTop(val)
@@ -216,6 +229,8 @@ func (m *Machine) setVarInPlace(loc uint16, val uint16) {
 	m.storeVar(loc, val)
 }
 
+// addToVar adds a signed value to a variable location and returns the new value
+// Used by instructions; INC and DEC + INC_CHK and DEC_CHK
 func (m *Machine) addToVar(loc uint16, val int16) int16 {
 	// We made loc uint16 for ease of use, now restrict to valid range
 	if loc > 0xFF {
@@ -355,7 +370,13 @@ func (m *Machine) readString() string {
 				}
 				return ""
 			case "load":
-				m.exitCode = EXIT_LOAD
+				ok := m.ext.Load(m.name, m)
+				if ok {
+					m.print("Game loaded successfully.\n")
+				} else {
+					m.print("Failed to load game.\n")
+				}
+				return ""
 			default:
 				m.debug(" - Unknown system command: %s\n", cmd)
 			}
@@ -395,7 +416,7 @@ func (m *Machine) lookupWordInDict(word string) dictEntry {
 	return longestMatch
 }
 
-// And unfinished show status line function
+// A mostly unfinished show status line function
 // Almost no Z-machine games use this, so I'm leaving it unfinished
 func (m *Machine) showStatus() {
 	if !m.flagStatus {
@@ -411,6 +432,15 @@ func (m *Machine) showStatus() {
 	m.print(fmt.Sprintf("\n\033[32m\033[7m %s                             score:%d turns:%d \033[27m\033[0m\n", obj.Desc, score, turns))
 }
 
+func (m *Machine) RequestExit(code int) {
+	m.exitCode = code
+}
+
+func (m *Machine) GetName() string {
+	return m.name
+}
+
+// GetSaveState creates a SaveState snapshot of the current machine
 func (m *Machine) GetSaveState() *SaveState {
 	return &SaveState{
 		PC:        m.pc,
@@ -419,13 +449,4 @@ func (m *Machine) GetSaveState() *SaveState {
 		Name:      m.name,
 		Objects:   m.objects,
 	}
-}
-
-func RestoreState(state *SaveState, ext External) *Machine {
-	m := NewMachine(state.Mem, state.Name, DEBUG_NONE, ext)
-	m.pc = state.PC
-	m.callStack = state.CallStack
-	m.objects = state.Objects
-
-	return m
 }

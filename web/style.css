@@ -34,45 +34,29 @@ nav {
 }
 
 pre {
-  font-family: "Workbench", "Courier New", Courier, monospace;
-  font-weight: 400;
-  letter-spacing: 1px;
-  font-style: normal;
   display: inline-block;
   width: 80%;
   height: 100%;
   overflow-y: hidden;
-  background-color: #000a00;
-  color: #31f731;
   padding: 1rem;
   margin: 0.8rem auto;
-  font-size: 1.5rem;
-  line-height: 1.8rem;
   white-space: pre-wrap;
   user-select: text;
   flex-grow: 1;
   cursor: text;
   border: inset 8px #dbceb4;
   box-sizing: border-box;
-  box-shadow: inset 0 0 60px rgba(0, 255, 0, 0.3), inset 0 0 120px rgba(0, 255, 0, 0.1);
-  text-shadow: 0 0 3px #33ff33, 0 0 8px rgba(51, 255, 51, 0.7), 0 0 12px rgba(51, 255, 51, 0.5);
   border-radius: 3px;
 }
 
 input[type="text"] {
-  font-family: "Workbench", "Courier New", Courier, monospace;
   width: 80%;
   padding: 0.5rem;
   letter-spacing: 1px;
   margin: 0.2rem auto 0.8rem auto;
-  font-size: 1.5rem;
-  background: #001100;
-  color: #33ff33;
   outline: none;
   border: solid 8px #8b7d5f;
   box-sizing: border-box;
-  box-shadow: inset 0 0 16px rgba(0, 255, 0, 0.3), inset 0 0 20px rgba(0, 255, 0, 0.15);
-  text-shadow: 0 0 3px #33ff33, 0 0 8px rgba(51, 255, 51, 0.7), 0 0 12px rgba(51, 255, 51, 0.5);
   border-radius: 3px;
 }
 
@@ -81,6 +65,8 @@ input[type="text"] {
     margin: 0rem;
     width: 99%;
     overflow-y: hidden;
+    font-size: 0.9rem !important;
+    line-height: 1.1rem !important;
   }
 
   input[type="text"] {
@@ -115,24 +101,69 @@ nav a:hover {
 
 .menuItem {
   padding: 0.5rem 0.5rem;
-  border-bottom: 1px solid #8b7d5f;
 }
 
 .menuItem:hover {
-  background-color: #c4b59a;
+  background-color: #cebfa5;
   color: #000;
-}
-
-.menuItem:last-child {
-  border-bottom: none;
-}
-
-.menuItem:first-child {
-  border-bottom: none;
 }
 
 hr {
   border: none;
   border-top: 2px solid #8b7d5f;
   margin: 0.5rem 0;
+}
+
+.disabled {
+  color: #777 !important;
+  pointer-events: none;
+}
+
+.themeRetroGlow {
+  font-family: "Workbench", "Courier New", Courier, monospace;
+  font-weight: 400;
+  letter-spacing: 1px;
+  font-style: normal;
+  background-color: #000a00;
+  color: #31f731;
+  font-size: 1.5rem;
+  line-height: 1.8rem;
+  box-shadow: inset 0 0 60px rgba(0, 255, 0, 0.3), inset 0 0 120px rgba(0, 255, 0, 0.1);
+  text-shadow: 0 0 3px #33ff33, 0 0 8px rgba(51, 255, 51, 0.7), 0 0 12px rgba(51, 255, 51, 0.5);
+}
+
+.themeRetroPlain {
+  font-family: "Workbench", "Courier New", Courier, monospace;
+  font-weight: 400;
+  letter-spacing: 1px;
+  font-style: normal;
+  background-color: #000a00;
+  color: #31f731;
+  font-size: 1.5rem;
+  line-height: 1.8rem;
+}
+
+.themeSimple {
+  font-family: "Consolas", "Courier New", Courier, monospace;
+  font-weight: 400;
+  letter-spacing: 1px;
+  font-style: normal;
+  background-color: #000000;
+  color: #dfdfdf;
+  font-size: 1.3rem;
+  line-height: 1.3rem;
+  padding: 0.4rem;
+}
+
+.themeRetroGlowAmber {
+  font-family: "Workbench", "Courier New", Courier, monospace;
+  font-weight: 400;
+  letter-spacing: 1px;
+  font-style: normal;
+  background-color: #110900;
+  color: #ffb71d;
+  font-size: 1.5rem;
+  line-height: 1.8rem;
+  box-shadow: inset 0 0 60px rgba(126, 88, 17, 0.4), inset 0 0 120px rgba(122, 84, 14, 0.2);
+  text-shadow: 0 0 3px #ffb347, 0 0 8px rgba(255, 165, 0, 0.8), 0 0 12px rgba(255, 165, 0, 0.6);
 }

@@ -12,6 +12,6 @@ type External interface {
 	TextOut(text string)
 	ReadInput() string
 	PlaySound(soundID uint16, effect uint16, volume uint16)
-	Save(m *SaveState) bool
-	Load(name string) *Machine
+	Save(state *SaveState) bool
+	Load(name string, m *Machine) bool
 }

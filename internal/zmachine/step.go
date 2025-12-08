@@ -75,8 +75,8 @@ func (m *Machine) step() {
 	// RESTORE
 	case 0xB6:
 		m.debug("RESTORE instruction encountered, restarting to load saved game...\n")
-		m.exitCode = EXIT_LOAD
-		m.branchHandler(inst.len, true)
+		ok := m.ext.Load(m.name, m)
+		m.branchHandler(inst.len, ok)
 
 	// RESTART
 	case 0xB7:
@@ -333,7 +333,9 @@ func (m *Machine) step() {
 	case 0x0D, 0x2D, 0x4D, 0x6D, 0xCD:
 		v := inst.operands[0]
 		s := inst.operands[1]
-		m.setVarInPlace(v, s)
+		// TODO: REMOVE
+		// m.setVarInPlace(v, s)
+		m.storeVar(v, s)
 		m.pc += uint32(inst.len)
 
 	// INSERT_OBJ
@@ -695,7 +697,9 @@ func (m *Machine) step() {
 	case 0xE9:
 		val := m.getCallFrame().Pop()
 		varLoc := inst.operands[0]
-		m.setVarInPlace(varLoc, val)
+		// TODO: REMOVE
+		//m.setVarInPlace(varLoc, val)
+		m.storeVar(varLoc, val)
 		m.pc += uint32(inst.len)
 
 	// OUTPUT_STREAM
