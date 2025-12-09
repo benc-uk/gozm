@@ -148,9 +148,9 @@ window.addEventListener("DOMContentLoaded", async () => {
     }
   };
   inputBox.onfocus = function () {
-    requestAnimationFrame(() => {
+    setTimeout(() => {
       outArea.scrollTop = outArea.scrollHeight;
-    });
+    }, 100);
   };
 
   boot();
