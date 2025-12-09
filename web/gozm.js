@@ -147,6 +147,11 @@ window.addEventListener("DOMContentLoaded", async () => {
       inputBox.value = "";
     }
   };
+  inputBox.onfocus = function () {
+    requestAnimationFrame(() => {
+      outArea.scrollTop = outArea.scrollHeight;
+    });
+  };
 
   boot();
 
