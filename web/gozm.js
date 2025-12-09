@@ -147,11 +147,19 @@ window.addEventListener("DOMContentLoaded", async () => {
       inputBox.value = "";
     }
   };
+
   inputBox.onfocus = function () {
-    setTimeout(() => {
+    requestAnimationFrame(() => {
       outArea.scrollTop = outArea.scrollHeight;
-    }, 100);
+    });
   };
+
+  // detect rezize to adjust scroll
+  window.addEventListener("resize", () => {
+    requestAnimationFrame(() => {
+      outArea.scrollTop = outArea.scrollHeight;
+    });
+  });
 
   boot();
 
