@@ -26,6 +26,9 @@ function requestInput() {
   // scroll input box into view and focus
   inputBox.scrollIntoView();
   inputBox.focus();
+  requestAnimationFrame(() => {
+    outArea.scrollTop = outArea.scrollHeight;
+  });
 }
 
 function clearScreen() {
