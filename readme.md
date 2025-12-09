@@ -128,11 +128,12 @@ More chapters are planned as work continues on streams, save/restore, and altern
 - [ ] Regression test suite driven by official specification transcripts.
 - [x] Browser prefs and theme support.
 - [ ] Acknowledgements & about and credits screen.
+- [ ] Input history and command recall.
 
 ## Tools & References
 
 - UnZ – https://github.com/heasm66/UnZ
-- Inform 6 compiler – `sudo apt install inform6-compiler`
+- Inform 6 compiler – https://github.com/DavidKinder/Inform6
 - Z-Machine specs – https://zspec.jaredreisinger.com/ & https://inform-fiction.org/zmachine/standards/z1point1/
 - Background reading – https://intfiction.org/t/process-of-writing-a-z-machine-interpreter/53231/5 and notes under `misc/`
 - ZILF toolkit – https://zilf.io/

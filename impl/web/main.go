@@ -102,6 +102,8 @@ func main() {
 	filenameOnly = filenameOnly[:len(filenameOnly)-len(path.Ext(filenameOnly))]
 	machine = zmachine.NewMachine(data, filenameOnly, zmachine.DEBUG_NONE, ext)
 
+	js.Global().Call("requestInput")
+
 	exitCode := machine.Run()
 	if exitCode == zmachine.EXIT_RESTART {
 		ext.TextOut("Restarting the game...\n")

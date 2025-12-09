@@ -23,6 +23,8 @@ function textOut(text) {
 }
 
 function requestInput() {
+  // scroll input box into view and focus
+  inputBox.scrollIntoView();
   inputBox.focus();
 }
 
