@@ -41,6 +41,8 @@ func (w *WebExternal) ReadInput() string {
 	for i, v := range w.history {
 		hIface[i] = v
 	}
+
+	// Request input from the page in JS and pass history
 	js.Global().Call("requestInput", js.ValueOf(hIface))
 
 	// Wait for input to be sent via the inputChan
