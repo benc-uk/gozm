@@ -50,7 +50,7 @@ func main() {
 	fmt.Printf("Starting GOZM WebAssembly: %s\n", file)
 
 	ext = NewWebExternal()
-	js.Global().Set("inputSend", js.FuncOf(ext.ReceiveInput))
+	js.Global().Set("inputSend", js.FuncOf(ext.receiveInput))
 	js.Global().Set("receiveFileData", js.FuncOf(receiveFileData))
 	js.Global().Set("save", js.FuncOf(save))
 	js.Global().Set("load", js.FuncOf(load))
@@ -94,23 +94,23 @@ func main() {
 	}
 	ext.TextOut("\n")
 
-	js.Global().Call("clearScreen")
-	js.Global().Call("loadedFile")
+	js.Global().Call("loadedFile", file)
 
 	filenameOnly := path.Base(file)
-
 	filenameOnly = filenameOnly[:len(filenameOnly)-len(path.Ext(filenameOnly))]
+
 	machine = zmachine.NewMachine(data, filenameOnly, zmachine.DEBUG_NONE, ext)
 
-	js.Global().Call("requestInput")
-
+	// Everything is about this one line
 	exitCode := machine.Run()
+
 	if exitCode == zmachine.EXIT_RESTART {
 		ext.TextOut("Restarting the game...\n")
 		// For web, we just reload the page
 		js.Global().Get("location").Call("reload")
 		return
 	}
+
 	os.Exit(exitCode - 1)
 }
 

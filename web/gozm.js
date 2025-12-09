@@ -3,38 +3,18 @@
 // WebAssembly frontend JavaScript code
 // ===============================================================
 
-let outArea;
-let inputBox;
 const MAX_OUTBUFFER = 8000;
 
 // WebAssembly Go interface
 const go = new Go();
+let prefs = {};
+let outArea;
+let inputBox;
+let hist = [];
+let histIndex = -1;
 
-function textOut(text) {
-  outArea.textContent += text;
-  requestAnimationFrame(() => {
-    outArea.scrollTop = outArea.scrollHeight;
-  });
-
-  // Trim output buffer if too large
-  if (outArea.textContent.length > MAX_OUTBUFFER) {
-    outArea.textContent = outArea.textContent.slice(-MAX_OUTBUFFER);
-  }
-}
-
-function requestInput() {
-  // scroll input box into view and focus
-  inputBox.scrollIntoView();
-  inputBox.focus();
-  requestAnimationFrame(() => {
-    outArea.scrollTop = outArea.scrollHeight;
-  });
-}
-
-function clearScreen() {
-  outArea.textContent = "";
-}
-
+// Initiate loading a story file and starting the Go WASM module
+// Called from JS only
 async function openFile(filename, filedata) {
   const result = await WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject);
   if (!result) {
@@ -72,11 +52,57 @@ async function openFile(filename, filedata) {
   inputBox.blur();
 }
 
-function loadedFile() {
-  clearScreen();
-  inputBox.style.visibility = "visible";
+// Called from Go to send text to the screen
+function textOut(text) {
+  outArea.textContent += text;
+  requestAnimationFrame(() => {
+    outArea.scrollTop = outArea.scrollHeight;
+  });
+
+  // Trim output buffer if too large
+  if (outArea.textContent.length > MAX_OUTBUFFER) {
+    outArea.textContent = outArea.textContent.slice(-MAX_OUTBUFFER);
+  }
 }
 
+// Called from Go to request user input
+function requestInput(history) {
+  hist = history || [];
+  histIndex = hist.length;
+
+  // scroll input box into view and focus
+  inputBox.scrollIntoView();
+  inputBox.focus();
+
+  requestAnimationFrame(() => {
+    outArea.scrollTop = outArea.scrollHeight;
+  });
+}
+
+// Called from both Go and JS
+function clearScreen() {
+  outArea.textContent = "";
+}
+
+// Called from Go when file is loaded and program is running
+function loadedFile(filename) {
+  clearScreen();
+  inputBox.style.visibility = "visible";
+  requestInput();
+
+  console.log("Loaded file:", filename);
+  prefs.loadedFile = filename;
+  localStorage.setItem("prefs", JSON.stringify(prefs));
+}
+
+// Reset the system to initial state
+function reset() {
+  prefs.loadedFile = null;
+  localStorage.setItem("prefs", JSON.stringify(prefs));
+  location.reload();
+}
+
+// Called from JS to fake a boot sequence
 function boot() {
   clearScreen();
   inputBox.value = "";
@@ -86,13 +112,6 @@ function boot() {
   textOut("WASM subsystem initializing... complete.\n");
   textOut(`Go Z-Machine Engine\nGOZM v${version} © Ben Coleman 2025\n\n`);
   textOut("Open a file to begin.\n");
-}
-
-function hideMenus() {
-  document.querySelector("#fileMenu").style.display = "none";
-  document.querySelector("#sysMenu").style.display = "none";
-  document.querySelector("#prefsMenu").style.display = "none";
-  document.querySelector("#infoMenu").style.display = "none";
 }
 
 function promptFile() {
@@ -113,7 +132,7 @@ function promptFile() {
   input.click();
 }
 
-// When DOM is loaded
+// When DOM is loaded, initialize everything, this is our entry point
 window.addEventListener("DOMContentLoaded", async () => {
   inputBox = document.querySelector("input");
   outArea = document.querySelector("pre");
@@ -146,6 +165,25 @@ window.addEventListener("DOMContentLoaded", async () => {
       inputSend(inputBox.value);
       inputBox.value = "";
     }
+
+    if (e.key === "ArrowUp") {
+      if (histIndex > 0) {
+        histIndex--;
+        inputBox.value = hist[histIndex];
+      }
+      e.preventDefault();
+    }
+
+    if (e.key === "ArrowDown") {
+      if (histIndex < hist.length - 1) {
+        histIndex++;
+        inputBox.value = hist[histIndex];
+      } else {
+        histIndex = hist.length;
+        inputBox.value = "";
+      }
+      e.preventDefault();
+    }
   };
 
   inputBox.onfocus = function () {
@@ -161,30 +199,33 @@ window.addEventListener("DOMContentLoaded", async () => {
     });
   });
 
-  boot();
-
-  // check query params for story file URL
-  const urlParams = new URLSearchParams(window.location.search);
-  const storyUrl = urlParams.get("story");
-  if (storyUrl) {
-    try {
-      const response = await fetch(storyUrl);
-      if (response.ok) {
-        const arrayBuffer = await response.arrayBuffer();
-        openFile(storyUrl, new Uint8Array(arrayBuffer));
-      } else {
-        console.error(`Failed to load story from URL: ${storyUrl}`);
-      }
-    } catch (error) {
-      console.error(`Error loading story from URL: ${storyUrl}`, error);
+  // get saved theme from localStorage
+  try {
+    const savedTheme = localStorage.getItem("prefs");
+    if (!savedTheme) {
+      throw new Error("No saved preferences, using defaults");
     }
+    prefs = JSON.parse(savedTheme);
+  } catch (e) {
+    prefs = {
+      theme: "RetroGlow",
+      loadedFile: null,
+    };
+
+    localStorage.setItem("prefs", JSON.stringify(prefs));
+  }
+
+  setTheme(prefs.theme || "RetroGlow");
+
+  if (prefs.loadedFile) {
+    // Auto-load last file
+    openFile(prefs.loadedFile);
+  } else {
+    boot();
   }
 });
 
-function reset() {
-  window.location.reload();
-}
-
+// Menu system
 function showMenu(id) {
   hideMenus();
   menuDiv = document.querySelector("#" + id);
@@ -201,9 +242,21 @@ function showMenu(id) {
   });
 }
 
+// Menu system
+function hideMenus() {
+  document.querySelector("#fileMenu").style.display = "none";
+  document.querySelector("#sysMenu").style.display = "none";
+  document.querySelector("#prefsMenu").style.display = "none";
+  document.querySelector("#infoMenu").style.display = "none";
+}
+
+// Change theme of the fake terminal UI
 function setTheme(theme) {
   outArea.className = `theme${theme}`;
   inputBox.className = `theme${theme}`;
+
+  prefs.theme = theme;
+  localStorage.setItem("prefs", JSON.stringify(prefs));
 
   hideMenus();
 }

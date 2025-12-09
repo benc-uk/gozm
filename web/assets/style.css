@@ -54,7 +54,7 @@ nav a:hover {
 
 pre {
   display: inline-block;
-  width: 100dvh;
+  width: 90dvw;
   height: 100dvh;
   /* Allow scrolling but hide the scrollbar */
   overflow-y: auto;
@@ -67,7 +67,7 @@ pre {
   border: inset 8px #dbceb4;
   box-sizing: border-box;
   border-radius: 3px;
-  cursor: url("amiga_wb13_text.png") 4 9, text;
+  cursor: url("./amiga_wb13_text.png") 4 9, text;
 }
 
 /* Hide scrollbar (Firefox) */
@@ -83,7 +83,7 @@ pre::-webkit-scrollbar {
 }
 
 input[type="text"] {
-  width: 100dvh;
+  width: 90dvw;
   padding: 0.5rem;
   letter-spacing: 1px;
   margin: 0.2rem auto 0.8rem auto;
