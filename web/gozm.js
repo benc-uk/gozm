@@ -261,15 +261,18 @@ function setTheme(theme) {
   hideMenus();
 }
 
+// Print about information
 function printAbout() {
   clearScreen();
   hideMenus();
   textOut(`About:\nGo Z-Machine Engine (GOZM) v${version}\n`);
   textOut("A Z-Machine interpreter written in Go, compiled to WebAssembly.\n");
   textOut("© Ben Coleman 2025\n");
-  textOut("Github: https://github.com/benc-uk/gozm\n");
+  textOut("Github: https://github.com/benc-uk/gozm\n\n");
+  textOut("See the GitHub repository for full license, acknowledgments etc.\n");
 }
 
+// Print help information
 function printHelp() {
   clearScreen();
   hideMenus();

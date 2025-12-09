@@ -1,14 +1,14 @@
 # GOZM – Go Z-Machine Runtime & Engine
 
-GOZM is a Z-Machine interpreter & engine written in Go with a focus on version 3 story files. It executes real games end-to-end (tested with the bundled Infocom classics and custom Inform 6 stories)
-while keeping the codebase approachable for anyone curious about the architecture of the original Infocom virtual machine.
+GOZM is a Z-Machine interpreter written in Go that runs classic text adventure games from the Infocom era. It focuses on Z-Machine version 3 and executes real games end-to-end—including bundled Infocom titles and custom Inform 6 stories—both in the terminal and directly in the browser via WebAssembly. The codebase is designed to be readable and educational, making it accessible for anyone interested in understanding the architecture of Infocom's original virtual machine.
 
 ## Current Status
 
-- Runs Z3 story files via a terminal frontend (`impl/terminal`) with blocking input, text output, and core engine loop.
-- Opcode coverage includes branching, routine calls, stack and object tree handling, text decoding, abbreviations, and dictionary lookup logic as required by V3.
+- Full compatibility with any game that targets Z-Machine version 3, including Infocom titles like Zork I, II, III, and freeware games compiled with Inform 6.
+- Web frontend with retro terminal-style UI for immersive text adventure gameplay.
+- Plain-text terminal runner for local play and debugging.
 - Command-line debug levels (`-debug 0|1|2`) expose instruction tracing and state dumps to aid reverse engineering and spec validation.
-- Comprehensive guide material documents the journey from bytecode loading to full execution.
+- Save/Load functionality for all games and browser localStorage integration.
 
 ![web screenshot](./docs/screens/web.png)
 
@@ -24,7 +24,6 @@ A live deployment of the web version is available at **https://gozm.benc.dev/** 
 - Terminal UI providing synchronous input and display, suitable for playing stories directly in the shell.
 - **Save/Load support** – Persistent game state with Quetzal-compatible save files, plus browser localStorage integration for the web version.
 - **System commands** – Special `/` prefixed commands for save, load, restart, and quit operations.
-- Optional debug tooling: instruction tracing, breakpoint hooks, opcode filtering, and pre-generated memory dumps under `misc/` and `test/`.
 
 ## Project Layout
 
@@ -67,7 +66,7 @@ While playing, you can use system commands prefixed with `/` to control the inte
 - `/restart` – Restart the current story from the beginning
 - `/quit` – Exit the interpreter
 
-Note: Game save files are stored in the current working directory by default.
+Note: Game save files are stored in the user's home directory by default.
 
 ### Build and Run the Web Version
 
@@ -85,11 +84,15 @@ make serve
 
 This will launch a development server (using Vite via `npx`) and open the app in your browser. The interface includes:
 
-- A menu bar for selecting from bundled story files (Mini Zork, Moonglow, Catseye, Adventure, etc.).
-- A terminal-style display with monospace font rendering game output.
-- An input field for entering commands, with input echoed back to the display.
-- Story files are fetched on demand from the `web/stories/` directory.
-- System commands (`/save`, `/load`, `/restart`, `/quit`) work in the browser just like the terminal version.
+- **Story selection menu** – A prominent dropdown menu at the top of the page lets you choose from bundled story files including Mini Zork, Moonglow, Catseye, Adventure, and other classic titles.
+- **Retro terminal interface** – A faithful recreation of classic terminal aesthetics with monospace font, amber-on-black color scheme (customizable via themes), and authentic cursor rendering.
+- **Interactive command input** – Text input field at the bottom of the terminal display captures commands, with full keyboard support and visual feedback as you type.
+- **Command history & recall** – Use up/down arrow keys to navigate through previously entered commands for easy repetition and editing.
+- **On-demand story loading** – Story files are fetched dynamically from `web/stories/` only when selected, minimizing initial page load time.
+- **System commands** – All system commands (`/save`, `/load`, `/restart`, `/quit`) function identically to the terminal version, with save states persisted to browser localStorage for seamless session continuity.
+- **Theme customization** – Choose from multiple color schemes (amber, green, white-on-black) and adjust font sizing through the settings menu.
+- **About & acknowledgements screen** – Built-in credits page accessible from the menu bar documenting game sources and project contributors.
+- **Responsive layout** – Terminal display adapts to various screen sizes while maintaining readability and the classic text adventure aesthetic.
 
 The WASM build uses Go's `syscall/js` package to bridge between the Z-machine core and browser JavaScript:
 
@@ -99,7 +102,7 @@ The WASM build uses Go's `syscall/js` package to bridge between the Z-machine co
 
 ### Make Targets
 
-`make build` compiles the terminal binary, `make run STORY=minizork` launches a bundled game, `make story STORY=scratch` rebuilds the matching Inform 6 source and dumps the generated bytecode, `make web` builds the WASM binary, and `make serve` starts a local web server for testing the browser frontend.
+`make build` compiles the terminal binary, `make run` launches a bundled game, `make story STORY=scratch` rebuilds the matching Inform 6 source and dumps the generated bytecode, `make web` builds the WASM binary, and `make serve` starts a local web server for testing the browser frontend.
 
 ## Design Notes
 
@@ -127,13 +130,16 @@ More chapters are planned as work continues on streams, save/restore, and altern
 - [x] Persistent state in browser (localStorage/IndexedDB).
 - [ ] Regression test suite driven by official specification transcripts.
 - [x] Browser prefs and theme support.
-- [ ] Acknowledgements & about and credits screen.
-- [ ] Input history and command recall.
+- [x] Acknowledgements & about and credits screen.
+- [x] Input history and command recall.
 
 ## Tools & References
 
 - UnZ – https://github.com/heasm66/UnZ
 - Inform 6 compiler – https://github.com/DavidKinder/Inform6
+- Bocfel interpreter – https://cspiegel.github.io/bocfel/index.html
 - Z-Machine specs – https://zspec.jaredreisinger.com/ & https://inform-fiction.org/zmachine/standards/z1point1/
-- Background reading – https://intfiction.org/t/process-of-writing-a-z-machine-interpreter/53231/5 and notes under `misc/`
-- ZILF toolkit – https://zilf.io/
+
+## Acknowledgements
+
+The game files included with this project are the intellectual property of their respective owners. They are provided on the basis of the freely available copies on [The Interactive Fiction Archive](http://mirror.ifarchive.org/)
