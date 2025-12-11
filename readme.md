@@ -20,7 +20,7 @@ A live deployment of the web version is available at **https://gozm.benc.dev/** 
 
 - Z-Machine v3 focused interpreter core with structured call stack and object model support.
 - Story loader that validates headers, decodes packed addresses, and hydrates initial game memory from Z3 files.
-- Text decoding pipeline (ZSCII, abbreviations, dictionary lookup) shared by interpreter and tests.
+- Text decoding (ZSCII, abbreviations, dictionary lookup)
 - Terminal UI providing synchronous input and display, suitable for playing stories directly in the shell.
 - **Save/Load support** – Persistent game state with Quetzal-compatible save files, plus browser localStorage integration for the web version.
 - **System commands** – Special `/` prefixed commands for save, load, restart, and quit operations.
