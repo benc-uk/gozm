@@ -55,11 +55,11 @@ nav a:hover {
 pre {
   display: inline-block;
   width: 90dvw;
-  height: 100dvh;
+  /* height: 90dvh; */
   /* Allow scrolling but hide the scrollbar */
   overflow-y: auto;
   padding: 1rem;
-  margin: 0.8rem auto;
+  margin: 0.5rem auto;
   white-space: pre-wrap;
   user-select: text;
   flex-grow: 1;
@@ -86,7 +86,7 @@ input[type="text"] {
   width: 90dvw;
   padding: 0.5rem;
   letter-spacing: 1px;
-  margin: 0.2rem auto 0.8rem auto;
+  margin: 0.2rem auto 0.5rem auto;
   outline: none;
   border: inset 8px #dbceb4;
   box-sizing: border-box;

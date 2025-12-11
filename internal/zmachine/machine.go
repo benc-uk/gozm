@@ -34,7 +34,6 @@ const (
 
 // Machine represents the state of a Z-machine interpreter
 type Machine struct {
-	ext           External    // External interface for I/O
 	name          string      // Name of the loaded Z-machine file
 	mem           []byte      // Z-machine memory
 	pc            uint32      // Program counter, supports 32-bit addressing for larger files
@@ -50,6 +49,7 @@ type Machine struct {
 	dictSep       []string    // Dictionary separator characters
 	dictStartAddr uint16      // Start address of dictionary entries
 	exitCode      int         // Flag to indicate machine termination
+	ext           External    // External interface for I/O
 
 	version     byte   // Header: version number
 	highAddr    uint16 // Header: high memory address

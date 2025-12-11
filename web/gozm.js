@@ -107,11 +107,11 @@ function boot() {
   clearScreen();
   inputBox.value = "";
   textOut("System booting...\n");
-  textOut("64K dynamic memory available.\n");
-  textOut("I/O buffers flushed.\n\n");
-  textOut("WASM subsystem initializing... complete.\n");
-  textOut(`Go Z-Machine Engine\nGOZM v${version} © Ben Coleman 2025\n\n`);
-  textOut("Open a file to begin.\n");
+  textOut("64K dynamic memory available\n");
+  textOut("I/O buffers flushed\n\n");
+  textOut("WASM subsystem initializing... complete!\n");
+  textOut(`GOZM v${version} © Ben Coleman 2025\n\n`);
+  textOut("Open a file to begin\n");
 }
 
 function promptFile() {
