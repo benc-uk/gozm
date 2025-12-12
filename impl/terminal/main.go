@@ -41,5 +41,6 @@ func main() {
 	machine := zmachine.NewMachine(data, filenameOnly, debugLevel, ext)
 
 	exitCode := machine.Run()
+	fmt.Printf("Program exited with code %d\n", exitCode)
 	os.Exit(exitCode - 1)
 }

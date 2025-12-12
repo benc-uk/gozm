@@ -4,78 +4,80 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strings"
 
 	"encoding/json"
 
 	"github.com/benc-uk/gozm/internal/zmachine"
-	"github.com/chzyer/readline"
+	"github.com/peterh/liner"
 )
 
 // Implements a simple terminal interface for Z-machine IO
 type Terminal struct {
-	history []string
-	rl      *readline.Instance
+	liner         *liner.State
+	pendingPrompt string // Text output that didn't end with newline (used as prompt)
 }
 
 func NewTerminal() *Terminal {
-	t := &Terminal{
-		history: make([]string, 0),
-	}
+	t := &Terminal{}
 
-	// Try to create a readline instance for better UX (arrow-key history)
-	// Fall back to stdio if readline fails (e.g., unsupported terminal)
-	cfg := readline.Config{
-		Prompt:                 ">",
-		HistoryLimit:           20,
-		InterruptPrompt:        "",
-		DisableAutoSaveHistory: true,
-	}
-	if inst, err := readline.NewEx(&cfg); err == nil {
-		t.rl = inst
+	// Try to create a liner instance for better UX (arrow-key history)
+	l := liner.NewLiner()
+	if l != nil {
+		l.SetCtrlCAborts(true)
+		t.liner = l
 	}
 	return t
 }
 
 // TextOut outputs text to the console
+// This is made more complex by the need to track text that might be a prompt
 func (t *Terminal) TextOut(text string) {
-	fmt.Printf("%s", text)
+	// Track text that doesn't end with newline as pending prompt
+	if strings.HasSuffix(text, "\n") {
+		// Has newline - print everything and clear pending prompt
+		fmt.Printf("%s%s", t.pendingPrompt, text)
+		t.pendingPrompt = ""
+	} else {
+		// No newline - find the last line to use as prompt
+		lastNewline := strings.LastIndex(text, "\n")
+		if lastNewline >= 0 {
+			// Print everything up to and including the last newline
+			fmt.Printf("%s%s", t.pendingPrompt, text[:lastNewline+1])
+			// Store the remainder as pending prompt
+			t.pendingPrompt = text[lastNewline+1:]
+		} else {
+			// No newlines at all - append to pending prompt
+			t.pendingPrompt += text
+		}
+	}
+	os.Stdout.Sync()
 }
 
 // ReadInput reads a line of input from the console
 func (t *Terminal) ReadInput() string {
-	// If readline is available, use it to provide history navigation
-	if t.rl != nil {
-		line, err := t.rl.Readline()
+	// If liner is available, use it to provide history navigation
+	if t.liner != nil {
+		line, err := t.liner.Prompt(t.pendingPrompt)
+		t.pendingPrompt = ""
 		if err == nil {
-			trimmed := line
-			if len(trimmed) > 0 && (len(t.history) == 0 || t.history[len(t.history)-1] != trimmed) {
-				t.history = append(t.history, trimmed)
-				// Keep a bounded history
-				if len(t.history) >= 100 {
-					t.history = t.history[1:]
-				}
+			if len(line) > 0 {
+				t.liner.AppendHistory(line)
 			}
-			// Update readline's internal history so Up/Down work immediately
-			if t.rl != nil && trimmed != "" {
-				_ = t.rl.SaveHistory(trimmed)
-			}
-			return trimmed + "\n"
+			return line + "\n"
 		}
-		// If readline errors (e.g., EOF), fall back to stdio
+		// If liner errors (e.g., EOF/Ctrl-C), fall back to stdio
+	}
+
+	// Print the pending prompt before reading
+	if t.pendingPrompt != "" {
+		fmt.Print(t.pendingPrompt)
+		t.pendingPrompt = ""
+		os.Stdout.Sync()
 	}
 
 	reader := bufio.NewReader(os.Stdin)
 	text, _ := reader.ReadString('\n')
-
-	// Store in history if non-blank and not duplicate of last entry
-	trimmed := string(text[:len(text)-1])
-	if len(trimmed) > 0 && (len(t.history) == 0 || t.history[len(t.history)-1] != trimmed) {
-		t.history = append(t.history, trimmed)
-		if len(t.history) >= 20 {
-			t.history = t.history[1:]
-		}
-	}
-
 	return text
 }
 
