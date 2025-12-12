@@ -4,4 +4,4 @@ misc/
 tools/
 .vite/
 web/main.wasm
-web/version.js
+web/**/version.js

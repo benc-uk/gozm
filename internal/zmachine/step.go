@@ -706,12 +706,16 @@ func (m *Machine) step() {
 	case 0xF3:
 		panic("NOT_IMPLEMENTED: OUTPUT_STREAM")
 
+	// SOUND_EFFECT
 	case 0xF5:
 		soundID := inst.operands[0]
 		effect := inst.operands[1]
-		volume := inst.operands[2]
+		volume := 0
+		if len(inst.operands) > 2 {
+			volume = int(inst.operands[2])
+		}
 		m.debug(" - play sound ID:%d effect:%d volume:%d\n", soundID, effect, volume)
-		m.ext.PlaySound(soundID, effect, volume)
+		m.ext.PlaySound(soundID, effect, uint16(volume))
 		m.pc += uint32(inst.len)
 
 	// Unimplemented instruction!

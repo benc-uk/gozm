@@ -18,19 +18,21 @@ type WebExternal struct {
 	inputChan    chan string
 	inputWaiting bool
 	history      []string
+	bridge       js.Value
 }
 
 func NewWebExternal() *WebExternal {
 	ext := &WebExternal{
 		inputChan: make(chan string, 1),
 		history:   make([]string, 0),
+		bridge:    js.Global().Get("bridge"),
 	}
 
 	return ext
 }
 
 func (w *WebExternal) TextOut(text string) {
-	js.Global().Call("textOut", text)
+	w.bridge.Call("textOut", text)
 }
 
 func (w *WebExternal) ReadInput() string {
@@ -43,7 +45,7 @@ func (w *WebExternal) ReadInput() string {
 	}
 
 	// Request input from the page in JS and pass history
-	js.Global().Call("requestInput", js.ValueOf(hIface))
+	w.bridge.Call("requestInput", js.ValueOf(hIface))
 
 	// Wait for input to be sent via the inputChan
 	input := <-w.inputChan
@@ -60,7 +62,7 @@ func (w *WebExternal) ReadInput() string {
 }
 
 func (w *WebExternal) PlaySound(soundID uint16, effect uint16, volume uint16) {
-	js.Global().Call("playSound", soundID, effect, volume)
+	w.bridge.Call("playSound", soundID, effect, volume)
 }
 
 func (w *WebExternal) Load(name string, machine *zmachine.Machine) bool {

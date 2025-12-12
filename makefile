@@ -47,7 +47,7 @@ story: # 📚 Compile and dump the story file
 
 web: # 🏗️ Build the web app
 	rm -f web/main.wasm 
-	echo "version = \"$(VERSION)\";" > web/version.js
+	echo "export const version = \"$(VERSION)\";" > web/js/version.js
 	GOOS=js GOARCH=wasm go build -o web/main.wasm $(PACKAGE)/impl/web
 
 clean: # 🧹 Clean build artifacts

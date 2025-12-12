@@ -19,6 +19,7 @@ var uploadedFileData []byte // Slice to store uploaded file data
 var fileDataReady chan bool // Channel to signal when file data is ready
 var machine *zmachine.Machine
 var ext *WebExternal
+var bridge js.Value // JavaScript WASM bridge
 
 // If user selects a file to upload & run, this function is called from JS to pass the data
 func receiveFileData(this js.Value, args []js.Value) interface{} {
@@ -50,11 +51,12 @@ func main() {
 	fmt.Printf("Starting GOZM WebAssembly: %s\n", file)
 
 	ext = NewWebExternal()
-	js.Global().Set("inputSend", js.FuncOf(ext.receiveInput))
-	js.Global().Set("receiveFileData", js.FuncOf(receiveFileData))
-	js.Global().Set("save", js.FuncOf(save))
-	js.Global().Set("load", js.FuncOf(load))
-	js.Global().Set("printInfo", js.FuncOf(printInfo))
+	bridge = js.Global().Get("bridge")
+	bridge.Set("inputSend", js.FuncOf(ext.receiveInput))
+	bridge.Set("receiveFileData", js.FuncOf(receiveFileData))
+	bridge.Set("save", js.FuncOf(save))
+	bridge.Set("load", js.FuncOf(load))
+	bridge.Set("printInfo", js.FuncOf(printInfo))
 
 	var data []byte
 
@@ -94,7 +96,7 @@ func main() {
 	}
 	ext.TextOut("\n")
 
-	js.Global().Call("loadedFile", file)
+	bridge.Call("loadedFile", file)
 
 	filenameOnly := path.Base(file)
 	filenameOnly = filenameOnly[:len(filenameOnly)-len(path.Ext(filenameOnly))]
@@ -111,6 +113,7 @@ func main() {
 		return
 	}
 
+	fmt.Printf("Game exited with code: %d\n", exitCode)
 	os.Exit(exitCode - 1)
 }
 

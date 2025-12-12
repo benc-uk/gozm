@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0; interactive-widget=resizes-content" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" />
     <title>GOZM: Go Z-Machine Engine</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -16,8 +16,7 @@
     <link rel="shortcut icon" href="assets/icon.png" type="image/png" />
 
     <script src="wasm_exec.js"></script>
-    <script src="version.js"></script>
-    <script src="gozm.js"></script>
+    <script src="js/gozm.js" type="module"></script>
   </head>
 
   <body>
@@ -26,50 +25,14 @@
       <span id="powerIndicator">🔴</span>
     </nav>
 
-    <div id="fileMenu" class="menu">
-      <div class="menuItem" onclick="promptFile()">Open...</div>
-      <hr />
+    <div id="fileMenu" class="menu"></div>
+    <div id="sysMenu" class="menu" style="left: 100px"></div>
+    <div id="prefsMenu" class="menu" style="left: 150px; width: 250px"></div>
+    <div id="infoMenu" class="menu" style="left: 200px"></div>
 
-      <div class="menuItem" onclick="openFile('minizork.z3')">Mini Zork</div>
-      <div class="menuItem" onclick="openFile('moonglow.z3')">Moonglow</div>
-      <div class="menuItem" onclick="openFile('catseye.z3')">Catseye</div>
-      <div class="menuItem" onclick="openFile('advent.z3')">Adventure</div>
-      <div class="menuItem" onclick="openFile('buccaneers_cache.z3')">Buccaneers Cache</div>
-      <div class="menuItem" onclick="openFile('duckme.z3')">Duck Me</div>
-      <hr />
-      <div class="menuItem" onclick="openFile('zork1-r119-s880429.z3')">Zork I</div>
-      <div class="menuItem" onclick="openFile('zork2-r63-s860811.z3')">Zork II</div>
-      <div class="menuItem" onclick="openFile('zork3-r25-s860811.z3')">Zork III</div>
-      <div class="menuItem" onclick="openFile('enchanter-r24-s851118.z3')">Enchanter</div>
-      <div class="menuItem" onclick="openFile('hitchhiker-r60-s861002.z3')">Hitchhiker's Guide</div>
-      <div class="menuItem" onclick="openFile('lurkinghorror-r221-s870918.z3')">The Lurking Horror</div>
-      <div class="menuItem" onclick="openFile('planetfall-r39-s880501.z3')">Planetfall</div>
-      <div class="menuItem" onclick="openFile('wishbringer-r69-s850920.z3')">Wishbringer</div>
-    </div>
-
-    <div id="sysMenu" class="menu" style="left: 100px">
-      <div class="menuItem disableNoFile" onclick="save()">Save</div>
-      <div class="menuItem disableNoFile" onclick="load()">Restore</div>
-      <hr />
-      <div class="menuItem" onclick="reset();">Reset System</div>
-    </div>
-
-    <div id="prefsMenu" class="menu" style="left: 150px; width: 250px">
-      <div class="menuItem" onclick="setTheme('RetroGlow')">Theme: Retro Green</div>
-      <div class="menuItem" onclick="setTheme('RetroGlowAmber')">Theme: Retro Amber</div>
-      <div class="menuItem" onclick="setTheme('RetroPlain')">Theme: Retro No Glow</div>
-      <div class="menuItem" onclick="setTheme('Simple')">Theme: Simple</div>
-    </div>
-
-    <div id="infoMenu" class="menu" style="left: 200px">
-      <div class="menuItem disableNoFile" onclick="hideMenus(); clearScreen(); printInfo()">System Info</div>
-      <div class="menuItem" onclick="hideMenus(); printHelp()">Help</div>
-      <div class="menuItem" onclick="hideMenus(); printAbout()">About</div>
-    </div>
-
-    <div class="column" onclick="hideMenus()">
+    <div class="column">
       <pre class="themeRetroGlow"></pre>
-      <input type="text" class="themeRetroGlow" />
+      <input type="text" class="themeRetroGlow" autocapitalize="off" autocomplete="off" autocorrect="off" />
     </div>
   </body>
 </html>
