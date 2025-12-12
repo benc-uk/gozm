@@ -35,6 +35,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   inputBox = document.querySelector('input')
   outArea = document.querySelector('pre')
   initMenus()
+  inputBox.style.display = 'none'
 
   inputBox.onkeydown = function (e) {
     if (e.key === 'Enter') {
@@ -195,7 +196,7 @@ export function setTheme(theme) {
 // Called from Go when file is loaded and program is running
 function loadedFile(filename) {
   clearScreen()
-  inputBox.style.visibility = 'visible'
+  inputBox.style.display = 'block'
   requestInput()
 
   console.log('Loaded file:', filename)
