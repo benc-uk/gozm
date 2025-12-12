@@ -22,14 +22,14 @@ A live deployment of the web version is available at **https://gozm.benc.dev/** 
 - Story loader that validates headers, decodes packed addresses, and hydrates initial game memory from Z3 files.
 - Text decoding (ZSCII, abbreviations, dictionary lookup)
 - Terminal UI providing synchronous input and display, suitable for playing stories directly in the shell.
-- **Save/Load support** – Persistent game state with Quetzal-compatible save files, plus browser localStorage integration for the web version.
+- **Save/Load support** – Persistent game state with save files, plus browser localStorage integration for the web version.
 - **System commands** – Special `/` prefixed commands for save, load, restart, and quit operations.
 
 ## Project Layout
 
 - `internal/zmachine/` – machine runtime: instruction dispatch, call stack, object tree, I/O hooks.
 - `internal/decode/` – helpers for unpacking V3 headers, operands, and text (abbreviations, ZSCII tables).
-- `impl/terminal/` – CLI runner that wires stdin/stdout to the interpreter and exposes debug flags.
+- `impl/terminal/` – CLI runner that wires stdin/stdout to the interpreter.
 - `impl/web/` – WASM entry point for running Z-machine games in the browser with a retro terminal UI.
 - `web/` – HTML, CSS, and JavaScript frontend for the WASM build, including story file selection menu.
 - [`docs/spec/`](docs/spec/README.md) & [`docs/guide/`](docs/guide/part-01.md) – annotated spec excerpts and a tutorial series documenting implementation details.
@@ -44,13 +44,13 @@ A live deployment of the web version is available at **https://gozm.benc.dev/** 
 ### Build the CLI Runner
 
 ```bash
-go build -o bin/gozm ./impl/terminal
+make build
 ```
 
 ### Run a Story
 
 ```bash
-./bin/gozm -file stories/minizork.z3
+./bin/gozm -file web/stories/minizork.z3
 ```
 
 Add `-debug 1` for single-step logging or `-debug 2` for instruction traces. The repository ships with several Infocom-compatible story files under `stories/` and compiler fixtures under `test/` for quick smoke testing.

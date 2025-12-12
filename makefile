@@ -7,7 +7,7 @@ VERSION := $(shell git describe --tags --abbrev=0 --dirty=-dev 2>/dev/null || ec
 
 .DEFAULT_GOAL := help
 
-.PHONY: help build test run watch lint tidy install story web
+.PHONY: help build test run watch lint tidy install story web watch-web serve clean ver test-czech
 
 help: # 💬 Show this help message
 	@grep -E '^[a-zA-Z_-]+:.*?# .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?# "}; {printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2}'
@@ -45,7 +45,7 @@ story: # 📚 Compile and dump the story file
 	inform6 -v3 ./test/$(STORY).inf ./test/$(STORY).z3
 	./tools/unz ./test/$(STORY).z3 > ./test/$(STORY).dump.txt
 
-web: # 🏗️ Build the web app
+web: # 🔨 Build the web app
 	rm -f web/main.wasm 
 	echo "export const version = \"$(VERSION)\";" > web/js/version.js
 	GOOS=js GOARCH=wasm go build -o web/main.wasm $(PACKAGE)/impl/web
@@ -61,5 +61,5 @@ watch-web: # 👀 Watch for changes and build the web app
 serve: web # 🌐 Serve the web app
 	npx vite web/
 
-ver: # 🏷️ Show the current version
+ver: # 🧲 Show the current version
 	@echo $(VERSION)

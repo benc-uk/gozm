@@ -9,16 +9,6 @@ tmp_dir = "tmp"
   kill_delay = "0s"
   log = "build-errors.log"
 
-[color]
-  build = "yellow"
-  main = "magenta"
-  runner = "green"
-  watcher = "cyan"
-
-[log]
-  main_only = false
-  time = false
-
 [misc]
   clean_on_exit = true
 
