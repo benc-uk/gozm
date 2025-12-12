@@ -5,6 +5,7 @@
 
 import { version } from './version.js'
 import { initMenus } from './menus.js'
+import { initInput, requestInput, removeInputDisplay } from './input.js'
 
 const MAX_OUTBUFFER = 8000
 
@@ -12,12 +13,7 @@ const MAX_OUTBUFFER = 8000
 const go = new Go()
 let prefs = {}
 let outArea
-let hiddenInput
-let hist = []
-let histIndex = -1
-let inputBuffer = ''
-let inputActive = false
-const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+let modal
 
 // Two way bridge between Go and JS
 window.bridge = {
@@ -28,7 +24,7 @@ window.bridge = {
   // These are stubs to be replaced by Go when the module is running
   save: null,
   load: null,
-  printInfo: null,
+  getInfo: null,
   inputSend: null,
   receiveFileData: null,
 }
@@ -36,32 +32,15 @@ window.bridge = {
 // When DOM is loaded, initialize everything, this is our entry point
 window.addEventListener('DOMContentLoaded', async () => {
   outArea = document.querySelector('pre')
-  hiddenInput = document.getElementById('hiddenInput')
+  modal = document.getElementById('modal')
+  const hiddenInput = document.getElementById('hiddenInput')
   initMenus()
 
-  // Capture keyboard input on the document for terminal-style input
-  document.addEventListener('keydown', handleKeyDown)
-
-  // Handle paste events
-  document.addEventListener('paste', handlePaste)
-
-  // Click on output area to focus - shows keyboard on mobile
-  outArea.addEventListener('click', () => {
-    if (inputActive && isMobile) {
-      hiddenInput.focus()
-    } else {
-      outArea.focus()
-    }
+  // Initialize input handling with submit callback
+  initInput(outArea, hiddenInput, (text) => {
+    // textOut(text + '\n')
+    bridge.inputSend(text)
   })
-
-  // Handle hidden input for mobile
-  if (hiddenInput) {
-    hiddenInput.addEventListener('input', handleMobileInput)
-    hiddenInput.addEventListener('keydown', handleMobileKeyDown)
-  }
-
-  // Make outArea focusable
-  outArea.tabIndex = 0
 
   // detect resizes to adjust scroll
   window.addEventListener('resize', () => {
@@ -117,29 +96,19 @@ export async function openFile(filename, filedata) {
   // Wait for the program to complete, this will block until exit
   await runPromise
 
-  inputActive = false
-  removeInputDisplay()
   textOut('Program has exited. Load another file\n')
 }
 
 // Called from Go to send text to the screen
 export function textOut(text) {
   // Temporarily remove cursor elements before modifying textContent
-  const cursor = document.getElementById('termCursor')
-  const inputSpan = document.getElementById('termInput')
-  if (cursor) cursor.remove()
-  if (inputSpan) inputSpan.remove()
+  removeInputDisplay()
 
   outArea.textContent += text
 
   // Trim output buffer if too large
   if (outArea.textContent.length > MAX_OUTBUFFER) {
     outArea.textContent = outArea.textContent.slice(-MAX_OUTBUFFER)
-  }
-
-  // Restore cursor if input is active
-  if (inputActive) {
-    updateInputDisplay()
   }
 
   requestAnimationFrame(() => {
@@ -151,168 +120,6 @@ export function textOut(text) {
 export function clearScreen() {
   outArea.textContent = ''
 }
-
-// Called from Go to request user input
-function requestInput(history) {
-  hist = history || []
-  histIndex = hist.length
-  inputBuffer = ''
-  inputActive = true
-
-  // Show cursor
-  updateInputDisplay()
-  
-  // Focus appropriate element based on platform
-  if (isMobile && hiddenInput) {
-    hiddenInput.value = ''
-    hiddenInput.focus()
-  } else {
-    outArea.focus()
-  }
-
-  requestAnimationFrame(() => {
-    outArea.scrollTop = outArea.scrollHeight
-  })
-}
-
-// Handle input from hidden input on mobile
-function handleMobileInput(e) {
-  if (!inputActive) return
-  inputBuffer = e.target.value
-  updateInputDisplay()
-}
-
-// Handle special keys from hidden input on mobile
-function handleMobileKeyDown(e) {
-  if (!inputActive) return
-
-  if (e.key === 'Enter') {
-    e.preventDefault()
-    inputActive = false
-    removeInputDisplay()
-    textOut(inputBuffer + '\n')
-    bridge.inputSend(inputBuffer)
-    inputBuffer = ''
-    hiddenInput.value = ''
-    hiddenInput.blur()
-    return
-  }
-}
-
-// Handle keyboard input for terminal-style typing
-function handleKeyDown(e) {
-  if (!inputActive) return
-
-  // Don't capture if user is in a menu or other input
-  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return
-
-  if (e.key === 'Enter') {
-    e.preventDefault()
-    inputActive = false
-    // Remove cursor and add newline
-    removeInputDisplay()
-    textOut(inputBuffer + '\n')
-    bridge.inputSend(inputBuffer)
-    inputBuffer = ''
-    return
-  }
-
-  if (e.key === 'Backspace') {
-    e.preventDefault()
-    if (inputBuffer.length > 0) {
-      inputBuffer = inputBuffer.slice(0, -1)
-      updateInputDisplay()
-    }
-    return
-  }
-
-  if (e.key === 'ArrowUp') {
-    e.preventDefault()
-    if (histIndex > 0) {
-      histIndex--
-      inputBuffer = hist[histIndex] || ''
-      updateInputDisplay()
-    }
-    return
-  }
-
-  if (e.key === 'ArrowDown') {
-    e.preventDefault()
-    if (histIndex < hist.length - 1) {
-      histIndex++
-      inputBuffer = hist[histIndex] || ''
-    } else {
-      histIndex = hist.length
-      inputBuffer = ''
-    }
-    updateInputDisplay()
-    return
-  }
-
-  // Ignore other control keys
-  if (e.key.length > 1 || e.ctrlKey || e.metaKey || e.altKey) {
-    return
-  }
-
-  // Add printable character
-  e.preventDefault()
-  inputBuffer += e.key
-  updateInputDisplay()
-}
-
-// Handle paste events
-function handlePaste(e) {
-  if (!inputActive) return
-  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return
-
-  e.preventDefault()
-  const text = e.clipboardData.getData('text')
-  // Only take first line and filter to printable chars
-  const firstLine = text.split('\n')[0].replace(/[^\x20-\x7E]/g, '')
-  inputBuffer += firstLine
-  updateInputDisplay()
-}
-
-// Update the display to show current input with cursor
-function updateInputDisplay() {
-  // Remove any existing input display
-  const cursor = document.getElementById('termCursor')
-  if (cursor) {
-    cursor.remove()
-  }
-
-  // Remove previously displayed input text
-  const inputSpan = document.getElementById('termInput')
-  if (inputSpan) {
-    inputSpan.remove()
-  }
-
-  // Create new input span with cursor
-  const newInputSpan = document.createElement('span')
-  newInputSpan.id = 'termInput'
-  newInputSpan.textContent = inputBuffer
-
-  const newCursor = document.createElement('span')
-  newCursor.id = 'termCursor'
-  newCursor.className = 'cursor'
-  newCursor.textContent = '█'
-
-  outArea.appendChild(newInputSpan)
-  outArea.appendChild(newCursor)
-
-  requestAnimationFrame(() => {
-    outArea.scrollTop = outArea.scrollHeight
-  })
-}
-
-// Remove the input display (cursor and typed text)
-function removeInputDisplay() {
-  const cursor = document.getElementById('termCursor')
-  if (cursor) cursor.remove()
-  const inputSpan = document.getElementById('termInput')
-  if (inputSpan) inputSpan.remove()
-}
-
 // Reset the system to initial state
 export function reset() {
   prefs.loadedFile = null
@@ -320,6 +127,7 @@ export function reset() {
   location.reload()
 }
 
+// Start a file open dialog to select a Z-Machine story file
 export function promptFile() {
   const input = document.createElement('input')
   input.type = 'file'
@@ -340,6 +148,7 @@ export function promptFile() {
 // Change theme of the fake terminal UI
 export function setTheme(theme) {
   outArea.className = `theme${theme}`
+  modal.className = `theme${theme}`
 
   prefs.theme = theme
   localStorage.setItem('prefs', JSON.stringify(prefs))
@@ -358,7 +167,6 @@ function loadedFile(filename) {
 // Called from JS to fake a boot sequence
 function boot() {
   clearScreen()
-  inputBuffer = ''
   textOut('System booting...\n')
   textOut('64K dynamic memory available\n')
   textOut('I/O buffers flushed\n\n')
@@ -369,4 +177,10 @@ function boot() {
 
 function playSound(soundID, effect, vol) {
   console.log('STUB! Play sound requested:', soundID, effect, vol)
+}
+
+export function showModal(message) {
+  const modal = document.getElementById('modal')
+  modal.firstChild.textContent = message
+  modal.style.display = 'block'
 }

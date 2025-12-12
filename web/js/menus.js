@@ -3,7 +3,7 @@
 // Menus JavaScript code
 // ===============================================================
 
-import { textOut, openFile, promptFile, setTheme, clearScreen, reset } from './gozm.js'
+import { openFile, promptFile, setTheme, reset, showModal } from './gozm.js'
 import { version } from './version.js'
 
 let fileMenu, sysMenu, prefsMenu, infoMenu
@@ -56,7 +56,7 @@ export function initMenus() {
 
   // Info Menu
   //prettier-ignore
-  addMenuItem(infoMenu, 'System Info', () => { bridge.printInfo() }, true)
+  addMenuItem(infoMenu, 'System Info', () => printInfo(), true)
   addMenuItem(infoMenu, 'About', () => printAbout())
   addMenuItem(infoMenu, 'Help', () => printHelp())
 
@@ -151,27 +151,29 @@ function toggleMenu(menu) {
 
 // Print about information
 function printAbout() {
-  clearScreen()
-  textOut(`About:\nGo Z-Machine Engine (GOZM) v${version}\n`)
-  textOut('A Z-Machine interpreter written in Go, compiled to WebAssembly.\n')
-  textOut('© Ben Coleman 2025\n')
-  textOut('Github: https://github.com/benc-uk/gozm\n\n')
-  textOut('See the GitHub repository for full license, acknowledgments etc.\n')
+  showModal(
+    `GOZM v${version}\n\nA Z-Machine interpreter written in Go, compiled to WebAssembly.
+    \n© Ben Coleman 2025\nGithub: https://github.com/benc-uk/gozm\n\nSee the GitHub repository for full license, acknowledgments etc.`
+  )
 }
 
 // Print help information
 function printHelp() {
-  clearScreen()
-  textOut('Help:\n')
-  textOut('Use the File menu to open a Z-Machine story file (.z3)')
-  textOut(' or open a supplied adventure file.\n')
-  textOut('Type your commands in the input box and press Enter to send.\n')
-  textOut('Use the System menu to save/load game state.\n')
-  textOut('Use the Preferences menu to change themes.\n')
-  textOut('')
-  textOut('System commands:\n')
-  textOut('  /quit - Exit the game\n')
-  textOut('  /restart - Restart the game\n')
-  textOut('  /save - Save the game\n')
-  textOut('  /load - Load a saved game\n')
+  showModal(
+    `Help:
+Use the File menu to open a Z-Machine story file (.z3) or open a supplied adventure file.
+Type your commands in the input box and press Enter to send.
+Use the System menu to save/load game state.
+Use the Preferences menu to change themes.
+
+System commands:
+  /quit - Exit the game
+  /restart - Restart the game
+  /save - Save the game
+  /load - Load a saved game`
+  )
+}
+
+function printInfo() {
+  showModal(bridge.getInfo())
 }

@@ -56,7 +56,7 @@ func main() {
 	bridge.Set("receiveFileData", js.FuncOf(receiveFileData))
 	bridge.Set("save", js.FuncOf(save))
 	bridge.Set("load", js.FuncOf(load))
-	bridge.Set("printInfo", js.FuncOf(printInfo))
+	bridge.Set("getInfo", js.FuncOf(getInfo))
 
 	var data []byte
 
@@ -149,13 +149,9 @@ func load(this js.Value, args []js.Value) interface{} {
 	return nil
 }
 
-func printInfo(this js.Value, args []js.Value) interface{} {
+func getInfo(this js.Value, args []js.Value) interface{} {
 	if machine == nil {
-		ext.TextOut("No machine available to print info.\n")
-		return nil
+		return "No machine available to print info.\n"
 	}
-
-	ext.TextOut(machine.GetInfo())
-
-	return nil
+	return machine.GetInfo()
 }
