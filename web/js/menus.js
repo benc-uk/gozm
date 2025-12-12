@@ -15,10 +15,10 @@ export function initMenus() {
   prefsMenu = document.querySelector('#prefsMenu')
   infoMenu = document.querySelector('#infoMenu')
 
-  document.querySelector('#fileButton').addEventListener('click', (e) => {
-    hideMenus()
-    showMenu(fileMenu)
-  })
+  addMenuButton('#fileButton', fileMenu)
+  addMenuButton('#sysButton', sysMenu)
+  addMenuButton('#prefsButton', prefsMenu)
+  addMenuButton('#infoButton', infoMenu)
 
   addMenuItem(fileMenu, 'Open...', promptFile)
   addMenuSeparator(fileMenu)
@@ -37,21 +37,6 @@ export function initMenus() {
   addMenuItem(fileMenu, 'The Lurking Horror', async () => await openFile('lurkinghorror-r221-s870918.z3'))
   addMenuItem(fileMenu, 'Planetfall', async () => await openFile('planetfall-r39-s880501.z3'))
   addMenuItem(fileMenu, 'Wishbringer', async () => await openFile('wishbringer-r69-s850920.z3'))
-
-  document.querySelector('#sysButton').addEventListener('click', (e) => {
-    hideMenus()
-    showMenu(sysMenu)
-  })
-
-  document.querySelector('#prefsButton').addEventListener('click', (e) => {
-    hideMenus()
-    showMenu(prefsMenu)
-  })
-
-  document.querySelector('#infoButton').addEventListener('click', (e) => {
-    hideMenus()
-    showMenu(infoMenu)
-  })
 
   // System Menu
   //prettier-ignore
@@ -75,9 +60,10 @@ export function initMenus() {
   addMenuItem(infoMenu, 'About', () => printAbout())
   addMenuItem(infoMenu, 'Help', () => printHelp())
 
-  document.querySelector('.column').addEventListener('click', (e) => {
-    hideMenus()
-  })
+  // Close menus when clicking/touching the main content area
+  const column = document.querySelector('.column')
+  column.addEventListener('click', () => hideMenus())
+  column.addEventListener('touchstart', () => hideMenus(), { passive: true })
 }
 
 // Show a specific menu and hide others
@@ -111,10 +97,17 @@ function addMenuItem(menu, label, onClick, needsFile = false) {
     item.classList.add('disableNoFile')
   }
 
-  item.addEventListener('click', (e) => {
+  const handler = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
     onClick()
     hideMenus()
-  })
+  }
+
+  // Handle touch for mobile
+  item.addEventListener('touchend', handler, { passive: false })
+  // Handle click for desktop
+  item.addEventListener('click', handler)
 
   menu.appendChild(item)
 }
@@ -122,6 +115,38 @@ function addMenuItem(menu, label, onClick, needsFile = false) {
 // Add a separator to a menu
 function addMenuSeparator(menu) {
   menu.appendChild(document.createElement('hr'))
+}
+
+// Add click/touch handler to a menu button
+function addMenuButton(selector, menu) {
+  const button = document.querySelector(selector)
+
+  // Handle touch events for mobile - prevent double firing
+  button.addEventListener(
+    'touchend',
+    (e) => {
+      e.preventDefault()
+      e.stopPropagation()
+      toggleMenu(menu)
+    },
+    { passive: false }
+  )
+
+  // Handle click for desktop
+  button.addEventListener('click', (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    toggleMenu(menu)
+  })
+}
+
+// Toggle a menu open/closed
+function toggleMenu(menu) {
+  const isVisible = menu.style.display === 'block'
+  hideMenus()
+  if (!isVisible) {
+    showMenu(menu)
+  }
 }
 
 // Print about information
