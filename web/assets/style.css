@@ -1,6 +1,6 @@
 :root {
-  font-family: "Ubuntu Mono", "Courier New", Courier, monospace;
-  cursor: url("amiga_wb13_normal.png"), pointer;
+  font-family: 'Ubuntu Mono', 'Courier New', Courier, monospace;
+  cursor: url('amiga_wb13_normal.png'), pointer;
 }
 
 body,
@@ -67,7 +67,7 @@ pre {
   border: inset 8px #dbceb4;
   box-sizing: border-box;
   border-radius: 3px;
-  cursor: url("./amiga_wb13_text.png") 4 9, text;
+  cursor: url('./amiga_wb13_text.png') 4 9, text;
 }
 
 /* Hide scrollbar (Firefox) */
@@ -82,15 +82,14 @@ pre::-webkit-scrollbar {
   display: none;
 }
 
-input[type="text"] {
-  width: 90dvw;
-  padding: 0.5rem;
-  letter-spacing: 1px;
-  margin: 0.2rem auto 0.5rem auto;
-  outline: none;
-  border: inset 8px #dbceb4;
-  box-sizing: border-box;
-  cursor: url("amiga_wb13_text.png") 4 9, text;
+/* Hidden input for mobile keyboard - positioned off-screen */
+#hiddenInput {
+  position: absolute;
+  left: -9999px;
+  top: -9999px;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
 }
 
 @media (max-width: 768px) {
@@ -100,11 +99,6 @@ input[type="text"] {
     overflow-y: auto;
     font-size: 1.1rem !important;
     line-height: 1.2rem !important;
-  }
-
-  input[type="text"] {
-    margin: 0rem;
-    width: 99%;
   }
 }
 
@@ -130,7 +124,7 @@ nav a:hover {
   display: none;
   cursor: pointer;
   z-index: 10;
-  cursor: url("amiga_wb13_normal.png"), pointer;
+  cursor: url('amiga_wb13_normal.png'), pointer;
 }
 
 .menuItem {
@@ -153,8 +147,30 @@ hr {
   pointer-events: none;
 }
 
+/* Blinking cursor for terminal input */
+.cursor {
+  animation: blink 1s step-end infinite;
+  position: relative;
+  top: -0.15em;
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+/* Focus outline for accessibility */
+pre:focus {
+  outline: none;
+}
+
 .themeRetroGlow {
-  font-family: "Workbench", "Courier New", Courier, monospace;
+  font-family: 'Workbench', 'Courier New', Courier, monospace;
   font-weight: 400;
   letter-spacing: 1px;
   font-style: normal;
@@ -173,7 +189,7 @@ input.themeRetroGlow {
 }
 
 .themeRetroPlain {
-  font-family: "Workbench", "Courier New", Courier, monospace;
+  font-family: 'Workbench', 'Courier New', Courier, monospace;
   font-weight: 400;
   letter-spacing: 1px;
   font-style: normal;
@@ -184,7 +200,7 @@ input.themeRetroGlow {
 }
 
 .themeSimple {
-  font-family: "Consolas", "Courier New", Courier, monospace;
+  font-family: 'Consolas', 'Courier New', Courier, monospace;
   font-weight: 400;
   letter-spacing: 1px;
   font-style: normal;
@@ -196,7 +212,7 @@ input.themeRetroGlow {
 }
 
 .themeRetroGlowAmber {
-  font-family: "Workbench", "Courier New", Courier, monospace;
+  font-family: 'Workbench', 'Courier New', Courier, monospace;
   font-weight: 400;
   letter-spacing: 1px;
   font-style: normal;
