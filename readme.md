@@ -1,6 +1,6 @@
 # GOZM – Go Z-Machine Runtime & Engine
 
-GOZM is a Z-Machine interpreter written in Go that runs classic text adventure games from the Infocom era. It focuses on Z-Machine version 3 and executes real games end-to-end—including bundled Infocom titles and custom Inform 6 stories—both in the terminal and directly in the browser via WebAssembly. The codebase is designed to be readable and educational, making it accessible for anyone interested in understanding the architecture of Infocom's original virtual machine.
+GOZM is a Z-Machine interpreter written in Go that runs classic text adventure games from the 80s era. It focuses on compatibility with Z-Machine version 3 and runs full games either commercially released Infocom titles or fan made games. The project includes both a command-line interface (CLI) runner for local play and debugging, as well as a WebAssembly (WASM) frontend that allows playing games directly in the browser with a retro terminal-style UI.
 
 ## Current Status
 
@@ -8,13 +8,13 @@ GOZM is a Z-Machine interpreter written in Go that runs classic text adventure g
 - Web frontend with retro terminal-style UI for immersive text adventure gameplay.
 - Plain-text terminal runner for local play and debugging.
 - Command-line debug levels (`-debug 0|1|2`) expose instruction tracing and state dumps to aid reverse engineering and spec validation.
-- Save/Load functionality for all games and browser localStorage integration.
+- Save/Load functionality for all games including the browser version.
 
 ![web screenshot](./docs/screens/web.png)
 
 ## Try the Live Web Version
 
-A live deployment of the web version is available at **https://gozm.benc.dev/** where you can play Z-machine games directly in your browser without any installation. Simply select a story from the menu and start playing classic text adventures with a retro terminal interface.
+A live deployment of the web version is available at **https://gozm.benc.dev/** where you can play Z-machine games directly in your browser without any installation. Simply select a story from the menu and start playing
 
 ## Features
 
@@ -32,9 +32,12 @@ A live deployment of the web version is available at **https://gozm.benc.dev/** 
 - `impl/terminal/` – CLI runner that wires stdin/stdout to the interpreter.
 - `impl/web/` – WASM entry point for running Z-machine games in the browser with a retro terminal UI.
 - `web/` – HTML, CSS, and JavaScript frontend for the WASM build, including story file selection menu.
-- [`docs/spec/`](docs/spec/README.md) & [`docs/guide/`](docs/guide/part-01.md) – annotated spec excerpts and a tutorial series documenting implementation details.
 
-## Getting Started
+## Download precompiled binaries
+
+Precompiled binaries for Linux, macOS, and Windows are available on the [Releases](https://github.com/benc-uk/gozm/releases) page. Download the appropriate archive for your platform, extract it, and run the `gozm` executable from the command line.
+
+## Building and Running (Dev Guide)
 
 ### Prerequisites
 
@@ -53,7 +56,7 @@ make build
 ./bin/gozm -file web/stories/minizork.z3
 ```
 
-Add `-debug 1` for single-step logging or `-debug 2` for instruction traces. The repository ships with several Infocom-compatible story files under `stories/` and compiler fixtures under `test/` for quick smoke testing.
+Add `-debug 1` for single-step logging or `-debug 2` for instruction traces. The repository ships with several Infocom-compatible story files under `web/stories/` and compiler fixtures under `test/` for quick smoke testing.
 
 You can also execute directly with `go run ./impl/terminal -file test/core.z3` during development.
 
@@ -84,25 +87,16 @@ make serve
 
 This will launch a development server (using Vite via `npx`) and open the app in your browser. The interface includes:
 
-- **Story selection menu** – A prominent dropdown menu at the top of the page lets you choose from bundled story files including Mini Zork, Moonglow, Catseye, Adventure, and other classic titles.
-- **Retro terminal interface** – A faithful recreation of classic terminal aesthetics with monospace font, amber-on-black color scheme (customizable via themes), and authentic cursor rendering.
-- **Interactive command input** – Text input field at the bottom of the terminal display captures commands, with full keyboard support and visual feedback as you type.
-- **Command history & recall** – Use up/down arrow keys to navigate through previously entered commands for easy repetition and editing.
-- **On-demand story loading** – Story files are fetched dynamically from `web/stories/` only when selected, minimizing initial page load time.
-- **System commands** – All system commands (`/save`, `/load`, `/restart`, `/quit`) function identically to the terminal version, with save states persisted to browser localStorage for seamless session continuity.
-- **Theme customization** – Choose from multiple color schemes (amber, green, white-on-black) and adjust font sizing through the settings menu.
-- **About & acknowledgements screen** – Built-in credits page accessible from the menu bar documenting game sources and project contributors.
-- **Responsive layout** – Terminal display adapts to various screen sizes while maintaining readability and the classic text adventure aesthetic.
+- Story menu with bundled titles (Mini Zork, Moonglow, Catseye, Adventure, etc.).
+- Retro terminal UI with themes.
+- Command input with full keyboard support and history (up/down to recall).
+- Responsive layout for desktop and mobile browsers.
 
 The WASM build uses Go's `syscall/js` package to bridge between the Z-machine core and browser JavaScript:
 
 - `impl/web/main.go` – entry point that loads story files via HTTP and initializes the machine.
 - `impl/web/webext.go` – implements the `External` interface, routing text output and input through JavaScript callbacks.
-- `web/gozm.js` – JavaScript glue code that handles DOM manipulation, input events, and WASM initialization.
-
-### Make Targets
-
-`make build` compiles the terminal binary, `make run` launches a bundled game, `make story STORY=scratch` rebuilds the matching Inform 6 source and dumps the generated bytecode, `make web` builds the WASM binary, and `make serve` starts a local web server for testing the browser frontend.
+- `web/js/gozm.js` – Main JavaScript file on the browser side.
 
 ## Design Notes
 

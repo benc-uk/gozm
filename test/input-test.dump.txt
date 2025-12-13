@@ -55,7 +55,7 @@ Number of unique properties:               0
 0000C 02 B0                   GLOBALS Global variables table:    0x02B0
 0000E 04 F9                   PURBOT  Base of static memory:     0x04F9
 00010 00 00                   FLAGS   Flags 2:                   0x0000
-00012 32 35 31 32 30 35       SERIAL  Serial number:             251205
+00012 32 35 31 32 31 33       SERIAL  Serial number:             251213
 00018 00 42                   FWORDS  Abbreviations table:       0x0042
 0001A 03 59                   PLENTH  Length of file:            0x06B2
 0001C BC FE                   PCHKSM  Checksum of file:          0xBCFE
