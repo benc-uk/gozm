@@ -15,6 +15,12 @@ help: # 💬 Show this help message
 build: # 🔨 Build the Go binary
 	go build -o bin/gozm -ldflags="-X 'main.version=$(VERSION)'" $(PACKAGE)/impl/terminal
 
+build-win: # 🔨 Build the Go binary for Windows
+	GOOS=windows GOARCH=amd64 go build -o bin/gozm.exe -ldflags="-X 'main.version=$(VERSION)'" $(PACKAGE)/impl/terminal
+
+build-mac: # 🔨 Build the Go binary for macOS
+	GOOS=darwin GOARCH=amd64 go build -o bin/mac-gozm -ldflags="-X 'main.version=$(VERSION)'" $(PACKAGE)/impl/terminal
+
 test: # 🧪 Run tests
 	go test -v ./...
 
