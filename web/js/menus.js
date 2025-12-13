@@ -29,13 +29,13 @@ export function initMenus() {
   addMenuItem(fileMenu, 'Buccaneers Cache', async () => await openFile('buccaneers_cache.z3'))
   addMenuItem(fileMenu, 'Duck Me', async () => await openFile('duckme.z3'))
   addMenuSeparator(fileMenu)
-  addMenuItem(fileMenu, 'Zork I', async () => await openFile('zork1-r119-s880429.z3'))
-  addMenuItem(fileMenu, 'Zork II', async () => await openFile('zork2-r63-s860811.z3'))
-  addMenuItem(fileMenu, 'Zork III', async () => await openFile('zork3-r25-s860811.z3'))
+  addMenuItem(fileMenu, 'Zork I', async () => await openFile('zork1-r88-s840726.z3'))
+  addMenuItem(fileMenu, 'Zork II', async () => await openFile('zork2-r48-s840904.z3'))
+  addMenuItem(fileMenu, 'Zork III', async () => await openFile('zork3-r17-s840727.z3'))
   addMenuItem(fileMenu, 'Enchanter', async () => await openFile('enchanter-r24-s851118.z3'))
-  addMenuItem(fileMenu, "Hitchhiker's Guide", async () => await openFile('hitchhiker-r60-s861002.z3'))
+  addMenuItem(fileMenu, "Hitchhiker's Guide", async () => await openFile('hitchhiker-r59-s851108.z3'))
   addMenuItem(fileMenu, 'The Lurking Horror', async () => await openFile('lurkinghorror-r221-s870918.z3'))
-  addMenuItem(fileMenu, 'Planetfall', async () => await openFile('planetfall-r39-s880501.z3'))
+  addMenuItem(fileMenu, 'Planetfall', async () => await openFile('planetfall-r37-s851003.z3'))
   addMenuItem(fileMenu, 'Wishbringer', async () => await openFile('wishbringer-r69-s850920.z3'))
 
   // System Menu
