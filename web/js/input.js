@@ -82,7 +82,7 @@ function handleMobileKeyDown(e) {
     e.preventDefault()
     submitInput()
     hiddenInput.value = ''
-    hiddenInput.blur()
+    // Don't blur on mobile - keep keyboard open for next input
     return
   }
 }
