@@ -18,6 +18,7 @@ func main() {
 	fileName := ""
 	flag.IntVar(&debugLevel, "debug", zmachine.DEBUG_NONE, "Set debug level (0=none, 1=step, 2=trace)")
 	flag.StringVar(&fileName, "file", "", "Path to Z-machine story file to load")
+	flag.StringVar(&fileName, "f", "", "Path to Z-machine story file to load")
 	flag.Parse()
 
 	if debugLevel < 0 || debugLevel > 2 {
@@ -26,7 +27,13 @@ func main() {
 	}
 
 	if fileName == "" {
-		panic("No story file specified, use -file to provide a path")
+		// try to get from positional args
+		if flag.NArg() > 0 {
+			fileName = flag.Arg(0)
+		} else {
+			fmt.Printf("No story file specified\n")
+			os.Exit(1)
+		}
 	}
 
 	data, err := os.ReadFile(fileName)
